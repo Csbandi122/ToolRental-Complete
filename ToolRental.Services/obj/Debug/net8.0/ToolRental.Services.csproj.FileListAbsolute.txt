@@ -1,0 +1,34 @@
+C:\Users\acseke\source\repos\ToolRental.Services\obj\Debug\net8.0\ToolRental.Services.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\acseke\source\repos\ToolRental.Services\obj\Debug\net8.0\ToolRental.Services.AssemblyInfoInputs.cache
+C:\Users\acseke\source\repos\ToolRental.Services\obj\Debug\net8.0\ToolRental.Services.AssemblyInfo.cs
+C:\Users\acseke\source\repos\ToolRental.Services\obj\Debug\net8.0\ToolRental.Services.csproj.CoreCompileInputs.cache
+C:\Users\acseke\source\repos\ToolRental.Services\bin\Debug\net8.0\ToolRental.Services.deps.json
+C:\Users\acseke\source\repos\ToolRental.Services\bin\Debug\net8.0\ToolRental.Services.dll
+C:\Users\acseke\source\repos\ToolRental.Services\bin\Debug\net8.0\ToolRental.Services.pdb
+C:\Users\acseke\source\repos\ToolRental.Services\bin\Debug\net8.0\ToolRental.Core.dll
+C:\Users\acseke\source\repos\ToolRental.Services\bin\Debug\net8.0\ToolRental.Data.dll
+C:\Users\acseke\source\repos\ToolRental.Services\bin\Debug\net8.0\ToolRental.Core.pdb
+C:\Users\acseke\source\repos\ToolRental.Services\bin\Debug\net8.0\ToolRental.Data.pdb
+C:\Users\acseke\source\repos\ToolRental.Services\obj\Debug\net8.0\ToolRental.Services.csproj.AssemblyReference.cache
+C:\Users\acseke\source\repos\ToolRental.Services\obj\Debug\net8.0\ToolRent.8F36D6D6.Up2Date
+C:\Users\acseke\source\repos\ToolRental.Services\obj\Debug\net8.0\ToolRental.Services.dll
+C:\Users\acseke\source\repos\ToolRental.Services\obj\Debug\net8.0\refint\ToolRental.Services.dll
+C:\Users\acseke\source\repos\ToolRental.Services\obj\Debug\net8.0\ToolRental.Services.pdb
+C:\Users\acseke\source\repos\ToolRental.Services\obj\Debug\net8.0\ref\ToolRental.Services.dll
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\bin\Debug\net8.0\ToolRental.Services.deps.json
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\bin\Debug\net8.0\ToolRental.Services.dll
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\bin\Debug\net8.0\ToolRental.Services.pdb
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\bin\Debug\net8.0\ToolRental.Core.dll
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\bin\Debug\net8.0\ToolRental.Data.dll
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\bin\Debug\net8.0\ToolRental.Core.pdb
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\bin\Debug\net8.0\ToolRental.Data.pdb
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\obj\Debug\net8.0\ToolRental.Services.csproj.AssemblyReference.cache
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\obj\Debug\net8.0\ToolRental.Services.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\obj\Debug\net8.0\ToolRental.Services.AssemblyInfoInputs.cache
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\obj\Debug\net8.0\ToolRental.Services.AssemblyInfo.cs
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\obj\Debug\net8.0\ToolRental.Services.csproj.CoreCompileInputs.cache
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\obj\Debug\net8.0\ToolRent.8F36D6D6.Up2Date
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\obj\Debug\net8.0\ToolRental.Services.dll
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\obj\Debug\net8.0\refint\ToolRental.Services.dll
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\obj\Debug\net8.0\ToolRental.Services.pdb
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Services\obj\Debug\net8.0\ref\ToolRental.Services.dll
