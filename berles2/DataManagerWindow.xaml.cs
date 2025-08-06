@@ -15,6 +15,8 @@ namespace berles2
         private List<Customer> _allCustomers;
         private ObservableCollection<Device> _devices;
         private List<Device> _allDevices;
+        private ObservableCollection<RentalDisplayModel> _rentals;
+        private List<RentalDisplayModel> _allRentals;
 
         public DataManagerWindow()
         {
@@ -22,6 +24,7 @@ namespace berles2
             InitializeDatabase();
             LoadCustomers();
             LoadDevices();
+            LoadRentals();
         }
 
         private void InitializeDatabase()
@@ -43,6 +46,145 @@ namespace berles2
             {
                 MessageBox.Show($"Hiba az ügyfelek betöltésekor: {ex.Message}",
                               "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void CustomersDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            bool hasSelection = CustomersDataGrid.SelectedItem != null;
+            EditCustomerButton.IsEnabled = hasSelection;
+            DeleteCustomerButton.IsEnabled = hasSelection;
+        }
+
+        private void AddCustomerButton_Click(object sender, RoutedEventArgs e)
+        {
+            var customerDialog = new CustomerDialog();
+            if (customerDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var customer = customerDialog.Customer;
+                    _context.Customers.Add(customer);
+                    _context.SaveChanges();
+
+                    LoadCustomers(); // Frissítés
+                    MessageBox.Show("Ügyfél sikeresen hozzáadva!", "Siker",
+                                  MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Hiba az ügyfél mentésekor: {ex.Message}",
+                                  "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void EditCustomerButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CustomersDataGrid.SelectedItem is Customer selectedCustomer)
+            {
+                var customerDialog = new CustomerDialog(selectedCustomer);
+                if (customerDialog.ShowDialog() == true)
+                {
+                    try
+                    {
+                        var customer = customerDialog.Customer;
+                        var existingCustomer = _context.Customers.Find(customer.Id);
+                        if (existingCustomer != null)
+                        {
+                            existingCustomer.Name = customer.Name;
+                            existingCustomer.Zipcode = customer.Zipcode;
+                            existingCustomer.City = customer.City;
+                            existingCustomer.Address = customer.Address;
+                            existingCustomer.Email = customer.Email;
+                            existingCustomer.IdNumber = customer.IdNumber;
+                            existingCustomer.Comment = customer.Comment;
+
+                            _context.SaveChanges();
+                            LoadCustomers(); // Frissítés
+
+                            MessageBox.Show("Ügyfél sikeresen módosítva!", "Siker",
+                                          MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Hiba az ügyfél módosításakor: {ex.Message}",
+                                      "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+
+        private void DeleteCustomerButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (CustomersDataGrid.SelectedItem is Customer selectedCustomer)
+            {
+                var result = MessageBox.Show(
+                    $"Biztosan törli '{selectedCustomer.Name}' ügyfelet?\n\nFIGYELEM: A törlés visszavonhatatlan!",
+                    "Törlés megerősítése", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        // Ellenőrizzük, hogy vannak-e kapcsolódó bérlések
+                        var hasRentals = _context.Rentals.Any(r => r.CustomerId == selectedCustomer.Id);
+                        if (hasRentals)
+                        {
+                            MessageBox.Show(
+                                "Ez az ügyfél nem törölhető, mert vannak hozzá kapcsolódó bérlések!",
+                                "Törlés nem lehetséges", MessageBoxButton.OK, MessageBoxImage.Warning);
+                            return;
+                        }
+
+                        var customerToDelete = _context.Customers.Find(selectedCustomer.Id);
+                        if (customerToDelete != null)
+                        {
+                            _context.Customers.Remove(customerToDelete);
+                            _context.SaveChanges();
+                            LoadCustomers(); // Frissítés
+
+                            MessageBox.Show("Ügyfél sikeresen törölve!", "Siker",
+                                          MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Hiba az ügyfél törlésekor: {ex.Message}",
+                                      "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+
+        private void SearchCustomerTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string searchText = SearchCustomerTextBox.Text.ToLower();
+
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                // Ha üres a keresés, mutasd az összes ügyfelet
+                _customers.Clear();
+                foreach (var customer in _allCustomers)
+                {
+                    _customers.Add(customer);
+                }
+            }
+            else
+            {
+                // Szűrés név, város vagy e-mail alapján
+                var filteredCustomers = _allCustomers.Where(c =>
+                    c.Name.ToLower().Contains(searchText) ||
+                    c.City.ToLower().Contains(searchText) ||
+                    c.Email.ToLower().Contains(searchText)
+                ).ToList();
+
+                _customers.Clear();
+                foreach (var customer in filteredCustomers)
+                {
+                    _customers.Add(customer);
+                }
             }
         }
 
@@ -205,141 +347,74 @@ namespace berles2
             }
         }
 
-        private void CustomersDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        // BÉRLÉSEK KEZELÉSE
+        private void LoadRentals()
         {
-            bool hasSelection = CustomersDataGrid.SelectedItem != null;
-            EditCustomerButton.IsEnabled = hasSelection;
-            DeleteCustomerButton.IsEnabled = hasSelection;
-        }
-
-        private void AddCustomerButton_Click(object sender, RoutedEventArgs e)
-        {
-            var customerDialog = new CustomerDialog();
-            if (customerDialog.ShowDialog() == true)
+            try
             {
-                try
-                {
-                    var customer = customerDialog.Customer;
-                    _context.Customers.Add(customer);
-                    _context.SaveChanges();
+                var rentalsFromDb = _context.Rentals
+                    .Include(r => r.Customer)
+                    .Include(r => r.RentalDevices)
+                        .ThenInclude(rd => rd.Device)
+                    .OrderByDescending(r => r.RentStart)
+                    .ToList();
 
-                    LoadCustomers(); // Frissítés
-                    MessageBox.Show("Ügyfél sikeresen hozzáadva!", "Siker",
-                                  MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-                catch (Exception ex)
+                // Konvertálás display modellre
+                _allRentals = rentalsFromDb.Select(r => new RentalDisplayModel
                 {
-                    MessageBox.Show($"Hiba az ügyfél mentésekor: {ex.Message}",
-                                  "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                    Id = r.Id,
+                    TicketNr = r.TicketNr,
+                    CustomerName = r.Customer.Name,
+                    RentStart = r.RentStart,
+                    RentalDays = r.RentalDays,
+                    TotalAmount = r.TotalAmount,
+                    PaymentMode = r.PaymentMode,
+                    Comment = r.Comment ?? "",
+                    DevicesText = string.Join(", ", r.RentalDevices.Select(rd => rd.Device.DeviceName))
+                }).ToList();
+
+                _rentals = new ObservableCollection<RentalDisplayModel>(_allRentals);
+                RentalsDataGrid.ItemsSource = _rentals;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba a bérlések betöltésekor: {ex.Message}",
+                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void EditCustomerButton_Click(object sender, RoutedEventArgs e)
+        private void RefreshRentalsButton_Click(object sender, RoutedEventArgs e)
         {
-            if (CustomersDataGrid.SelectedItem is Customer selectedCustomer)
-            {
-                var customerDialog = new CustomerDialog(selectedCustomer);
-                if (customerDialog.ShowDialog() == true)
-                {
-                    try
-                    {
-                        var customer = customerDialog.Customer;
-                        var existingCustomer = _context.Customers.Find(customer.Id);
-                        if (existingCustomer != null)
-                        {
-                            existingCustomer.Name = customer.Name;
-                            existingCustomer.Zipcode = customer.Zipcode;
-                            existingCustomer.City = customer.City;
-                            existingCustomer.Address = customer.Address;
-                            existingCustomer.Email = customer.Email;
-                            existingCustomer.IdNumber = customer.IdNumber;
-                            existingCustomer.Comment = customer.Comment;
-
-                            _context.SaveChanges();
-                            LoadCustomers(); // Frissítés
-
-                            MessageBox.Show("Ügyfél sikeresen módosítva!", "Siker",
-                                          MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Hiba az ügyfél módosításakor: {ex.Message}",
-                                      "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-            }
+            LoadRentals();
+            SearchRentalTextBox.Clear();
         }
 
-        private void DeleteCustomerButton_Click(object sender, RoutedEventArgs e)
+        private void SearchRentalTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (CustomersDataGrid.SelectedItem is Customer selectedCustomer)
-            {
-                var result = MessageBox.Show(
-                    $"Biztosan törli '{selectedCustomer.Name}' ügyfelet?\n\nFIGYELEM: A törlés visszavonhatatlan!",
-                    "Törlés megerősítése", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    try
-                    {
-                        // Ellenőrizzük, hogy vannak-e kapcsolódó bérlések
-                        var hasRentals = _context.Rentals.Any(r => r.CustomerId == selectedCustomer.Id);
-                        if (hasRentals)
-                        {
-                            MessageBox.Show(
-                                "Ez az ügyfél nem törölhető, mert vannak hozzá kapcsolódó bérlések!",
-                                "Törlés nem lehetséges", MessageBoxButton.OK, MessageBoxImage.Warning);
-                            return;
-                        }
-
-                        var customerToDelete = _context.Customers.Find(selectedCustomer.Id);
-                        if (customerToDelete != null)
-                        {
-                            _context.Customers.Remove(customerToDelete);
-                            _context.SaveChanges();
-                            LoadCustomers(); // Frissítés
-
-                            MessageBox.Show("Ügyfél sikeresen törölve!", "Siker",
-                                          MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Hiba az ügyfél törlésekor: {ex.Message}",
-                                      "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-            }
-        }
-
-        private void SearchCustomerTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            string searchText = SearchCustomerTextBox.Text.ToLower();
+            string searchText = SearchRentalTextBox.Text.ToLower();
 
             if (string.IsNullOrWhiteSpace(searchText))
             {
-                // Ha üres a keresés, mutasd az összes ügyfelet
-                _customers.Clear();
-                foreach (var customer in _allCustomers)
+                // Ha üres a keresés, mutasd az összes bérlést
+                _rentals.Clear();
+                foreach (var rental in _allRentals)
                 {
-                    _customers.Add(customer);
+                    _rentals.Add(rental);
                 }
             }
             else
             {
-                // Szűrés név, város vagy e-mail alapján
-                var filteredCustomers = _allCustomers.Where(c =>
-                    c.Name.ToLower().Contains(searchText) ||
-                    c.City.ToLower().Contains(searchText) ||
-                    c.Email.ToLower().Contains(searchText)
+                // Szűrés jegy szám vagy ügyfél név alapján
+                var filteredRentals = _allRentals.Where(r =>
+                    r.TicketNr.ToLower().Contains(searchText) ||
+                    r.CustomerName.ToLower().Contains(searchText) ||
+                    r.DevicesText.ToLower().Contains(searchText)
                 ).ToList();
 
-                _customers.Clear();
-                foreach (var customer in filteredCustomers)
+                _rentals.Clear();
+                foreach (var rental in filteredRentals)
                 {
-                    _customers.Add(customer);
+                    _rentals.Add(rental);
                 }
             }
         }
@@ -354,5 +429,19 @@ namespace berles2
             _context?.Dispose();
             base.OnClosing(e);
         }
+    }
+
+    // SEGÉD OSZTÁLY A BÉRLÉSEK MEGJELENÍTÉSÉHEZ
+    public class RentalDisplayModel
+    {
+        public int Id { get; set; }
+        public string TicketNr { get; set; } = string.Empty;
+        public string CustomerName { get; set; } = string.Empty;
+        public DateTime RentStart { get; set; }
+        public int RentalDays { get; set; }
+        public decimal TotalAmount { get; set; }
+        public string PaymentMode { get; set; } = string.Empty;
+        public string Comment { get; set; } = string.Empty;
+        public string DevicesText { get; set; } = string.Empty;
     }
 }

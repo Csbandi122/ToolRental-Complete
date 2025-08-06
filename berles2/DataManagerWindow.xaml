@@ -87,7 +87,7 @@
                 </Grid>
             </TabItem>
 
-            <!-- ESZKÖZÖK FÜL - MOST MÁR TELJES -->
+            <!-- ESZKÖZÖK FÜL -->
             <TabItem Header="🚲 Eszközök" x:Name="DevicesTab">
                 <Grid Margin="10">
                     <Grid.RowDefinitions>
@@ -153,19 +153,69 @@
                 </Grid>
             </TabItem>
 
-            <!-- TOVÁBBI FÜLEK (egyelőre üres) -->
+            <!-- BÉRLÉSEK FÜL - CSAK OLVASHATÓ -->
             <TabItem Header="📋 Bérlések" x:Name="RentalsTab">
-                <TextBlock Text="Bérlések kezelése - hamarosan..." 
-                          HorizontalAlignment="Center" VerticalAlignment="Center" 
-                          FontSize="16" Foreground="Gray"/>
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40"/>
+                        <!-- Felső keresés -->
+                        <RowDefinition Height="*"/>
+                        <!-- DataGrid -->
+                    </Grid.RowDefinitions>
+
+                    <!-- FELSŐ KERESÉS -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" 
+                               HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <TextBox x:Name="SearchRentalTextBox" Width="200" Height="30" 
+                                Margin="0,0,10,0" VerticalContentAlignment="Center"
+                                TextChanged="SearchRentalTextBox_TextChanged"/>
+
+                        <TextBlock Text="🔍 Keresés (jegy szám, ügyfél neve)" VerticalAlignment="Center" 
+                                  Margin="0,0,20,0" FontWeight="Bold"/>
+
+                        <Button x:Name="RefreshRentalsButton" Content="🔄 Frissítés" 
+                                Width="100" Height="30"
+                                Background="#2196F3" Foreground="White" FontWeight="Bold"
+                                Click="RefreshRentalsButton_Click"/>
+                    </StackPanel>
+
+                    <!-- BÉRLÉSEK TÁBLÁZAT -->
+                    <DataGrid Grid.Row="1" x:Name="RentalsDataGrid" 
+                             Margin="0,10,0,0" AutoGenerateColumns="False"
+                             CanUserAddRows="False" CanUserDeleteRows="False"
+                             IsReadOnly="True" SelectionMode="Single"
+                             GridLinesVisibility="Horizontal" AlternatingRowBackground="#F5F5F5">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                            <DataGridTextColumn Header="Jegy szám" Binding="{Binding TicketNr}" Width="80"/>
+                            <DataGridTextColumn Header="Ügyfél neve" Binding="{Binding CustomerName}" Width="150"/>
+                            <DataGridTextColumn Header="Bérlés kezdete" Width="120">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="RentStart" StringFormat="{}{0:yyyy.MM.dd HH:mm}"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Napok" Binding="{Binding RentalDays}" Width="60"/>
+                            <DataGridTextColumn Header="Végösszeg" Width="80">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="TotalAmount" StringFormat="{}{0:N0} Ft"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Fizetési mód" Binding="{Binding PaymentMode}" Width="100"/>
+                            <DataGridTextColumn Header="Bérelt eszközök" Binding="{Binding DevicesText}" Width="200"/>
+                            <DataGridTextColumn Header="Megjegyzés" Binding="{Binding Comment}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
             </TabItem>
 
+            <!-- PÉNZÜGYEK FÜL -->
             <TabItem Header="💰 Pénzügyek" x:Name="FinancialsTab">
                 <TextBlock Text="Pénzügyek kezelése - hamarosan..." 
                           HorizontalAlignment="Center" VerticalAlignment="Center" 
                           FontSize="16" Foreground="Gray"/>
             </TabItem>
 
+            <!-- SZERVIZ FÜL -->
             <TabItem Header="🔧 Szerviz" x:Name="ServicesTab">
                 <TextBlock Text="Szerviz kezelése - hamarosan..." 
                           HorizontalAlignment="Center" VerticalAlignment="Center" 
