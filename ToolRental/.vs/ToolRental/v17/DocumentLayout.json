@@ -59,18 +59,6 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "CustomerDialog.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerDialog.xaml.cs",
-              "RelativeDocumentMoniker": "..\\berles2\\CustomerDialog.xaml.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerDialog.xaml.cs",
-              "RelativeToolTip": "..\\berles2\\CustomerDialog.xaml.cs",
-              "ViewState": "AgIAAEgAAAAAAAAAAAAswFcAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-06T20:42:48.69Z"
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 5,
               "Title": "CustomerDialog.xaml",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerDialog.xaml",
@@ -127,10 +115,6 @@
               "WhenOpened": "2025-08-06T20:24:07.547Z"
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
-            },
-            {
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "DeviceDialog.xaml",
@@ -140,6 +124,22 @@
               "RelativeToolTip": "..\\berles2\\DeviceDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
               "WhenOpened": "2025-08-06T20:48:39.562Z"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CustomerDialog.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerDialog.xaml.cs",
+              "RelativeDocumentMoniker": "..\\berles2\\CustomerDialog.xaml.cs",
+              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerDialog.xaml.cs",
+              "RelativeToolTip": "..\\berles2\\CustomerDialog.xaml.cs",
+              "ViewState": "AgIAAEgAAAAAAAAAAAAswFcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-06T20:42:48.69Z"
             }
           ]
         }
