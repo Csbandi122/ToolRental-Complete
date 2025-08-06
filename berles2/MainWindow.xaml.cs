@@ -150,24 +150,55 @@ namespace berles2
 
             var stackPanel = new StackPanel();
 
-            // Eszköz képe
-            var image = new Image
+            // Eszköz képe - EGYSZERŰ VERZIÓ
+            var imageContainer = new Border
             {
                 Width = 120,
                 Height = 120,
                 Margin = new Thickness(10, 10, 10, 5),
-                Stretch = Stretch.Uniform
+                Background = Brushes.LightGray,
+                BorderBrush = Brushes.Gray,
+                BorderThickness = new Thickness(1)
             };
 
-            // Kép betöltése ha van
-            if (!string.IsNullOrEmpty(device.Picture) && File.Exists(device.Picture))
+            // Ha van kép, próbáljuk betölteni
+            try
             {
-                image.Source = new BitmapImage(new Uri(device.Picture));
+                if (!string.IsNullOrEmpty(device.Picture) && File.Exists(device.Picture))
+                {
+                    var image = new Image
+                    {
+                        Source = new BitmapImage(new Uri(device.Picture)),
+                        Stretch = Stretch.Uniform
+                    };
+                    imageContainer.Child = image;
+                }
+                else
+                {
+                    // Ha nincs kép, egy emoji ikon
+                    var iconText = new TextBlock
+                    {
+                        Text = "🚲",  // Kerékpár emoji
+                        FontSize = 48,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center,
+                        Foreground = Brushes.DarkGray
+                    };
+                    imageContainer.Child = iconText;
+                }
             }
-            else
+            catch
             {
-                // Alapértelmezett kép ha nincs
-                image.Source = new BitmapImage(new Uri("pack://application:,,,/Assets/no-image.png"));
+                // Ha hiba van, emoji ikon
+                var iconText = new TextBlock
+                {
+                    Text = "🚲",
+                    FontSize = 48,
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Foreground = Brushes.DarkGray
+                };
+                imageContainer.Child = iconText;
             }
 
             // Eszköz neve
@@ -190,7 +221,7 @@ namespace berles2
                 Margin = new Thickness(5, 0, 5, 10)
             };
 
-            stackPanel.Children.Add(image);
+            stackPanel.Children.Add(imageContainer);
             stackPanel.Children.Add(nameText);
             stackPanel.Children.Add(priceText);
             border.Child = stackPanel;
