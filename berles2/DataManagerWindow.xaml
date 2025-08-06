@@ -87,13 +87,73 @@
                 </Grid>
             </TabItem>
 
-            <!-- TOVÁBBI FÜLEK (egyelőre üres) -->
+            <!-- ESZKÖZÖK FÜL - MOST MÁR TELJES -->
             <TabItem Header="🚲 Eszközök" x:Name="DevicesTab">
-                <TextBlock Text="Eszközök kezelése - hamarosan..." 
-                          HorizontalAlignment="Center" VerticalAlignment="Center" 
-                          FontSize="16" Foreground="Gray"/>
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40"/>
+                        <!-- Felső gombok -->
+                        <RowDefinition Height="*"/>
+                        <!-- DataGrid -->
+                    </Grid.RowDefinitions>
+
+                    <!-- FELSŐ ESZKÖZTÁR -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" 
+                               HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <Button x:Name="AddDeviceButton" Content="➕ Új eszköz" 
+                                Width="100" Height="30" Margin="0,0,10,0"
+                                Background="#4CAF50" Foreground="White" FontWeight="Bold"
+                                Click="AddDeviceButton_Click"/>
+
+                        <Button x:Name="EditDeviceButton" Content="✏️ Szerkesztés" 
+                                Width="100" Height="30" Margin="0,0,10,0"
+                                Background="#2196F3" Foreground="White" FontWeight="Bold"
+                                IsEnabled="False" Click="EditDeviceButton_Click"/>
+
+                        <Button x:Name="DeleteDeviceButton" Content="🗑️ Törlés" 
+                                Width="100" Height="30" Margin="0,0,20,0"
+                                Background="#F44336" Foreground="White" FontWeight="Bold"
+                                IsEnabled="False" Click="DeleteDeviceButton_Click"/>
+
+                        <TextBox x:Name="SearchDeviceTextBox" Width="200" Height="30" 
+                                Margin="0,0,10,0" VerticalContentAlignment="Center"
+                                TextChanged="SearchDeviceTextBox_TextChanged"/>
+
+                        <TextBlock Text="🔍 Keresés" VerticalAlignment="Center" 
+                                  Margin="0,0,10,0" FontWeight="Bold"/>
+                    </StackPanel>
+
+                    <!-- ESZKÖZÖK TÁBLÁZAT -->
+                    <DataGrid Grid.Row="1" x:Name="DevicesDataGrid" 
+                             Margin="0,10,0,0" AutoGenerateColumns="False"
+                             CanUserAddRows="False" CanUserDeleteRows="False"
+                             IsReadOnly="True" SelectionMode="Single"
+                             GridLinesVisibility="Horizontal" AlternatingRowBackground="#F5F5F5"
+                             SelectionChanged="DevicesDataGrid_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                            <DataGridTextColumn Header="Eszköz neve" Binding="{Binding DeviceName}" Width="150"/>
+                            <DataGridTextColumn Header="Típus" Binding="{Binding DeviceTypeNavigation.TypeName}" Width="100"/>
+                            <DataGridTextColumn Header="Sorozatszám" Binding="{Binding Serial}" Width="120"/>
+                            <DataGridTextColumn Header="Vételár" Width="80">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="Price" StringFormat="{}{0:N0} Ft"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Bérlési ár" Width="80">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="RentPrice" StringFormat="{}{0:N0} Ft"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridCheckBoxColumn Header="Elérhető" Binding="{Binding Available}" Width="70"/>
+                            <DataGridTextColumn Header="Bérlések száma" Binding="{Binding RentCount}" Width="100"/>
+                            <DataGridTextColumn Header="Megjegyzés" Binding="{Binding Notes}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
             </TabItem>
 
+            <!-- TOVÁBBI FÜLEK (egyelőre üres) -->
             <TabItem Header="📋 Bérlések" x:Name="RentalsTab">
                 <TextBlock Text="Bérlések kezelése - hamarosan..." 
                           HorizontalAlignment="Center" VerticalAlignment="Center" 
