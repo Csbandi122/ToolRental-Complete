@@ -5,8 +5,169 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:berles2"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="Kerékpár Bérlő Rendszer" Height="800" Width="1200"
+        WindowStartupLocation="CenterScreen">
 
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="80"/>
+            <!-- Fejléc -->
+            <RowDefinition Height="*"/>
+            <!-- Főtartalom -->
+            <RowDefinition Height="60"/>
+            <!-- Alsó gombok -->
+        </Grid.RowDefinitions>
+
+        <!-- FEJLÉC SZEKCIÓ -->
+        <Border Grid.Row="0" Background="#2E7D32" Padding="10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Logo -->
+                    <ColumnDefinition Width="*"/>
+                    <!-- Cégcím -->
+                    <ColumnDefinition Width="Auto"/>
+                    <!-- Beállítások -->
+                </Grid.ColumnDefinitions>
+
+                <!-- LOGO (bal oldal) -->
+                <Image Grid.Column="0" x:Name="CompanyLogo" Width="60" Height="60" 
+                       Margin="0,0,20,0" VerticalAlignment="Center"/>
+
+                <!-- CÉG NEVE (közép) -->
+                <TextBlock Grid.Column="1" x:Name="CompanyNameText" 
+                          Text="Kerékpár Bérlő Kft." 
+                          FontSize="24" FontWeight="Bold" 
+                          Foreground="White" 
+                          VerticalAlignment="Center" HorizontalAlignment="Left"/>
+
+                <!-- JOBB OLDALI GOMBOK -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <!-- ADATKEZELŐ GOMB -->
+                    <Button x:Name="DataManagerButton" 
+                            Width="50" Height="50" Margin="0,0,10,0"
+                            Background="Transparent" BorderThickness="0"
+                            VerticalAlignment="Center"
+                            Click="DataManagerButton_Click">
+                        <TextBlock Text="🔧" FontSize="24"/>
+                    </Button>
+
+                    <!-- BEÁLLÍTÁSOK GOMB -->
+                    <Button x:Name="SettingsButton" 
+                            Width="50" Height="50" 
+                            Background="Transparent" BorderThickness="0"
+                            VerticalAlignment="Center">
+                        <TextBlock Text="⚙️" FontSize="24"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- FŐTARTALOM SZEKCIÓ -->
+        <Grid Grid.Row="1" Margin="20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*"/>
+                <!-- Bérlő adatok -->
+                <ColumnDefinition Width="1*"/>
+                <!-- Bérlés részletek -->
+                <ColumnDefinition Width="2*"/>
+                <!-- Eszközök -->
+            </Grid.ColumnDefinitions>
+
+            <!-- BÉRLŐ ADATAI SZEKCIÓ -->
+            <GroupBox Grid.Column="0" Header="Bérlő adatai" Margin="0,0,10,0" 
+                      FontSize="14" FontWeight="Bold">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="10">
+                        <Label Content="Név:"/>
+                        <TextBox x:Name="CustomerNameTextBox" Height="30" Margin="0,0,0,10"/>
+
+                        <Label Content="Irányítószám:"/>
+                        <TextBox x:Name="CustomerZipTextBox" Height="30" Margin="0,0,0,10"/>
+
+                        <Label Content="Város:"/>
+                        <TextBox x:Name="CustomerCityTextBox" Height="30" Margin="0,0,0,10"/>
+
+                        <Label Content="Cím:"/>
+                        <TextBox x:Name="CustomerAddressTextBox" Height="30" Margin="0,0,0,10"/>
+
+                        <Label Content="E-mail:"/>
+                        <TextBox x:Name="CustomerEmailTextBox" Height="30" Margin="0,0,0,10"/>
+
+                        <Label Content="Igazolvány szám:"/>
+                        <TextBox x:Name="CustomerIdNumberTextBox" Height="30" Margin="0,0,0,10"/>
+
+                        <Label Content="Megjegyzés:"/>
+                        <TextBox x:Name="CustomerCommentTextBox" Height="60" 
+                                TextWrapping="Wrap" AcceptsReturn="True"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </GroupBox>
+
+            <!-- BÉRLÉS RÉSZLETEI SZEKCIÓ -->
+            <GroupBox Grid.Column="1" Header="Bérlés részletei" Margin="5,0,5,0"
+                      FontSize="14" FontWeight="Bold">
+                <StackPanel Margin="10">
+                    <Label Content="Jegy szám:"/>
+                    <TextBox x:Name="TicketNumberTextBox" Height="30" Margin="0,0,0,10" 
+                             IsReadOnly="True" Background="#F0F0F0"/>
+
+                    <Label Content="Bérlés kezdete:"/>
+                    <TextBox x:Name="RentStartTextBox" Height="30" Margin="0,0,0,10" 
+                             IsReadOnly="True" Background="#F0F0F0"/>
+
+                    <Label Content="Bérlési napok:"/>
+                    <TextBox x:Name="RentalDaysTextBox" Height="30" Margin="0,0,0,10" Text="1"/>
+
+                    <Label Content="Fizetési mód:"/>
+                    <ComboBox x:Name="PaymentModeComboBox" Height="30" Margin="0,0,0,10" SelectedIndex="0">
+                        <ComboBoxItem Content="Bankkártya"/>
+                        <ComboBoxItem Content="Készpénz"/>
+                        <ComboBoxItem Content="SZÉP kártya"/>
+                        <ComboBoxItem Content="Átutalás"/>
+                        <ComboBoxItem Content="Vegyes"/>
+                        <ComboBoxItem Content="Egyéb"/>
+                    </ComboBox>
+
+                    <Label Content="Megjegyzés:"/>
+                    <TextBox x:Name="RentalCommentTextBox" Height="60" 
+                            TextWrapping="Wrap" AcceptsReturn="True" Margin="0,0,0,10"/>
+
+                    <Label Content="Végösszeg:"/>
+                    <TextBox x:Name="TotalAmountTextBox" Height="30" 
+                             IsReadOnly="True" Background="#F0F0F0" 
+                             FontWeight="Bold" FontSize="16"/>
+                </StackPanel>
+            </GroupBox>
+
+            <!-- BÉRELT ESZKÖZÖK SZEKCIÓ -->
+            <GroupBox Grid.Column="2" Header="Bérelt eszközök" Margin="10,0,0,0"
+                      FontSize="14" FontWeight="Bold">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <WrapPanel x:Name="DevicesWrapPanel" Margin="10" 
+                              Orientation="Horizontal"/>
+                </ScrollViewer>
+            </GroupBox>
+        </Grid>
+
+        <!-- ALSÓ GOMBOK SZEKCIÓ -->
+        <Border Grid.Row="2" Background="#F5F5F5" Padding="20,10">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="ContractButton" Content="Szerződés" 
+                        Width="120" Height="40" Margin="0,0,10,0"
+                        Background="#4CAF50" Foreground="White" FontWeight="Bold"
+                        Click="ContractButton_Click"/>
+
+                <Button x:Name="InvoiceButton" Content="Számlázás" 
+                        Width="120" Height="40" Margin="0,0,10,0"
+                        Background="#9E9E9E" Foreground="White" FontWeight="Bold"
+                        IsEnabled="False"/>
+
+                <Button x:Name="CancelButton" Content="Mégsem" 
+                        Width="120" Height="40"
+                        Background="#F44336" Foreground="White" FontWeight="Bold"
+                        Click="CancelButton_Click"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>

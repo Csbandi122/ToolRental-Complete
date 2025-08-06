@@ -26,6 +26,7 @@ C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Data\obj\Debug\net8.0
 C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Data\obj\Debug\net8.0\ToolRental.Data.AssemblyInfoInputs.cache
 C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Data\obj\Debug\net8.0\ToolRental.Data.AssemblyInfo.cs
 C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Data\obj\Debug\net8.0\ToolRental.Data.csproj.CoreCompileInputs.cache
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Data\obj\Debug\net8.0\ToolRental.Data.sourcelink.json
 C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Data\obj\Debug\net8.0\ToolRent.9FDF81F9.Up2Date
 C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Data\obj\Debug\net8.0\ToolRental.Data.dll
 C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Data\obj\Debug\net8.0\refint\ToolRental.Data.dll

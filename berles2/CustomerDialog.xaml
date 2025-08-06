@@ -1,0 +1,71 @@
+﻿<Window x:Class="berles2.CustomerDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:berles2"
+        mc:Ignorable="d"
+        Title="Ügyfél adatok" Height="500" Width="400"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Címsor -->
+            <RowDefinition Height="*"/>
+            <!-- Főtartalom -->
+            <RowDefinition Height="Auto"/>
+            <!-- Gombok -->
+        </Grid.RowDefinitions>
+
+        <!-- CÍMSOR -->
+        <TextBlock Grid.Row="0" x:Name="TitleTextBlock" Text="Új ügyfél hozzáadása" 
+                   FontSize="18" FontWeight="Bold" HorizontalAlignment="Center" 
+                   Margin="0,0,0,20" Foreground="#2E7D32"/>
+
+        <!-- ADATOK -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <Label Content="Név *:" FontWeight="Bold"/>
+                <TextBox x:Name="NameTextBox" Height="30" Margin="0,0,0,10"/>
+
+                <Label Content="Irányítószám:" FontWeight="Bold"/>
+                <TextBox x:Name="ZipcodeTextBox" Height="30" Margin="0,0,0,10"/>
+
+                <Label Content="Város:" FontWeight="Bold"/>
+                <TextBox x:Name="CityTextBox" Height="30" Margin="0,0,0,10"/>
+
+                <Label Content="Cím:" FontWeight="Bold"/>
+                <TextBox x:Name="AddressTextBox" Height="30" Margin="0,0,0,10"/>
+
+                <Label Content="E-mail *:" FontWeight="Bold"/>
+                <TextBox x:Name="EmailTextBox" Height="30" Margin="0,0,0,10"/>
+
+                <Label Content="Igazolvány szám:" FontWeight="Bold"/>
+                <TextBox x:Name="IdNumberTextBox" Height="30" Margin="0,0,0,10"/>
+
+                <Label Content="Megjegyzés:" FontWeight="Bold"/>
+                <TextBox x:Name="CommentTextBox" Height="80" 
+                        TextWrapping="Wrap" AcceptsReturn="True" 
+                        VerticalScrollBarVisibility="Auto" Margin="0,0,0,10"/>
+
+                <TextBlock Text="* Kötelező mezők" FontSize="12" 
+                          Foreground="Red" FontStyle="Italic" Margin="0,10,0,0"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- GOMBOK -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" 
+                   HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button x:Name="SaveButton" Content="Mentés" 
+                    Width="80" Height="35" Margin="0,0,10,0"
+                    Background="#4CAF50" Foreground="White" FontWeight="Bold"
+                    Click="SaveButton_Click"/>
+
+            <Button x:Name="CancelButton" Content="Mégsem" 
+                    Width="80" Height="35"
+                    Background="#757575" Foreground="White" FontWeight="Bold"
+                    Click="CancelButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
