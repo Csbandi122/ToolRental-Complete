@@ -6,6 +6,12 @@
       "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\datamanagerwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\financialdialog.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\financialdialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\datamanagerwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
@@ -40,7 +46,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 7,
+          "SelectedChildIndex": 8,
           "Children": [
             {
               "$type": "Bookmark",
@@ -51,12 +57,33 @@
               "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
             },
             {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "FinancialDialog.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\FinancialDialog.xaml.cs",
+              "RelativeDocumentMoniker": "..\\berles2\\FinancialDialog.xaml.cs",
+              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\FinancialDialog.xaml.cs",
+              "RelativeToolTip": "..\\berles2\\FinancialDialog.xaml.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-08-07T10:51:47.224Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 2,
+              "Title": "FinancialDialog.xaml",
+              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\FinancialDialog.xaml",
+              "RelativeDocumentMoniker": "..\\berles2\\FinancialDialog.xaml",
+              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\FinancialDialog.xaml",
+              "RelativeToolTip": "..\\berles2\\FinancialDialog.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-08-07T10:51:23.402Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
               "Title": "CustomerSelectDialog.xaml.cs",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerSelectDialog.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\CustomerSelectDialog.xaml.cs",
@@ -69,7 +96,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 5,
               "Title": "CustomerSelectDialog.xaml",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerSelectDialog.xaml",
               "RelativeDocumentMoniker": "..\\berles2\\CustomerSelectDialog.xaml",
@@ -81,7 +108,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 8,
               "Title": "DeviceDialog.xaml.cs",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DeviceDialog.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\DeviceDialog.xaml.cs",
@@ -93,7 +120,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 11,
               "Title": "CustomerDialog.xaml",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerDialog.xaml",
               "RelativeDocumentMoniker": "..\\berles2\\CustomerDialog.xaml",
@@ -108,16 +135,20 @@
               "Title": "DataManagerWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DataManagerWindow.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\DataManagerWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DataManagerWindow.xaml.cs*",
-              "RelativeToolTip": "..\\berles2\\DataManagerWindow.xaml.cs*",
-              "ViewState": "AgIAALACAAAAAAAAAAA3wK8CAAAAAAAAAAAAAA==",
+              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DataManagerWindow.xaml.cs",
+              "RelativeToolTip": "..\\berles2\\DataManagerWindow.xaml.cs",
+              "ViewState": "AgIAAJQBAAAAAAAAAAAswLcBAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-06T20:42:05.282Z",
               "EditorCaption": ""
             },
             {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
+            },
+            {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 3,
               "Title": "DataManagerWindow.xaml",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DataManagerWindow.xaml",
               "RelativeDocumentMoniker": "..\\berles2\\DataManagerWindow.xaml",
@@ -129,7 +160,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "MainWindow.xaml",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\MainWindow.xaml",
               "RelativeDocumentMoniker": "..\\berles2\\MainWindow.xaml",
@@ -141,7 +172,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "MainWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\MainWindow.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\MainWindow.xaml.cs",
@@ -154,7 +185,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 9,
               "Title": "DeviceDialog.xaml",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DeviceDialog.xaml",
               "RelativeDocumentMoniker": "..\\berles2\\DeviceDialog.xaml",
@@ -165,7 +196,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 10,
               "Title": "CustomerDialog.xaml.cs",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerDialog.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\CustomerDialog.xaml.cs",

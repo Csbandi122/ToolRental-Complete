@@ -18,7 +18,7 @@ namespace berles2
         private ObservableCollection<RentalDisplayModel> _rentals;
         private List<RentalDisplayModel> _allRentals;
         private ObservableCollection<ToolRental.Core.Models.Financial> _financials;
-        private List<ToolRental.Core.Models.Financial> _allFinancials
+        private List<ToolRental.Core.Models.Financial> _allFinancials;
 
         public DataManagerWindow()
         {
@@ -27,7 +27,7 @@ namespace berles2
             LoadCustomers();
             LoadDevices();
             LoadRentals();
-            // LoadFinancials();
+            LoadFinancials();
         }
 
         private void InitializeDatabase()
@@ -37,6 +37,9 @@ namespace berles2
             _context = new ToolRentalDbContext(optionsBuilder.Options);
         }
 
+        // ===========================================
+        // ÜGYFELEK KEZELÉS
+        // ===========================================
         private void LoadCustomers()
         {
             try
@@ -69,8 +72,7 @@ namespace berles2
                     var customer = customerDialog.Customer;
                     _context.Customers.Add(customer);
                     _context.SaveChanges();
-
-                    LoadCustomers(); // Frissítés
+                    LoadCustomers();
                     MessageBox.Show("Ügyfél sikeresen hozzáadva!", "Siker",
                                   MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -104,8 +106,7 @@ namespace berles2
                             existingCustomer.Comment = customer.Comment;
 
                             _context.SaveChanges();
-                            LoadCustomers(); // Frissítés
-
+                            LoadCustomers();
                             MessageBox.Show("Ügyfél sikeresen módosítva!", "Siker",
                                           MessageBoxButton.OK, MessageBoxImage.Information);
                         }
@@ -125,32 +126,17 @@ namespace berles2
             {
                 var result = MessageBox.Show(
                     $"Biztosan törli '{selectedCustomer.Name}' ügyfelet?\n\nFIGYELEM: A törlés visszavonhatatlan!",
-                    "Törlés megerősítése", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    "Megerősítés", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
                 {
                     try
                     {
-                        // Ellenőrizzük, hogy vannak-e kapcsolódó bérlések
-                        var hasRentals = _context.Rentals.Any(r => r.CustomerId == selectedCustomer.Id);
-                        if (hasRentals)
-                        {
-                            MessageBox.Show(
-                                "Ez az ügyfél nem törölhető, mert vannak hozzá kapcsolódó bérlések!",
-                                "Törlés nem lehetséges", MessageBoxButton.OK, MessageBoxImage.Warning);
-                            return;
-                        }
-
-                        var customerToDelete = _context.Customers.Find(selectedCustomer.Id);
-                        if (customerToDelete != null)
-                        {
-                            _context.Customers.Remove(customerToDelete);
-                            _context.SaveChanges();
-                            LoadCustomers(); // Frissítés
-
-                            MessageBox.Show("Ügyfél sikeresen törölve!", "Siker",
-                                          MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
+                        _context.Customers.Remove(selectedCustomer);
+                        _context.SaveChanges();
+                        LoadCustomers();
+                        MessageBox.Show("Ügyfél sikeresen törölve!", "Siker",
+                                      MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     catch (Exception ex)
                     {
@@ -163,43 +149,39 @@ namespace berles2
 
         private void SearchCustomerTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string searchText = SearchCustomerTextBox.Text.ToLower();
+            FilterCustomers();
+        }
 
-            if (string.IsNullOrWhiteSpace(searchText))
-            {
-                // Ha üres a keresés, mutasd az összes ügyfelet
-                _customers.Clear();
-                foreach (var customer in _allCustomers)
-                {
-                    _customers.Add(customer);
-                }
-            }
-            else
-            {
-                // Szűrés név, város vagy e-mail alapján
-                var filteredCustomers = _allCustomers.Where(c =>
-                    c.Name.ToLower().Contains(searchText) ||
-                    c.City.ToLower().Contains(searchText) ||
-                    c.Email.ToLower().Contains(searchText)
-                ).ToList();
+        private void FilterCustomers()
+        {
+            if (_allCustomers == null || _customers == null) return;
 
-                _customers.Clear();
-                foreach (var customer in filteredCustomers)
-                {
-                    _customers.Add(customer);
-                }
+            string searchText = SearchCustomerTextBox.Text?.ToLower() ?? "";
+            var filteredCustomers = _allCustomers.Where(c =>
+                string.IsNullOrWhiteSpace(searchText) ||
+                c.Name.ToLower().Contains(searchText) ||
+                c.Email.ToLower().Contains(searchText) ||
+                c.City.ToLower().Contains(searchText) ||
+                c.Address.ToLower().Contains(searchText)
+            ).ToList();
+
+            _customers.Clear();
+            foreach (var customer in filteredCustomers.OrderBy(c => c.Name))
+            {
+                _customers.Add(customer);
             }
         }
 
-        // ESZKÖZÖK KEZELÉSE
+        // ===========================================
+        // ESZKÖZÖK KEZELÉS
+        // ===========================================
         private void LoadDevices()
         {
             try
             {
                 _allDevices = _context.Devices
                     .Include(d => d.DeviceTypeNavigation)
-                    .OrderBy(d => d.DeviceName)
-                    .ToList();
+                    .OrderBy(d => d.DeviceName).ToList();
                 _devices = new ObservableCollection<Device>(_allDevices);
                 DevicesDataGrid.ItemsSource = _devices;
             }
@@ -227,8 +209,7 @@ namespace berles2
                     var device = deviceDialog.Device;
                     _context.Devices.Add(device);
                     _context.SaveChanges();
-
-                    LoadDevices(); // Frissítés
+                    LoadDevices();
                     MessageBox.Show("Eszköz sikeresen hozzáadva!", "Siker",
                                   MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -259,12 +240,11 @@ namespace berles2
                             existingDevice.Price = device.Price;
                             existingDevice.RentPrice = device.RentPrice;
                             existingDevice.Available = device.Available;
-                            existingDevice.Picture = device.Picture;
                             existingDevice.Notes = device.Notes;
+                           // existingDevice.PicturePath = device.PicturePath;
 
                             _context.SaveChanges();
-                            LoadDevices(); // Frissítés
-
+                            LoadDevices();
                             MessageBox.Show("Eszköz sikeresen módosítva!", "Siker",
                                           MessageBoxButton.OK, MessageBoxImage.Information);
                         }
@@ -284,32 +264,17 @@ namespace berles2
             {
                 var result = MessageBox.Show(
                     $"Biztosan törli '{selectedDevice.DeviceName}' eszközt?\n\nFIGYELEM: A törlés visszavonhatatlan!",
-                    "Törlés megerősítése", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    "Megerősítés", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (result == MessageBoxResult.Yes)
                 {
                     try
                     {
-                        // Ellenőrizzük, hogy vannak-e kapcsolódó bérlések
-                        var hasRentals = _context.RentalDevices.Any(rd => rd.DeviceId == selectedDevice.Id);
-                        if (hasRentals)
-                        {
-                            MessageBox.Show(
-                                "Ez az eszköz nem törölhető, mert vannak hozzá kapcsolódó bérlések!",
-                                "Törlés nem lehetséges", MessageBoxButton.OK, MessageBoxImage.Warning);
-                            return;
-                        }
-
-                        var deviceToDelete = _context.Devices.Find(selectedDevice.Id);
-                        if (deviceToDelete != null)
-                        {
-                            _context.Devices.Remove(deviceToDelete);
-                            _context.SaveChanges();
-                            LoadDevices(); // Frissítés
-
-                            MessageBox.Show("Eszköz sikeresen törölve!", "Siker",
-                                          MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
+                        _context.Devices.Remove(selectedDevice);
+                        _context.SaveChanges();
+                        LoadDevices();
+                        MessageBox.Show("Eszköz sikeresen törölve!", "Siker",
+                                      MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     catch (Exception ex)
                     {
@@ -322,61 +287,57 @@ namespace berles2
 
         private void SearchDeviceTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            string searchText = SearchDeviceTextBox.Text.ToLower();
+            FilterDevices();
+        }
 
-            if (string.IsNullOrWhiteSpace(searchText))
-            {
-                // Ha üres a keresés, mutasd az összes eszközt
-                _devices.Clear();
-                foreach (var device in _allDevices)
-                {
-                    _devices.Add(device);
-                }
-            }
-            else
-            {
-                // Szűrés név vagy sorozatszám alapján
-                var filteredDevices = _allDevices.Where(d =>
-                    d.DeviceName.ToLower().Contains(searchText) ||
-                    d.Serial.ToLower().Contains(searchText) ||
-                    (d.DeviceTypeNavigation?.TypeName.ToLower().Contains(searchText) ?? false)
-                ).ToList();
+        private void FilterDevices()
+        {
+            if (_allDevices == null || _devices == null) return;
 
-                _devices.Clear();
-                foreach (var device in filteredDevices)
-                {
-                    _devices.Add(device);
-                }
+            string searchText = SearchDeviceTextBox.Text?.ToLower() ?? "";
+            var filteredDevices = _allDevices.Where(d =>
+                string.IsNullOrWhiteSpace(searchText) ||
+                d.DeviceName.ToLower().Contains(searchText) ||
+                d.Serial.ToLower().Contains(searchText) ||
+                (d.DeviceTypeNavigation?.TypeName.ToLower().Contains(searchText) ?? false) ||
+                (d.Notes?.ToLower().Contains(searchText) ?? false)
+            ).ToList();
+
+            _devices.Clear();
+            foreach (var device in filteredDevices.OrderBy(d => d.DeviceName))
+            {
+                _devices.Add(device);
             }
         }
 
-        // BÉRLÉSEK KEZELÉSE
+        // ===========================================
+        // BÉRLÉSEK KEZELÉS
+        // ===========================================
         private void LoadRentals()
         {
             try
             {
-                var rentalsFromDb = _context.Rentals
+                var rentals = _context.Rentals
                     .Include(r => r.Customer)
                     .Include(r => r.RentalDevices)
                         .ThenInclude(rd => rd.Device)
                     .OrderByDescending(r => r.RentStart)
+                    .Select(r => new RentalDisplayModel
+                    {
+                        Id = r.Id,
+                        TicketNr = r.TicketNr,
+                        CustomerName = r.Customer.Name,
+                        RentStart = r.RentStart,
+                        RentalDays = r.RentalDays,
+                        TotalAmount = r.TotalAmount,
+                        PaymentMode = r.PaymentMode,
+                        Comment = r.Comment ?? "",
+                        DevicesText = string.Join(", ", r.RentalDevices.Select(rd => rd.Device.DeviceName))
+                    })
                     .ToList();
 
-                // Konvertálás display modellre
-                _allRentals = rentalsFromDb.Select(r => new RentalDisplayModel
-                {
-                    Id = r.Id,
-                    TicketNr = r.TicketNr,
-                    CustomerName = r.Customer.Name,
-                    RentStart = r.RentStart,
-                    RentalDays = r.RentalDays,
-                    TotalAmount = r.TotalAmount,
-                    PaymentMode = r.PaymentMode,
-                    Comment = r.Comment ?? "",
-                    DevicesText = string.Join(", ", r.RentalDevices.Select(rd => rd.Device.DeviceName))
-                }).ToList();
-
-                _rentals = new ObservableCollection<RentalDisplayModel>(_allRentals);
+                _allRentals = rentals;
+                _rentals = new ObservableCollection<RentalDisplayModel>(rentals);
                 RentalsDataGrid.ItemsSource = _rentals;
             }
             catch (Exception ex)
@@ -386,77 +347,44 @@ namespace berles2
             }
         }
 
+        private void SearchRentalTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            FilterRentals();
+        }
+
         private void RefreshRentalsButton_Click(object sender, RoutedEventArgs e)
         {
             LoadRentals();
-            SearchRentalTextBox.Clear();
         }
 
-        private void SearchRentalTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        private void FilterRentals()
         {
-            string searchText = SearchRentalTextBox.Text.ToLower();
+            if (_allRentals == null || _rentals == null) return;
 
-            if (string.IsNullOrWhiteSpace(searchText))
-            {
-                // Ha üres a keresés, mutasd az összes bérlést
-                _rentals.Clear();
-                foreach (var rental in _allRentals)
-                {
-                    _rentals.Add(rental);
-                }
-            }
-            else
-            {
-                // Szűrés jegy szám vagy ügyfél név alapján
-                var filteredRentals = _allRentals.Where(r =>
-                    r.TicketNr.ToLower().Contains(searchText) ||
-                    r.CustomerName.ToLower().Contains(searchText) ||
-                    r.DevicesText.ToLower().Contains(searchText)
-                ).ToList();
+            string searchText = SearchRentalTextBox.Text?.ToLower() ?? "";
+            var filteredRentals = _allRentals.Where(r =>
+                string.IsNullOrWhiteSpace(searchText) ||
+                r.TicketNr.ToLower().Contains(searchText) ||
+                r.CustomerName.ToLower().Contains(searchText) ||
+                r.DevicesText.ToLower().Contains(searchText)
+            ).ToList();
 
-                _rentals.Clear();
-                foreach (var rental in filteredRentals)
-                {
-                    _rentals.Add(rental);
-                }
+            _rentals.Clear();
+            foreach (var rental in filteredRentals)
+            {
+                _rentals.Add(rental);
             }
         }
 
-        private void CloseButton_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
-
-        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
-        {
-            _context?.Dispose();
-            base.OnClosing(e);
-        }
-    }
-
-    // SEGÉD OSZTÁLY A BÉRLÉSEK MEGJELENÍTÉSÉHEZ
-    public class RentalDisplayModel
-    {
-        public int Id { get; set; }
-        public string TicketNr { get; set; } = string.Empty;
-        public string CustomerName { get; set; } = string.Empty;
-        public DateTime RentStart { get; set; }
-        public int RentalDays { get; set; }
-        public decimal TotalAmount { get; set; }
-        public string PaymentMode { get; set; } = string.Empty;
-        public string Comment { get; set; } = string.Empty;
-        public string DevicesText { get; set; } = string.Empty;
-    }
-    // ===========================================
-// PÉNZÜGYEK KEZELÉS
-// ===========================================
-
-private void LoadFinancials()
+        // ===========================================
+        // PÉNZÜGYEK KEZELÉS
+        // ===========================================
+        private void LoadFinancials()
         {
             try
             {
                 _allFinancials = _context.Financials.OrderByDescending(f => f.Date).ToList();
-                _financials = new ObservableCollection<Financial>(_allFinancials);
+                _financials = new ObservableCollection<ToolRental.Core.Models.Financial>(_allFinancials);
                 FinancialsDataGrid.ItemsSource = _financials;
             }
             catch (Exception ex)
@@ -484,7 +412,22 @@ private void LoadFinancials()
                     _context.Financials.Add(financial);
                     _context.SaveChanges();
 
-                    LoadFinancials(); // Frissítés
+                    // Eszköz kapcsolatok mentése
+                    if (financialDialog.SelectedDevices.Any())
+                    {
+                        foreach (var device in financialDialog.SelectedDevices)
+                        {
+                            var financialDevice = new FinancialDevice
+                            {
+                                FinancialId = financial.Id,
+                                DeviceId = device.Id
+                            };
+                            _context.FinancialDevices.Add(financialDevice);
+                        }
+                        _context.SaveChanges();
+                    }
+
+                    LoadFinancials();
                     MessageBox.Show("Pénzügyi tétel sikeresen hozzáadva!", "Siker",
                                   MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -498,45 +441,15 @@ private void LoadFinancials()
 
         private void EditFinancialButton_Click(object sender, RoutedEventArgs e)
         {
-            if (FinancialsDataGrid.SelectedItem is Financial selectedFinancial)
-            {
-                var financialDialog = new FinancialDialog(selectedFinancial);
-                if (financialDialog.ShowDialog() == true)
-                {
-                    try
-                    {
-                        var financial = financialDialog.Financial;
-                        var existingFinancial = _context.Financials.Find(financial.Id);
-                        if (existingFinancial != null)
-                        {
-                            existingFinancial.Date = financial.Date;
-                            existingFinancial.EntryType = financial.EntryType;
-                            existingFinancial.SourceType = financial.SourceType;
-                            existingFinancial.TicketNr = financial.TicketNr;
-                            existingFinancial.Amount = financial.Amount;
-                            existingFinancial.Comment = financial.Comment;
-
-                            _context.SaveChanges();
-                            LoadFinancials(); // Frissítés
-
-                            MessageBox.Show("Pénzügyi tétel sikeresen módosítva!", "Siker",
-                                          MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Hiba a pénzügyi tétel módosításakor: {ex.Message}",
-                                      "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-            }
+            MessageBox.Show("Pénzügyi tétel szerkesztése - hamarosan elérhető!", "Info",
+                          MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         private void DeleteFinancialButton_Click(object sender, RoutedEventArgs e)
         {
-            if (FinancialsDataGrid.SelectedItem is Financial selectedFinancial)
+            if (FinancialsDataGrid.SelectedItem is ToolRental.Core.Models.Financial selectedFinancial)
             {
-                // Ellenőrizzük, hogy bérléshez kapcsolódó tétel-e
+                // Bérléshez kapcsolódó tételeket nem lehet törölni
                 if (selectedFinancial.SourceType == "bérlés" && selectedFinancial.SourceId.HasValue)
                 {
                     MessageBox.Show("Bérléshez kapcsolódó pénzügyi tételeket nem lehet törölni!\n" +
@@ -550,114 +463,6 @@ private void LoadFinancials()
                     $"Dátum: {selectedFinancial.Date:yyyy.MM.dd}\n" +
                     $"Típus: {selectedFinancial.EntryType}\n" +
                     $"Összeg: {selectedFinancial.Amount:N0} Ft\n" +
-                    $"Megjegyzés: {selectedFinancial.Comment}\n\n" +
-                    $"FIGYELEM: A törlés visszavonhatatlan!",
-                    "Megerősítés", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    try
-                    {
-                        _context.Financials.Remove(selectedFinancial);
-                        _context.SaveChanges();
-                        LoadFinancials(); // Frissítés
-
-                        MessageBox.Show("Pénzügyi tétel sikeresen törölve!", "Siker",
-                                      MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Hiba a pénzügyi tétel törlésekor: {ex.Message}",
-                                      "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-            }
-        }
-
-        private void FinancialTypeFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            FilterFinancials();
-        }
-
-        private void SearchFinancialTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            FilterFinancials();
-        }
-
-        private void FilterFinancials()
-        {
-            if (_allFinancials == null || _financials == null) return;
-
-            string searchText = SearchFinancialTextBox.Text?.ToLower() ?? "";
-            string selectedType = ((ComboBoxItem)FinancialTypeFilterComboBox.SelectedItem)?.Content?.ToString();
-
-            var filteredFinancials = _allFinancials.Where(f =>
-            {
-                // Szöveg keresés
-                bool matchesSearch = string.IsNullOrWhiteSpace(searchText) ||
-                                   f.Comment.ToLower().Contains(searchText) ||
-                                   f.TicketNr.ToLower().Contains(searchText) ||
-                                   f.SourceType.ToLower().Contains(searchText);
-
-                // Típus szűrés
-                bool matchesType = selectedType == "Összes típus" ||
-                                 (selectedType == "Bevétel" && f.EntryType == "bevétel") ||
-                                 (selectedType == "Költség" && f.EntryType == "költség");
-
-                return matchesSearch && matchesType;
-            }).ToList();
-
-            _financials.Clear();
-            foreach (var financial in filteredFinancials.OrderByDescending(f => f.Date))
-            {
-                _financials.Add(financial);
-            }
-
-            // ===========================================
-        // PÉNZÜGYEK KEZELÉS - ALAPOK
-        // ===========================================
-
-        private void LoadFinancials()
-        {
-            try
-            {
-                _allFinancials = _context.Financials.OrderByDescending(f => f.Date).ToList();
-                _financials = new ObservableCollection<ToolRental.Core.Models.Financial>(_allFinancials);
-                FinancialsDataGrid.ItemsSource = _financials;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Hiba a pénzügyi tételek betöltésekor: {ex.Message}",
-                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-
-        private void FinancialsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            bool hasSelection = FinancialsDataGrid.SelectedItem != null;
-            EditFinancialButton.IsEnabled = hasSelection;
-            DeleteFinancialButton.IsEnabled = hasSelection;
-        }
-
-        private void AddFinancialButton_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Pénzügyi tétel hozzáadása - hamarosan elérhető!", "Info", 
-                          MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        private void EditFinancialButton_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Pénzügyi tétel szerkesztése - hamarosan elérhető!", "Info", 
-                          MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        private void DeleteFinancialButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (FinancialsDataGrid.SelectedItem is ToolRental.Core.Models.Financial selectedFinancial)
-            {
-                var result = MessageBox.Show(
-                    $"Biztosan törli ezt a pénzügyi tételt?\n\n" +
-                    $"Összeg: {selectedFinancial.Amount:N0} Ft\n" +
                     $"Megjegyzés: {selectedFinancial.Comment}",
                     "Megerősítés", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
@@ -668,7 +473,6 @@ private void LoadFinancials()
                         _context.Financials.Remove(selectedFinancial);
                         _context.SaveChanges();
                         LoadFinancials();
-
                         MessageBox.Show("Pénzügyi tétel sikeresen törölve!", "Siker",
                                       MessageBoxButton.OK, MessageBoxImage.Information);
                     }
@@ -696,12 +500,21 @@ private void LoadFinancials()
             if (_allFinancials == null || _financials == null) return;
 
             string searchText = SearchFinancialTextBox.Text?.ToLower() ?? "";
-            
+            string selectedType = ((ComboBoxItem)FinancialTypeFilterComboBox.SelectedItem)?.Content?.ToString();
+
             var filteredFinancials = _allFinancials.Where(f =>
-                string.IsNullOrWhiteSpace(searchText) ||
-                f.Comment.ToLower().Contains(searchText) ||
-                f.TicketNr.ToLower().Contains(searchText)
-            ).ToList();
+            {
+                bool matchesSearch = string.IsNullOrWhiteSpace(searchText) ||
+                                   f.Comment.ToLower().Contains(searchText) ||
+                                   f.TicketNr.ToLower().Contains(searchText) ||
+                                   f.SourceType.ToLower().Contains(searchText);
+
+                bool matchesType = selectedType == "Összes típus" ||
+                                 (selectedType == "Bevétel" && f.EntryType == "bevétel") ||
+                                 (selectedType == "Költség" && f.EntryType == "költség");
+
+                return matchesSearch && matchesType;
+            }).ToList();
 
             _financials.Clear();
             foreach (var financial in filteredFinancials.OrderByDescending(f => f.Date))
@@ -709,6 +522,33 @@ private void LoadFinancials()
                 _financials.Add(financial);
             }
         }
+
+        // ===========================================
+        // ABLAK KEZELÉS
+        // ===========================================
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
+
+        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
+        {
+            _context?.Dispose();
+            base.OnClosing(e);
+        }
+    }
+
+    // SEGÉD OSZTÁLY A BÉRLÉSEK MEGJELENÍTÉSÉHEZ
+    public class RentalDisplayModel
+    {
+        public int Id { get; set; }
+        public string TicketNr { get; set; } = string.Empty;
+        public string CustomerName { get; set; } = string.Empty;
+        public DateTime RentStart { get; set; }
+        public int RentalDays { get; set; }
+        public decimal TotalAmount { get; set; }
+        public string PaymentMode { get; set; } = string.Empty;
+        public string Comment { get; set; } = string.Empty;
+        public string DevicesText { get; set; } = string.Empty;
     }
 }
