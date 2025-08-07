@@ -82,7 +82,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -91,6 +91,10 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{3ae79031-e1bc-11d0-8f78-00a0c9110057}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
             },
             {
               "$type": "Document",
@@ -104,10 +108,6 @@
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-07T16:22:15.695Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
             },
             {
               "$type": "Document",
@@ -182,7 +182,8 @@
               "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\ServiceDialog.xaml",
               "RelativeToolTip": "..\\berles2\\ServiceDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-07T11:33:25.339Z"
+              "WhenOpened": "2025-08-07T11:33:25.339Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -194,7 +195,8 @@
               "RelativeToolTip": "..\\ToolRental.Core\\Models\\ServiceDevice.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T11:30:59.672Z"
+              "WhenOpened": "2025-08-07T11:30:59.672Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -206,7 +208,8 @@
               "RelativeToolTip": "..\\ToolRental.Data\\ToolRentalDbContext.cs",
               "ViewState": "AgIAACgAAAAAAAAAAAAswD0AAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T11:28:54.376Z"
+              "WhenOpened": "2025-08-07T11:28:54.376Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -218,7 +221,8 @@
               "RelativeToolTip": "..\\ToolRental.Core\\Models\\Device.cs",
               "ViewState": "AgIAAAYAAAAAAAAAAAAowBcAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T11:28:19.11Z"
+              "WhenOpened": "2025-08-07T11:28:19.11Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -230,7 +234,8 @@
               "RelativeToolTip": "..\\ToolRental.Core\\Models\\Service.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAABjAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T11:27:43.661Z"
+              "WhenOpened": "2025-08-07T11:27:43.661Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -242,7 +247,8 @@
               "RelativeToolTip": "..\\berles2\\FinancialDialog.xaml.cs",
               "ViewState": "AgIAAHEAAAAAAAAAAAAEwIoAAAANAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T10:51:47.224Z"
+              "WhenOpened": "2025-08-07T10:51:47.224Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -253,7 +259,8 @@
               "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\FinancialDialog.xaml",
               "RelativeToolTip": "..\\berles2\\FinancialDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-07T10:51:23.402Z"
+              "WhenOpened": "2025-08-07T10:51:23.402Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -265,7 +272,8 @@
               "RelativeToolTip": "..\\berles2\\DataManagerWindow.xaml.cs",
               "ViewState": "AgIAAH8CAAAAAAAAAAAwwJECAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-06T20:42:05.282Z"
+              "WhenOpened": "2025-08-06T20:42:05.282Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -276,7 +284,8 @@
               "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DataManagerWindow.xaml",
               "RelativeToolTip": "..\\berles2\\DataManagerWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-06T20:41:45.68Z"
+              "WhenOpened": "2025-08-06T20:41:45.68Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -288,7 +297,8 @@
               "RelativeToolTip": "..\\berles2\\ServiceDialog.xaml.cs",
               "ViewState": "AgIAAEgBAAAAAAAAAAAgwE8BAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T11:33:51.7Z"
+              "WhenOpened": "2025-08-07T11:33:51.7Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -300,7 +310,8 @@
               "RelativeToolTip": "..\\berles2\\CustomerSelectDialog.xaml.cs",
               "ViewState": "AgIAAGIAAAAAAAAAAAAswIUAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T10:20:16.175Z"
+              "WhenOpened": "2025-08-07T10:20:16.175Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -311,7 +322,8 @@
               "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerSelectDialog.xaml",
               "RelativeToolTip": "..\\berles2\\CustomerSelectDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-07T10:19:49.998Z"
+              "WhenOpened": "2025-08-07T10:19:49.998Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -323,7 +335,8 @@
               "RelativeToolTip": "..\\berles2\\DeviceDialog.xaml.cs",
               "ViewState": "AgIAALYAAAAAAAAAAAAwwM8AAAAJAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-06T20:49:01.695Z"
+              "WhenOpened": "2025-08-06T20:49:01.695Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -334,7 +347,8 @@
               "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerDialog.xaml",
               "RelativeToolTip": "..\\berles2\\CustomerDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-06T20:42:31.268Z"
+              "WhenOpened": "2025-08-06T20:42:31.268Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -370,7 +384,8 @@
               "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DeviceDialog.xaml",
               "RelativeToolTip": "..\\berles2\\DeviceDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-06T20:48:39.562Z"
+              "WhenOpened": "2025-08-06T20:48:39.562Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -382,7 +397,8 @@
               "RelativeToolTip": "..\\berles2\\CustomerDialog.xaml.cs",
               "ViewState": "AgIAAEgAAAAAAAAAAAAswFcAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-06T20:42:48.69Z"
+              "WhenOpened": "2025-08-06T20:42:48.69Z",
+              "EditorCaption": ""
             }
           ]
         }
