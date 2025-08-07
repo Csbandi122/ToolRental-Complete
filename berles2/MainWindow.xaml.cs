@@ -281,17 +281,27 @@ namespace berles2
 
         private void ContractButton_Click(object sender, RoutedEventArgs e)
         {
+            // Validáció és bérlés mentése
             if (ValidateForm())
             {
                 try
                 {
                     SaveRental();
-                    MessageBox.Show("Bérlés sikeresen létrehozva!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
-                    ClearForm();
+
+                    // Sikeres mentés után gombok állapotának frissítése
+                    ContractButton.IsEnabled = false;
+                    ContractButton.Background = System.Windows.Media.Brushes.Gray;
+
+                    EmailButton.IsEnabled = true;
+                    EmailButton.Background = System.Windows.Media.Brushes.Blue;
+
+                    MessageBox.Show("Bérlés sikeresen mentve!\nMost elküldheted a szerződést e-mailben.",
+                                  "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Hiba történt a bérlés létrehozásakor: {ex.Message}", "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Hiba történt a bérlés létrehozásakor: {ex.Message}",
+                                  "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
         }
@@ -457,15 +467,7 @@ namespace berles2
 
 
 
-        private void CancelButton_Click(object sender, RoutedEventArgs e)
-        {
-            var result = MessageBox.Show("Biztosan bezárja az ablakot? A bevitt adatok elvesznek!",
-                                       "Megerősítés", MessageBoxButton.YesNo, MessageBoxImage.Question);
-            if (result == MessageBoxResult.Yes)
-            {
-                this.Close();
-            }
-        }
+        
 
         private void DataManagerButton_Click(object sender, RoutedEventArgs e)
         {
@@ -544,6 +546,98 @@ namespace berles2
         {
             _context?.Dispose();
             base.OnClosing(e);
+        }
+        // ===========================================
+        // BÉRLÉSI FOLYAMAT GOMBOK
+        // ===========================================
+
+        private void EmailButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Később implementáljuk
+            MessageBox.Show("E-mail küldés funkció - hamarosan implementálva!",
+                          "Fejlesztés alatt", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void InvoiceButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Később implementáljuk
+            MessageBox.Show("Számla generálás funkció - hamarosan implementálva!",
+                          "Fejlesztés alatt", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void FinishButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Ablak inicializálása
+            var result = MessageBox.Show("Biztosan befejezed és törölni szeretnéd az összes adatot?",
+                                        "Bérlés befejezése", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                ClearAllForms();
+                MessageBox.Show("Az ablak inicializálva! Új bérlést kezdhetsz.",
+                              "Kész", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void ClearAllForms()
+        {
+            // Bérlő adatok törlése
+            CustomerNameTextBox.Text = "";
+            CustomerZipTextBox.Text = "";  // ← JAVÍTVA!
+            CustomerCityTextBox.Text = "";
+            CustomerAddressTextBox.Text = "";
+            CustomerEmailTextBox.Text = "";
+            CustomerIdNumberTextBox.Text = "";
+            CustomerCommentTextBox.Text = "";
+
+            // Bérlés részletek törlése
+            RentalDaysTextBox.Text = "1";  // ← Alapértelmezett érték
+            PaymentModeComboBox.SelectedIndex = 0;
+            RentalCommentTextBox.Text = "";
+            TotalAmountTextBox.Text = "0 Ft";
+
+            // Kiválasztott eszközök törlése
+            _selectedDevices.Clear();
+
+            // Eszközök megjelenítésének újratöltése
+            DisplayDevices();
+
+            // Ticket szám újragenerálása
+            GenerateNextTicketNumber();  // ← JAVÍTVA!
+
+            // Kiválasztott ügyfél törlése
+            _selectedExistingCustomer = null;
+            if (SelectedCustomerBorder != null)
+                SelectedCustomerBorder.Visibility = Visibility.Collapsed;
+            SetCustomerFieldsEnabled(true);
+
+            // Végösszeg frissítése
+            UpdateTotalAmount();
+
+            // Gombok visszaállítása
+            ContractButton.IsEnabled = true;
+            ContractButton.Background = System.Windows.Media.Brushes.Green;
+
+            EmailButton.IsEnabled = false;
+            EmailButton.Background = System.Windows.Media.Brushes.Gray;
+
+            InvoiceButton.IsEnabled = false;
+            InvoiceButton.Background = System.Windows.Media.Brushes.Gray;
+        }
+        // ===========================================
+        // BÉRLÉSI FOLYAMAT GOMBOK
+        // ===========================================
+
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var settingsDialog = new SettingsDialog();
+            if (settingsDialog.ShowDialog() == true)
+            {
+                // Beállítások frissítése után reload company settings
+                LoadCompanySettings();
+                MessageBox.Show("Beállítások alkalmazva!",
+                              "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
     }
 }

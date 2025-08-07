@@ -1,0 +1,192 @@
+﻿<Window x:Class="berles2.SettingsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:berles2"
+        mc:Ignorable="d"
+        Title="Beállítások - Kerékpár Bérlő Rendszer" Height="750" Width="600"
+        WindowStartupLocation="CenterOwner" ResizeMode="CanResize">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <!-- Címsor -->
+            <RowDefinition Height="*"/>
+            <!-- ScrollViewer -->
+            <RowDefinition Height="Auto"/>
+            <!-- Gombok -->
+        </Grid.RowDefinitions>
+
+        <!-- CÍMSOR -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+            <TextBlock Text="⚙️" FontSize="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
+            <TextBlock Text="Rendszer beállítások" FontSize="18" FontWeight="Bold" 
+                       VerticalAlignment="Center" Foreground="#2E7D32"/>
+        </StackPanel>
+
+        <!-- FŐTARTALOM SCROLLVIEWER -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+
+                <!-- 1. CÉG ADATOK SZEKCIÓ -->
+                <GroupBox Header="🏢 Cég adatok" FontWeight="Bold" Margin="0,0,0,15">
+                    <StackPanel Margin="10">
+                        <Label Content="Cégnév *:" FontWeight="Bold"/>
+                        <TextBox x:Name="CompanyNameTextBox" Height="30" Margin="0,0,0,10"/>
+
+                        <Label Content="Cég logo:" FontWeight="Bold"/>
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="CompanyLogoTextBox" Grid.Column="0" Height="30" 
+                                     IsReadOnly="True" Background="#F5F5F5"/>
+                            <Button x:Name="BrowseLogoButton" Grid.Column="1" Content="Tallózás..." 
+                                    Height="30" Margin="5,0,0,0" Click="BrowseLogoButton_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- 2. EMAIL KAPCSOLAT BEÁLLÍTÁSOK -->
+                <GroupBox Header="📧 Email kapcsolat beállítások" FontWeight="Bold" Margin="0,0,0,15">
+                    <StackPanel Margin="10">
+                        <Label Content="SMTP szerver *:" FontWeight="Bold"/>
+                        <TextBox x:Name="EmailSmtpTextBox" Height="30" Margin="0,0,0,10"/>
+
+                        <Label Content="SMTP port *:" FontWeight="Bold"/>
+                        <TextBox x:Name="SmtpPortTextBox" Height="30" Margin="0,0,0,10" Text="587"/>
+
+                        <Label Content="Email cím *:" FontWeight="Bold"/>
+                        <TextBox x:Name="SenderEmailTextBox" Height="30" Margin="0,0,0,10"/>
+
+                        <Label Content="Email jelszó *:" FontWeight="Bold"/>
+                        <PasswordBox x:Name="EmailPasswordBox" Height="30" Margin="0,0,0,10"/>
+
+                        <Label Content="Küldő neve *:" FontWeight="Bold"/>
+                        <TextBox x:Name="SenderNameTextBox" Height="30" Margin="0,0,0,10"/>
+
+                        <Label Content="Másolat címzett (CC):" FontWeight="Bold"/>
+                        <TextBox x:Name="CcAddressTextBox" Height="30" Margin="0,0,0,10"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- 3. DOKUMENTUM SABLONOK -->
+                <GroupBox Header="📋 Dokumentum sablonok" FontWeight="Bold" Margin="0,0,0,15">
+                    <StackPanel Margin="10">
+                        <Label Content="Szerződés sablon (.docx):" FontWeight="Bold"/>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="TemplateContractTextBox" Grid.Column="0" Height="30" 
+                                     IsReadOnly="True" Background="#F5F5F5"/>
+                            <Button x:Name="BrowseContractButton" Grid.Column="1" Content="Tallózás..." 
+                                    Height="30" Margin="5,0,0,0" Click="BrowseContractButton_Click"/>
+                        </Grid>
+
+                        <Label Content="ÁSZF fájl (.pdf):" FontWeight="Bold"/>
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="AszfFileTextBox" Grid.Column="0" Height="30" 
+                                     IsReadOnly="True" Background="#F5F5F5"/>
+                            <Button x:Name="BrowseAszfButton" Grid.Column="1" Content="Tallózás..." 
+                                    Height="30" Margin="5,0,0,0" Click="BrowseAszfButton_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- 4. EMAIL TEMPLATE-EK -->
+                <GroupBox Header="📧 Email template-ek (HTML)" FontWeight="Bold" Margin="0,0,0,15">
+                    <StackPanel Margin="10">
+                        <Label Content="Szerződés email tárgy *:" FontWeight="Bold"/>
+                        <TextBox x:Name="EmailSubjectTextBox" Height="30" Margin="0,0,0,10"/>
+
+                        <Label Content="Szerződés email template (.html):" FontWeight="Bold"/>
+                        <Grid Margin="0,0,0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="ContractEmailTemplateTextBox" Grid.Column="0" Height="30" 
+                                     IsReadOnly="True" Background="#F5F5F5"/>
+                            <Button x:Name="BrowseContractEmailButton" Grid.Column="1" Content="Tallózás..." 
+                                    Height="30" Margin="5,0,0,0" Click="BrowseContractEmailButton_Click"/>
+                        </Grid>
+
+                        <Label Content="Értékelés email tárgy *:" FontWeight="Bold"/>
+                        <TextBox x:Name="ReviewEmailSubjectTextBox" Height="30" Margin="0,0,0,10"/>
+
+                        <Label Content="Értékelés email template (.html):" FontWeight="Bold"/>
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="ReviewEmailTemplateTextBox" Grid.Column="0" Height="30" 
+                                     IsReadOnly="True" Background="#F5F5F5"/>
+                            <Button x:Name="BrowseReviewEmailButton" Grid.Column="1" Content="Tallózás..." 
+                                    Height="30" Margin="5,0,0,0" Click="BrowseReviewEmailButton_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- 5. MARKETING/ÉRTÉKELÉS -->
+                <GroupBox Header="🌟 Marketing/értékelés" FontWeight="Bold" Margin="0,0,0,15">
+                    <StackPanel Margin="10">
+                        <Label Content="Google értékelés link:" FontWeight="Bold"/>
+                        <TextBox x:Name="GoogleReviewTextBox" Height="30" Margin="0,0,0,15"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- 6. SZÁMLA BEÁLLÍTÁSOK -->
+                <GroupBox Header="💰 Számla beállítások" FontWeight="Bold" Margin="0,0,0,15">
+                    <StackPanel Margin="10">
+                        <Label Content="Számla XML sablon (.xml):" FontWeight="Bold"/>
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="100"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox x:Name="InvoiceXmlTextBox" Grid.Column="0" Height="30" 
+                                     IsReadOnly="True" Background="#F5F5F5"/>
+                            <Button x:Name="BrowseInvoiceButton" Grid.Column="1" Content="Tallózás..." 
+                                    Height="30" Margin="5,0,0,0" Click="BrowseInvoiceButton_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- 7. ALAPÉRTELMEZÉSEK -->
+                <GroupBox Header="⏰ Alapértelmezések" FontWeight="Bold" Margin="0,0,0,15">
+                    <StackPanel Margin="10">
+                        <Label Content="Alapértelmezett bérlési idő (nap) *:" FontWeight="Bold"/>
+                        <TextBox x:Name="DefaultRentalDaysTextBox" Height="30" Margin="0,0,0,10" Text="1"/>
+
+                        <TextBlock Text="* Kötelező mezők" FontSize="12" 
+                                  Foreground="Red" FontStyle="Italic" Margin="0,10,0,0"/>
+                    </StackPanel>
+                </GroupBox>
+
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- ALSÓ GOMBOK -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" 
+                   HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button x:Name="SaveButton" Content="💾 Mentés" 
+                    Width="120" Height="40" Margin="0,0,10,0"
+                    Background="#4CAF50" Foreground="White" FontWeight="Bold"
+                    Click="SaveButton_Click"/>
+
+            <Button x:Name="CancelButton" Content="❌ Mégsem" 
+                    Width="120" Height="40"
+                    Background="#757575" Foreground="White" FontWeight="Bold"
+                    Click="CancelButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

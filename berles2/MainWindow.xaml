@@ -53,10 +53,12 @@
                     </Button>
 
                     <!-- BEÁLLÍTÁSOK GOMB -->
+                    <!-- BEÁLLÍTÁSOK GOMB -->
                     <Button x:Name="SettingsButton" 
-                            Width="50" Height="50" 
-                            Background="Transparent" BorderThickness="0"
-                            VerticalAlignment="Center">
+        Width="50" Height="50" 
+        Background="Transparent" BorderThickness="0"
+        VerticalAlignment="Center"
+        Click="SettingsButton_Click">
                         <TextBlock Text="⚙️" FontSize="24"/>
                     </Button>
                 </StackPanel>
@@ -179,20 +181,29 @@
         <!-- ALSÓ GOMBOK SZEKCIÓ -->
         <Border Grid.Row="2" Background="#F5F5F5" Padding="20,10">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button x:Name="ContractButton" Content="Szerződés" 
-                        Width="120" Height="40" Margin="0,0,10,0"
-                        Background="#4CAF50" Foreground="White" FontWeight="Bold"
-                        Click="ContractButton_Click"/>
+                <!-- SZERZŐDÉS GOMB (aktív) -->
+                <Button x:Name="ContractButton" Content="📋 Szerződés" 
+            Width="120" Height="40" Margin="0,0,10,0"
+            Background="#4CAF50" Foreground="White" FontWeight="Bold"
+            Click="ContractButton_Click"/>
 
-                <Button x:Name="InvoiceButton" Content="Számlázás" 
-                        Width="120" Height="40" Margin="0,0,10,0"
-                        Background="#9E9E9E" Foreground="White" FontWeight="Bold"
-                        IsEnabled="False"/>
+                <!-- E-MAIL GOMB (inaktív) -->
+                <Button x:Name="EmailButton" Content="📧 E-mail" 
+            Width="120" Height="40" Margin="0,0,10,0"
+            Background="#9E9E9E" Foreground="White" FontWeight="Bold"
+            IsEnabled="False" Click="EmailButton_Click"/>
 
-                <Button x:Name="CancelButton" Content="Mégsem" 
-                        Width="120" Height="40"
-                        Background="#F44336" Foreground="White" FontWeight="Bold"
-                        Click="CancelButton_Click"/>
+                <!-- SZÁMLA GOMB (inaktív) -->
+                <Button x:Name="InvoiceButton" Content="💰 Számla" 
+            Width="120" Height="40" Margin="0,0,10,0"
+            Background="#9E9E9E" Foreground="White" FontWeight="Bold"
+            IsEnabled="False" Click="InvoiceButton_Click"/>
+
+                <!-- BEFEJEZÉS GOMB (új funkció) -->
+                <Button x:Name="FinishButton" Content="🔄 Befejezés" 
+            Width="120" Height="40"
+            Background="#FF5722" Foreground="White" FontWeight="Bold"
+            Click="FinishButton_Click"/>
             </StackPanel>
         </Border>
     </Grid>
