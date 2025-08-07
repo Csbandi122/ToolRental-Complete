@@ -8,12 +8,24 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.IO;
 using Microsoft.EntityFrameworkCore;
 using ToolRental.Data;
 using ToolRental.Core.Models;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using System.Diagnostics;
+using SystemIO = System.IO;
+using WpfBorder = System.Windows.Controls.Border;
 
-
+// ALIASOK - mint a régi kódban
+using OpenXmlTable = DocumentFormat.OpenXml.Wordprocessing.Table;
+using OpenXmlTableRow = DocumentFormat.OpenXml.Wordprocessing.TableRow;
+using OpenXmlTableCell = DocumentFormat.OpenXml.Wordprocessing.TableCell;
+using OpenXmlParagraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
+using OpenXmlRun = DocumentFormat.OpenXml.Wordprocessing.Run;
+using OpenXmlText = DocumentFormat.OpenXml.Wordprocessing.Text;
+using BorderValues = DocumentFormat.OpenXml.Wordprocessing.BorderValues;
+using OpenXmlBold = DocumentFormat.OpenXml.Wordprocessing.Bold;
 
 namespace berles2
 {
@@ -97,7 +109,7 @@ namespace berles2
                     CompanyNameText.Text = settings.CompanyName;
 
                     // Logo betöltése ha van
-                    if (!string.IsNullOrEmpty(settings.CompanyLogo) && File.Exists(settings.CompanyLogo))
+                    if (!string.IsNullOrEmpty(settings.CompanyLogo) && SystemIO.File.Exists(settings.CompanyLogo))
                     {
                         CompanyLogo.Source = new BitmapImage(new Uri(settings.CompanyLogo));
                     }
@@ -138,9 +150,9 @@ namespace berles2
             }
         }
 
-        private Border CreateDeviceWidget(Device device)
+        private WpfBorder CreateDeviceWidget(Device device)
         {
-            var border = new Border
+            var border = new WpfBorder
             {
                 Width = 150,
                 Height = 200,
@@ -154,7 +166,7 @@ namespace berles2
             var stackPanel = new StackPanel();
 
             // Eszköz képe - EGYSZERŰ VERZIÓ
-            var imageContainer = new Border
+            var imageContainer = new WpfBorder
             {
                 Width = 120,
                 Height = 120,
@@ -167,7 +179,7 @@ namespace berles2
             // Ha van kép, próbáljuk betölteni
             try
             {
-                if (!string.IsNullOrEmpty(device.Picture) && File.Exists(device.Picture))
+                if (!string.IsNullOrEmpty(device.Picture) && SystemIO.File.Exists(device.Picture))
                 {
                     var image = new Image
                     {
@@ -236,7 +248,7 @@ namespace berles2
             return border;
         }
 
-        private void ToggleDeviceSelection(Device device, Border border)
+        private void ToggleDeviceSelection(Device device, WpfBorder border)
         {
             if (_selectedDevices.Contains(device))
             {
@@ -288,6 +300,9 @@ namespace berles2
                 {
                     SaveRental();
 
+                    // WORD SZERZŐDÉS GENERÁLÁS - ÚJ FUNKCIÓ!
+                    GenerateWordContract();
+
                     // Sikeres mentés után gombok állapotának frissítése
                     ContractButton.IsEnabled = false;
                     ContractButton.Background = System.Windows.Media.Brushes.Gray;
@@ -295,7 +310,7 @@ namespace berles2
                     EmailButton.IsEnabled = true;
                     EmailButton.Background = System.Windows.Media.Brushes.Blue;
 
-                    MessageBox.Show("Bérlés sikeresen mentve!\nMost elküldheted a szerződést e-mailben.",
+                    MessageBox.Show("Bérlés sikeresen mentve és szerződés elkészítve!",
                                   "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
                 catch (Exception ex)
@@ -448,7 +463,7 @@ namespace berles2
 
             // Eszköz kijelölések törlése
             _selectedDevices.Clear();
-            foreach (Border border in DevicesWrapPanel.Children)
+            foreach (WpfBorder border in DevicesWrapPanel.Children)
             {
                 border.Background = Brushes.White;
                 border.BorderBrush = Brushes.Gray;
@@ -467,7 +482,7 @@ namespace berles2
 
 
 
-        
+
 
         private void DataManagerButton_Click(object sender, RoutedEventArgs e)
         {
@@ -638,6 +653,192 @@ namespace berles2
                 MessageBox.Show("Beállítások alkalmazva!",
                               "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
             }
+        }
+        // ===========================================
+        // WORD TÁBLÁZAT GENERÁLÁS - RÉGI KÓD ALAPJÁN
+        // ===========================================
+
+        private void GenerateWordContract()
+        {
+            try
+            {
+                // 1. Beállítások betöltése
+                var setting = _context.Settings.FirstOrDefault();
+                if (setting?.TemplateContract == null || !SystemIO.File.Exists(setting.TemplateContract))
+                {
+                    MessageBox.Show("A szerződés sablon nincs beállítva vagy nem található!\nKérjük állítsa be a Beállítások menüben.",
+                                  "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // 2. Mappák létrehozása
+                string exeDirectory = SystemIO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
+                string contractsFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-word");
+                SystemIO.Directory.CreateDirectory(contractsFolder);
+
+                // 3. Fájlnév generálása
+                string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
+                string rentalDate = DateTime.Now.ToString("yyyy-MM-dd");
+                string fileName = $"szerződés_{customerName}_{rentalDate}.docx";
+                string outputPath = SystemIO.Path.Combine(contractsFolder, fileName);
+
+                // 4. Template másolása
+                SystemIO.File.Copy(setting.TemplateContract, outputPath, true);
+
+                // 5. Változók helyettesítése
+                ReplaceVariablesInWordDocument(outputPath);
+
+                // 6. Automatikus megnyitás
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = outputPath,
+                    UseShellExecute = true
+                });
+
+                MessageBox.Show($"Szerződés sikeresen elkészítve és megnyitva!\n\nFájl helye: {outputPath}",
+                              "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba a szerződés generálásakor: {ex.Message}",
+                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ReplaceVariablesInWordDocument(string filePath)
+        {
+            using (WordprocessingDocument document = WordprocessingDocument.Open(filePath, true))
+            {
+                var body = document.MainDocumentPart?.Document.Body;
+                if (body != null)
+                {
+                    // Szöveg elemek változói
+                    foreach (var text in body.Descendants<OpenXmlText>())
+                    {
+                        if (text.Text.Contains("{{"))
+                        {
+                            string originalText = text.Text;
+
+                            // Ügyfél adatok
+                            originalText = originalText.Replace("{{CUSTOMER_NAME}}", _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
+                            originalText = originalText.Replace("{{CUSTOMER_ZIP}}", _selectedExistingCustomer?.Zipcode ?? CustomerZipTextBox.Text);
+                            originalText = originalText.Replace("{{CUSTOMER_CITY}}", _selectedExistingCustomer?.City ?? CustomerCityTextBox.Text);
+                            originalText = originalText.Replace("{{CUSTOMER_ADDRESS}}", _selectedExistingCustomer?.Address ?? CustomerAddressTextBox.Text);
+                            originalText = originalText.Replace("{{CUSTOMER_EMAIL}}", _selectedExistingCustomer?.Email ?? CustomerEmailTextBox.Text);
+                            originalText = originalText.Replace("{{CUSTOMER_ID_NUMBER}}", _selectedExistingCustomer?.IdNumber ?? CustomerIdNumberTextBox.Text);
+
+                            // Bérlés adatok
+                            originalText = originalText.Replace("{{RENTAL_DATE}}", DateTime.Now.ToString("yyyy. MM. dd."));
+                            originalText = originalText.Replace("{{RENTAL_DAYS}}", RentalDaysTextBox.Text);
+                            originalText = originalText.Replace("{{DEVICE_COUNT}}", _selectedDevices.Count.ToString());
+
+                            // Végösszeg
+                            int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int days) ? days : 1;
+                            decimal totalAmount = _selectedDevices.Sum(d => d.RentPrice) * rentalDays;
+                            originalText = originalText.Replace("{{TOTAL_AMOUNT}}", $"{totalAmount:N0}");
+
+                            text.Text = originalText;
+                        }
+                    }
+
+                    // TÁBLÁZAT GENERÁLÁS
+                    ReplaceDeviceTable(body);
+                }
+
+                document.Save();
+            }
+        }
+
+        private void ReplaceDeviceTable(Body body)
+        {
+            foreach (var text in body.Descendants<OpenXmlText>())
+            {
+                if (text.Text.Contains("{{DEVICE_TABLE}}"))
+                {
+                    // Táblázat létrehozása - PONT MINT A RÉGI KÓDBAN
+                    OpenXmlTable table = new OpenXmlTable();
+
+                    // Táblázat tulajdonságok - RÉGI KÓD ALAPJÁN
+                    TableProperties tblProp = new TableProperties(
+                        new TableBorders(
+                            new TopBorder() { Val = BorderValues.Single, Size = 12 },
+                            new BottomBorder() { Val = BorderValues.Single, Size = 12 },
+                            new LeftBorder() { Val = BorderValues.Single, Size = 12 },
+                            new RightBorder() { Val = BorderValues.Single, Size = 12 },
+                            new InsideHorizontalBorder() { Val = BorderValues.Single, Size = 12 },
+                            new InsideVerticalBorder() { Val = BorderValues.Single, Size = 12 }
+                        )
+                    );
+                    table.AppendChild(tblProp);
+
+                    // Fejléc sor - RÉGI KÓD ALAPJÁN
+                    OpenXmlTableRow headerRow = new OpenXmlTableRow();
+                    headerRow.AppendChild(CreateTableCell("Eszköztípus", true));
+                    headerRow.AppendChild(CreateTableCell("Eszköz neve", true));
+                    headerRow.AppendChild(CreateTableCell("Sorozatszám", true));
+                    headerRow.AppendChild(CreateTableCell("Eszköz értéke", true));
+                    headerRow.AppendChild(CreateTableCell("Bérleti díj", true));
+                    table.AppendChild(headerRow);
+
+                    // Eszköz sorok - RÉGI KÓD ALAPJÁN
+                    foreach (var device in _selectedDevices)
+                    {
+                        OpenXmlTableRow dataRow = new OpenXmlTableRow();
+                        dataRow.AppendChild(CreateTableCell(device.DeviceTypeNavigation?.TypeName ?? "N/A", false));
+                        dataRow.AppendChild(CreateTableCell(device.DeviceName, false));
+                        dataRow.AppendChild(CreateTableCell(device.Serial, false));
+                        dataRow.AppendChild(CreateTableCell(device.Price.ToString("F0") + " Ft", false));
+                        dataRow.AppendChild(CreateTableCell(device.RentPrice.ToString("F0") + " Ft/nap", false));
+                        table.AppendChild(dataRow);
+                    }
+
+                    // Szöveg cseréje táblázatra - RÉGI KÓD ALAPJÁN
+                    var paragraph = text.Ancestors<OpenXmlParagraph>().First();
+                    text.Text = text.Text.Replace("{{DEVICE_TABLE}}", "");
+                    paragraph.Parent.InsertAfter(table, paragraph);
+                    break;
+                }
+            }
+        }
+
+        private OpenXmlTableCell CreateTableCell(string text, bool isBold)
+        {
+            OpenXmlTableCell cell = new OpenXmlTableCell();
+
+            OpenXmlParagraph paragraph = new OpenXmlParagraph();
+            OpenXmlRun run = new OpenXmlRun();
+
+            if (isBold)
+            {
+                RunProperties runProps = new RunProperties();
+                DocumentFormat.OpenXml.Wordprocessing.Bold bold = new DocumentFormat.OpenXml.Wordprocessing.Bold();
+                runProps.AppendChild(bold);
+                run.AppendChild(runProps);
+            }
+
+            OpenXmlText cellText = new OpenXmlText(text);
+            run.AppendChild(cellText);
+            paragraph.AppendChild(run);
+            cell.AppendChild(paragraph);
+
+            return cell;
+        }
+
+
+        private string GetCleanFileName(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return "ismeretlen";
+
+            char[] invalidChars = SystemIO.Path.GetInvalidFileNameChars();
+            string clean = input;
+            foreach (char c in invalidChars)
+            {
+                clean = clean.Replace(c.ToString(), "");
+            }
+
+            clean = clean.Replace(" ", "_");
+            return clean;
         }
     }
 }

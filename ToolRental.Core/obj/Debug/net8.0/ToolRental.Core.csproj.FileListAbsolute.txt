@@ -21,3 +21,4 @@ C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Core\obj\Debug\net8.0
 C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Core\obj\Debug\net8.0\refint\ToolRental.Core.dll
 C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Core\obj\Debug\net8.0\ToolRental.Core.pdb
 C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Core\obj\Debug\net8.0\ref\ToolRental.Core.dll
+C:\Users\acseke\source\repos\Toolrental Projekt\ToolRental.Core\obj\Debug\net8.0\ToolRental.Core.csproj.AssemblyReference.cache

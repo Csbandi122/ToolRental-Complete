@@ -8,6 +8,7 @@
     ".NETCoreApp,Version=v8.0": {
       "ToolRental.Services/1.0.0": {
         "dependencies": {
+          "Microsoft.Office.Interop.Word": "15.0.4797.1004",
           "ToolRental.Core": "1.0.0",
           "ToolRental.Data": "1.0.0"
         },
@@ -424,6 +425,14 @@
       },
       "Microsoft.NETCore.Platforms/1.1.0": {},
       "Microsoft.NETCore.Targets/1.1.0": {},
+      "Microsoft.Office.Interop.Word/15.0.4797.1004": {
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.Office.Interop.Word.dll": {
+            "assemblyVersion": "15.0.0.0",
+            "fileVersion": "15.0.4797.1003"
+          }
+        }
+      },
       "Microsoft.SqlServer.Server/1.0.0": {
         "runtime": {
           "lib/netstandard2.0/Microsoft.SqlServer.Server.dll": {
@@ -812,6 +821,9 @@
         }
       },
       "ToolRental.Core/1.0.0": {
+        "dependencies": {
+          "Microsoft.Office.Interop.Word": "15.0.4797.1004"
+        },
         "runtime": {
           "ToolRental.Core.dll": {
             "assemblyVersion": "1.0.0.0",
@@ -824,6 +836,7 @@
           "Microsoft.EntityFrameworkCore": "9.0.7",
           "Microsoft.EntityFrameworkCore.SqlServer": "9.0.7",
           "Microsoft.EntityFrameworkCore.Sqlite": "9.0.7",
+          "Microsoft.Office.Interop.Word": "15.0.4797.1004",
           "ToolRental.Core": "1.0.0"
         },
         "runtime": {
@@ -1078,6 +1091,13 @@
       "sha512": "sha512-aOZA3BWfz9RXjpzt0sRJJMjAscAUm3Hoa4UWAfceV9UTYxgwZ1lZt5nO2myFf+/jetYQo4uTP7zS8sJY67BBxg==",
       "path": "microsoft.netcore.targets/1.1.0",
       "hashPath": "microsoft.netcore.targets.1.1.0.nupkg.sha512"
+    },
+    "Microsoft.Office.Interop.Word/15.0.4797.1004": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-lavTOrMGK/o/t3+gGr7JuVrL8XDdnS0DwPLcYv/StOiysXO4L0C36IXTVtEJo1Mh9Aoxo9a8dgGcPi+faTlv0g==",
+      "path": "microsoft.office.interop.word/15.0.4797.1004",
+      "hashPath": "microsoft.office.interop.word.15.0.4797.1004.nupkg.sha512"
     },
     "Microsoft.SqlServer.Server/1.0.0": {
       "type": "package",
