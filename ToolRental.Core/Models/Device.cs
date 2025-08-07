@@ -18,7 +18,7 @@
         public ICollection<RentalDevice> RentalDevices { get; set; } = new List<RentalDevice>();
         // Device.cs Navigation Properties részébe add hozzá:
         public ICollection<FinancialDevice> FinancialDevices { get; set; } = new List<FinancialDevice>();
-        public ICollection<Service> Services { get; set; } = new List<Service>(); // ← ÚJ SOR!
+       
         public ICollection<ServiceDevice> ServiceDevices { get; set; } = new List<ServiceDevice>();
     }
 }
