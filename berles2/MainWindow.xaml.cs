@@ -13,6 +13,8 @@ using Microsoft.EntityFrameworkCore;
 using ToolRental.Data;
 using ToolRental.Core.Models;
 
+
+
 namespace berles2
 {
     public partial class MainWindow : Window
@@ -20,6 +22,7 @@ namespace berles2
         private ToolRentalDbContext _context;
         private List<Device> _selectedDevices = new List<Device>();
         private List<Device> _allDevices = new List<Device>();
+        private Customer? _selectedExistingCustomer = null;
 
         public MainWindow()
         {
@@ -322,20 +325,31 @@ namespace berles2
 
             try
             {
-                // 1. Customer létrehozása
-                var customer = new Customer
+                // 1. Customer kezelése - meglévő vagy új
+                Customer customer;
+                if (_selectedExistingCustomer != null)
                 {
-                    Name = CustomerNameTextBox.Text.Trim(),
-                    Zipcode = CustomerZipTextBox.Text.Trim(),
-                    City = CustomerCityTextBox.Text.Trim(),
-                    Address = CustomerAddressTextBox.Text.Trim(),
-                    Email = CustomerEmailTextBox.Text.Trim(),
-                    IdNumber = CustomerIdNumberTextBox.Text.Trim(),
-                    Comment = CustomerCommentTextBox.Text.Trim()
-                };
+                    // Meglévő ügyfél használata
+                    customer = _selectedExistingCustomer;
+                }
+                else
+                {
+                    // Új ügyfél létrehozása
+                    customer = new Customer
+                    {
+                        Name = CustomerNameTextBox.Text.Trim(),
+                        Zipcode = CustomerZipTextBox.Text.Trim(),
+                        City = CustomerCityTextBox.Text.Trim(),
+                        Address = CustomerAddressTextBox.Text.Trim(),
+                        Email = CustomerEmailTextBox.Text.Trim(),
+                        IdNumber = CustomerIdNumberTextBox.Text.Trim(),
+                        Comment = CustomerCommentTextBox.Text.Trim()
+                    };
 
-                _context.Customers.Add(customer);
-                _context.SaveChanges();
+                    _context.Customers.Add(customer);
+                    _context.SaveChanges();
+                }
+
 
                 // 2. Rental létrehozása
                 int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int days) ? Math.Max(1, days) : 1;
@@ -434,7 +448,14 @@ namespace berles2
             // Új ticket szám generálása
             GenerateNextTicketNumber();
             UpdateTotalAmount();
+
+            // Kiválasztott ügyfél törlése
+            _selectedExistingCustomer = null;
+            SelectedCustomerBorder.Visibility = Visibility.Collapsed;
+            SetCustomerFieldsEnabled(true);
         }
+
+
 
         private void CancelButton_Click(object sender, RoutedEventArgs e)
         {
@@ -451,7 +472,74 @@ namespace berles2
             var dataManagerWindow = new DataManagerWindow();
             dataManagerWindow.ShowDialog();
         }
+        private void SelectExistingCustomerButton_Click(object sender, RoutedEventArgs e)
+        {
+            var customerSelectDialog = new CustomerSelectDialog();
+            if (customerSelectDialog.ShowDialog() == true && customerSelectDialog.SelectedCustomer != null)
+            {
+                _selectedExistingCustomer = customerSelectDialog.SelectedCustomer;
+                LoadSelectedCustomerData();
+                ShowSelectedCustomerIndicator();
+            }
+        }
 
+        private void LoadSelectedCustomerData()
+        {
+            if (_selectedExistingCustomer != null)
+            {
+                CustomerNameTextBox.Text = _selectedExistingCustomer.Name;
+                CustomerZipTextBox.Text = _selectedExistingCustomer.Zipcode;
+                CustomerCityTextBox.Text = _selectedExistingCustomer.City;
+                CustomerAddressTextBox.Text = _selectedExistingCustomer.Address;
+                CustomerEmailTextBox.Text = _selectedExistingCustomer.Email;
+                CustomerIdNumberTextBox.Text = _selectedExistingCustomer.IdNumber;
+                CustomerCommentTextBox.Text = _selectedExistingCustomer.Comment ?? "";
+            }
+        }
+
+        private void ShowSelectedCustomerIndicator()
+        {
+            if (_selectedExistingCustomer != null)
+            {
+                SelectedCustomerBorder.Visibility = Visibility.Visible;
+                SelectedCustomerText.Text = $"✅ Kiválasztott ügyfél: {_selectedExistingCustomer.Name}";
+
+                // Mezők letiltása hogy ne lehessen módosítani
+                SetCustomerFieldsEnabled(false);
+            }
+        }
+
+        private void ClearSelectedCustomerButton_Click(object sender, RoutedEventArgs e)
+        {
+            _selectedExistingCustomer = null;
+            SelectedCustomerBorder.Visibility = Visibility.Collapsed;
+
+            // Mezők engedélyezése és törlése
+            SetCustomerFieldsEnabled(true);
+            ClearCustomerFields();
+        }
+
+        private void SetCustomerFieldsEnabled(bool enabled)
+        {
+            CustomerNameTextBox.IsEnabled = enabled;
+            CustomerZipTextBox.IsEnabled = enabled;
+            CustomerCityTextBox.IsEnabled = enabled;
+            CustomerAddressTextBox.IsEnabled = enabled;
+            CustomerEmailTextBox.IsEnabled = enabled;
+            CustomerIdNumberTextBox.IsEnabled = enabled;
+            CustomerCommentTextBox.IsEnabled = enabled;
+        }
+
+        private void ClearCustomerFields()
+        {
+            CustomerNameTextBox.Clear();
+            CustomerZipTextBox.Clear();
+            CustomerCityTextBox.Clear();
+            CustomerAddressTextBox.Clear();
+            CustomerEmailTextBox.Clear();
+            CustomerIdNumberTextBox.Clear();
+            CustomerCommentTextBox.Clear();
+        }
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             _context?.Dispose();
