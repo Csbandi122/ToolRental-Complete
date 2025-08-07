@@ -226,10 +226,7 @@
                     Background="#4CAF50" Foreground="White" FontWeight="Bold"
                     Click="AddFinancialButton_Click"/>
 
-                        <Button x:Name="EditFinancialButton" Content="✏️ Szerkesztés" 
-                    Width="100" Height="30" Margin="0,0,10,0"
-                    Background="#2196F3" Foreground="White" FontWeight="Bold"
-                    IsEnabled="False" Click="EditFinancialButton_Click"/>
+                        
 
                         <Button x:Name="DeleteFinancialButton" Content="🗑️ Törlés" 
                     Width="100" Height="30" Margin="0,0,20,0"

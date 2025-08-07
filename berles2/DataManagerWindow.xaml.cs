@@ -397,7 +397,6 @@ namespace berles2
         private void FinancialsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             bool hasSelection = FinancialsDataGrid.SelectedItem != null;
-            EditFinancialButton.IsEnabled = hasSelection;
             DeleteFinancialButton.IsEnabled = hasSelection;
         }
 
@@ -439,11 +438,7 @@ namespace berles2
             }
         }
 
-        private void EditFinancialButton_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Pénzügyi tétel szerkesztése - hamarosan elérhető!", "Info",
-                          MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+        
 
         private void DeleteFinancialButton_Click(object sender, RoutedEventArgs e)
         {

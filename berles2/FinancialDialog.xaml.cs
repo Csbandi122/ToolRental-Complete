@@ -19,7 +19,7 @@ namespace berles2
         public Financial Financial { get; private set; }
         public List<Device> SelectedDevices { get; private set; } = new List<Device>();
 
-        private bool _isEditMode = false;
+        
         private ToolRentalDbContext _context;
         private ObservableCollection<DeviceSelectionModel> _allDevices;
         private ObservableCollection<DeviceSelectionModel> _filteredDevices;
@@ -34,15 +34,7 @@ namespace berles2
         }
 
         // Szerkesztés konstruktor
-        public FinancialDialog(Financial financial)
-        {
-            InitializeComponent();
-            InitializeDatabase();
-            LoadDevices();
-            _isEditMode = true;
-            LoadFinancialData(financial);
-            TitleTextBlock.Text = "Pénzügyi tétel szerkesztése";
-        }
+        
 
         private void InitializeDatabase()
         {
@@ -60,27 +52,7 @@ namespace berles2
             UpdateAmountPreview();
         }
 
-        private void LoadFinancialData(Financial financial)
-        {
-            DatePicker.SelectedDate = financial.Date;
-
-            // Típus beállítása
-            if (financial.EntryType == "bevétel")
-                EntryTypeComboBox.SelectedIndex = 0;
-            else
-                EntryTypeComboBox.SelectedIndex = 1;
-
-            // Forrás típus beállítása
-            var sourceTypes = new[] { "kézi", "alkatrész", "javítás", "egyéb" };
-            var sourceIndex = Array.IndexOf(sourceTypes, financial.SourceType);
-            SourceTypeComboBox.SelectedIndex = sourceIndex >= 0 ? sourceIndex : 0;
-
-            TicketNumberTextBox.Text = financial.TicketNr;
-            AmountTextBox.Text = financial.Amount.ToString("0");
-            CommentTextBox.Text = financial.Comment;
-            UpdateAmountPreview();
-        }
-
+       
         private void EntryTypeComboBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
             UpdateAmountPreview();
@@ -144,30 +116,17 @@ namespace berles2
                                                 .Select(d => new Device { Id = d.Id, DeviceName = d.DeviceName })
                                                 .ToList();
 
-                    if (_isEditMode)
+                    // Új tétel létrehozása
+                    Financial = new Financial
                     {
-                        // Meglévő tétel módosítása
-                        Financial.Date = DatePicker.SelectedDate ?? DateTime.Now;
-                        Financial.EntryType = entryType;
-                        Financial.SourceType = sourceType;
-                        Financial.TicketNr = TicketNumberTextBox.Text.Trim();
-                        Financial.Amount = decimal.Parse(AmountTextBox.Text);
-                        Financial.Comment = CommentTextBox.Text.Trim();
-                    }
-                    else
-                    {
-                        // Új tétel létrehozása
-                        Financial = new Financial
-                        {
-                            Date = DatePicker.SelectedDate ?? DateTime.Now,
-                            EntryType = entryType,
-                            SourceType = sourceType,
-                            TicketNr = TicketNumberTextBox.Text.Trim(),
-                            Amount = decimal.Parse(AmountTextBox.Text),
-                            Comment = CommentTextBox.Text.Trim(),
-                            SourceId = null
-                        };
-                    }
+                        Date = DatePicker.SelectedDate ?? DateTime.Now,
+                        EntryType = entryType,
+                        SourceType = sourceType,
+                        TicketNr = TicketNumberTextBox.Text.Trim(),
+                        Amount = decimal.Parse(AmountTextBox.Text),
+                        Comment = CommentTextBox.Text.Trim(),
+                        SourceId = null
+                    };
 
                     this.DialogResult = true;
                     this.Close();
