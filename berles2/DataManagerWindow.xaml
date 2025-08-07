@@ -210,9 +210,73 @@
 
             <!-- PÉNZÜGYEK FÜL -->
             <TabItem Header="💰 Pénzügyek" x:Name="FinancialsTab">
-                <TextBlock Text="Pénzügyek kezelése - hamarosan..." 
-                          HorizontalAlignment="Center" VerticalAlignment="Center" 
-                          FontSize="16" Foreground="Gray"/>
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40"/>
+                        <!-- Felső gombok -->
+                        <RowDefinition Height="*"/>
+                        <!-- DataGrid -->
+                    </Grid.RowDefinitions>
+
+                    <!-- FELSŐ ESZKÖZTÁR -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <Button x:Name="AddFinancialButton" Content="➕ Új tétel" 
+                    Width="100" Height="30" Margin="0,0,10,0"
+                    Background="#4CAF50" Foreground="White" FontWeight="Bold"
+                    Click="AddFinancialButton_Click"/>
+
+                        <Button x:Name="EditFinancialButton" Content="✏️ Szerkesztés" 
+                    Width="100" Height="30" Margin="0,0,10,0"
+                    Background="#2196F3" Foreground="White" FontWeight="Bold"
+                    IsEnabled="False" Click="EditFinancialButton_Click"/>
+
+                        <Button x:Name="DeleteFinancialButton" Content="🗑️ Törlés" 
+                    Width="100" Height="30" Margin="0,0,20,0"
+                    Background="#F44336" Foreground="White" FontWeight="Bold"
+                    IsEnabled="False" Click="DeleteFinancialButton_Click"/>
+
+                        <ComboBox x:Name="FinancialTypeFilterComboBox" Width="120" Height="30" 
+                     Margin="0,0,10,0" SelectionChanged="FinancialTypeFilterComboBox_SelectionChanged">
+                            <ComboBoxItem Content="Összes típus" IsSelected="True"/>
+                            <ComboBoxItem Content="Bevétel"/>
+                            <ComboBoxItem Content="Költség"/>
+                        </ComboBox>
+
+                        <TextBox x:Name="SearchFinancialTextBox" Width="200" Height="30" 
+                    Margin="0,0,10,0" VerticalContentAlignment="Center"
+                    TextChanged="SearchFinancialTextBox_TextChanged"/>
+
+                        <TextBlock Text="🔍 Keresés" VerticalAlignment="Center" 
+                      Margin="0,0,10,0" FontWeight="Bold"/>
+                    </StackPanel>
+
+                    <!-- PÉNZÜGYI TÉTELEK TÁBLÁZAT -->
+                    <DataGrid Grid.Row="1" x:Name="FinancialsDataGrid" 
+                 Margin="0,10,0,0" AutoGenerateColumns="False"
+                 CanUserAddRows="False" CanUserDeleteRows="False"
+                 IsReadOnly="True" SelectionMode="Single"
+                 GridLinesVisibility="Horizontal" AlternatingRowBackground="#F5F5F5"
+                 SelectionChanged="FinancialsDataGrid_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
+                            <DataGridTextColumn Header="Dátum" Width="100">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="Date" StringFormat="{}{0:yyyy.MM.dd}"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Típus" Binding="{Binding EntryType}" Width="80"/>
+                            <DataGridTextColumn Header="Forrás típus" Binding="{Binding SourceType}" Width="100"/>
+                            <DataGridTextColumn Header="Jegy szám" Binding="{Binding TicketNr}" Width="80"/>
+                            <DataGridTextColumn Header="Összeg" Width="100">
+                                <DataGridTextColumn.Binding>
+                                    <Binding Path="Amount" StringFormat="{}{0:N0} Ft"/>
+                                </DataGridTextColumn.Binding>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Megjegyzés" Binding="{Binding Comment}" Width="*"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
             </TabItem>
 
             <!-- SZERVIZ FÜL -->

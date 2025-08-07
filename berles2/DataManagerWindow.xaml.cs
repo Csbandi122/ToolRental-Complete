@@ -17,6 +17,8 @@ namespace berles2
         private List<Device> _allDevices;
         private ObservableCollection<RentalDisplayModel> _rentals;
         private List<RentalDisplayModel> _allRentals;
+        private ObservableCollection<ToolRental.Core.Models.Financial> _financials;
+        private List<ToolRental.Core.Models.Financial> _allFinancials
 
         public DataManagerWindow()
         {
@@ -25,6 +27,7 @@ namespace berles2
             LoadCustomers();
             LoadDevices();
             LoadRentals();
+            // LoadFinancials();
         }
 
         private void InitializeDatabase()
@@ -443,5 +446,269 @@ namespace berles2
         public string PaymentMode { get; set; } = string.Empty;
         public string Comment { get; set; } = string.Empty;
         public string DevicesText { get; set; } = string.Empty;
+    }
+    // ===========================================
+// PÉNZÜGYEK KEZELÉS
+// ===========================================
+
+private void LoadFinancials()
+        {
+            try
+            {
+                _allFinancials = _context.Financials.OrderByDescending(f => f.Date).ToList();
+                _financials = new ObservableCollection<Financial>(_allFinancials);
+                FinancialsDataGrid.ItemsSource = _financials;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba a pénzügyi tételek betöltésekor: {ex.Message}",
+                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void FinancialsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            bool hasSelection = FinancialsDataGrid.SelectedItem != null;
+            EditFinancialButton.IsEnabled = hasSelection;
+            DeleteFinancialButton.IsEnabled = hasSelection;
+        }
+
+        private void AddFinancialButton_Click(object sender, RoutedEventArgs e)
+        {
+            var financialDialog = new FinancialDialog();
+            if (financialDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    var financial = financialDialog.Financial;
+                    _context.Financials.Add(financial);
+                    _context.SaveChanges();
+
+                    LoadFinancials(); // Frissítés
+                    MessageBox.Show("Pénzügyi tétel sikeresen hozzáadva!", "Siker",
+                                  MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Hiba a pénzügyi tétel mentésekor: {ex.Message}",
+                                  "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+
+        private void EditFinancialButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (FinancialsDataGrid.SelectedItem is Financial selectedFinancial)
+            {
+                var financialDialog = new FinancialDialog(selectedFinancial);
+                if (financialDialog.ShowDialog() == true)
+                {
+                    try
+                    {
+                        var financial = financialDialog.Financial;
+                        var existingFinancial = _context.Financials.Find(financial.Id);
+                        if (existingFinancial != null)
+                        {
+                            existingFinancial.Date = financial.Date;
+                            existingFinancial.EntryType = financial.EntryType;
+                            existingFinancial.SourceType = financial.SourceType;
+                            existingFinancial.TicketNr = financial.TicketNr;
+                            existingFinancial.Amount = financial.Amount;
+                            existingFinancial.Comment = financial.Comment;
+
+                            _context.SaveChanges();
+                            LoadFinancials(); // Frissítés
+
+                            MessageBox.Show("Pénzügyi tétel sikeresen módosítva!", "Siker",
+                                          MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Hiba a pénzügyi tétel módosításakor: {ex.Message}",
+                                      "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+
+        private void DeleteFinancialButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (FinancialsDataGrid.SelectedItem is Financial selectedFinancial)
+            {
+                // Ellenőrizzük, hogy bérléshez kapcsolódó tétel-e
+                if (selectedFinancial.SourceType == "bérlés" && selectedFinancial.SourceId.HasValue)
+                {
+                    MessageBox.Show("Bérléshez kapcsolódó pénzügyi tételeket nem lehet törölni!\n" +
+                                  "A tétel automatikusan létrejött a bérléskor.",
+                                  "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var result = MessageBox.Show(
+                    $"Biztosan törli ezt a pénzügyi tételt?\n\n" +
+                    $"Dátum: {selectedFinancial.Date:yyyy.MM.dd}\n" +
+                    $"Típus: {selectedFinancial.EntryType}\n" +
+                    $"Összeg: {selectedFinancial.Amount:N0} Ft\n" +
+                    $"Megjegyzés: {selectedFinancial.Comment}\n\n" +
+                    $"FIGYELEM: A törlés visszavonhatatlan!",
+                    "Megerősítés", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        _context.Financials.Remove(selectedFinancial);
+                        _context.SaveChanges();
+                        LoadFinancials(); // Frissítés
+
+                        MessageBox.Show("Pénzügyi tétel sikeresen törölve!", "Siker",
+                                      MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Hiba a pénzügyi tétel törlésekor: {ex.Message}",
+                                      "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+
+        private void FinancialTypeFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            FilterFinancials();
+        }
+
+        private void SearchFinancialTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            FilterFinancials();
+        }
+
+        private void FilterFinancials()
+        {
+            if (_allFinancials == null || _financials == null) return;
+
+            string searchText = SearchFinancialTextBox.Text?.ToLower() ?? "";
+            string selectedType = ((ComboBoxItem)FinancialTypeFilterComboBox.SelectedItem)?.Content?.ToString();
+
+            var filteredFinancials = _allFinancials.Where(f =>
+            {
+                // Szöveg keresés
+                bool matchesSearch = string.IsNullOrWhiteSpace(searchText) ||
+                                   f.Comment.ToLower().Contains(searchText) ||
+                                   f.TicketNr.ToLower().Contains(searchText) ||
+                                   f.SourceType.ToLower().Contains(searchText);
+
+                // Típus szűrés
+                bool matchesType = selectedType == "Összes típus" ||
+                                 (selectedType == "Bevétel" && f.EntryType == "bevétel") ||
+                                 (selectedType == "Költség" && f.EntryType == "költség");
+
+                return matchesSearch && matchesType;
+            }).ToList();
+
+            _financials.Clear();
+            foreach (var financial in filteredFinancials.OrderByDescending(f => f.Date))
+            {
+                _financials.Add(financial);
+            }
+
+            // ===========================================
+        // PÉNZÜGYEK KEZELÉS - ALAPOK
+        // ===========================================
+
+        private void LoadFinancials()
+        {
+            try
+            {
+                _allFinancials = _context.Financials.OrderByDescending(f => f.Date).ToList();
+                _financials = new ObservableCollection<ToolRental.Core.Models.Financial>(_allFinancials);
+                FinancialsDataGrid.ItemsSource = _financials;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba a pénzügyi tételek betöltésekor: {ex.Message}",
+                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void FinancialsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            bool hasSelection = FinancialsDataGrid.SelectedItem != null;
+            EditFinancialButton.IsEnabled = hasSelection;
+            DeleteFinancialButton.IsEnabled = hasSelection;
+        }
+
+        private void AddFinancialButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Pénzügyi tétel hozzáadása - hamarosan elérhető!", "Info", 
+                          MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void EditFinancialButton_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBox.Show("Pénzügyi tétel szerkesztése - hamarosan elérhető!", "Info", 
+                          MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void DeleteFinancialButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (FinancialsDataGrid.SelectedItem is ToolRental.Core.Models.Financial selectedFinancial)
+            {
+                var result = MessageBox.Show(
+                    $"Biztosan törli ezt a pénzügyi tételt?\n\n" +
+                    $"Összeg: {selectedFinancial.Amount:N0} Ft\n" +
+                    $"Megjegyzés: {selectedFinancial.Comment}",
+                    "Megerősítés", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        _context.Financials.Remove(selectedFinancial);
+                        _context.SaveChanges();
+                        LoadFinancials();
+
+                        MessageBox.Show("Pénzügyi tétel sikeresen törölve!", "Siker",
+                                      MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Hiba a törléskor: {ex.Message}",
+                                      "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+
+        private void FinancialTypeFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            FilterFinancials();
+        }
+
+        private void SearchFinancialTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            FilterFinancials();
+        }
+
+        private void FilterFinancials()
+        {
+            if (_allFinancials == null || _financials == null) return;
+
+            string searchText = SearchFinancialTextBox.Text?.ToLower() ?? "";
+            
+            var filteredFinancials = _allFinancials.Where(f =>
+                string.IsNullOrWhiteSpace(searchText) ||
+                f.Comment.ToLower().Contains(searchText) ||
+                f.TicketNr.ToLower().Contains(searchText)
+            ).ToList();
+
+            _financials.Clear();
+            foreach (var financial in filteredFinancials.OrderByDescending(f => f.Date))
+            {
+                _financials.Add(financial);
+            }
+        }
+        }
     }
 }
