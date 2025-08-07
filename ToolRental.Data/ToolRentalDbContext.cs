@@ -20,6 +20,7 @@ namespace ToolRental.Data
         public DbSet<Financial> Financials { get; set; }
         public DbSet<FinancialDevice> FinancialDevices { get; set; }
         public DbSet<Setting> Settings { get; set; }
+        public DbSet<ServiceDevice> ServiceDevices { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -58,6 +59,17 @@ namespace ToolRental.Data
                 .HasOne(fd => fd.Device)
                 .WithMany()
                 .HasForeignKey(fd => fd.DeviceId);
+            
+            // ServiceDevice many-to-many kapcsolat
+            modelBuilder.Entity<ServiceDevice>()
+                .HasOne(sd => sd.Service)
+                .WithMany(s => s.ServiceDevices)
+                .HasForeignKey(sd => sd.ServiceId);
+
+            modelBuilder.Entity<ServiceDevice>()
+                .HasOne(sd => sd.Device)
+                .WithMany(d => d.ServiceDevices)
+                .HasForeignKey(sd => sd.DeviceId);
 
             base.OnModelCreating(modelBuilder);
         }

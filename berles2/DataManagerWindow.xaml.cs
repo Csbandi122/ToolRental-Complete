@@ -1,10 +1,11 @@
-﻿using System.Collections.ObjectModel;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using Microsoft.EntityFrameworkCore;
-using ToolRental.Data;
+using System.Xaml;
 using ToolRental.Core.Models;
+using ToolRental.Data;
 
 namespace berles2
 {
@@ -19,6 +20,8 @@ namespace berles2
         private List<RentalDisplayModel> _allRentals;
         private ObservableCollection<ToolRental.Core.Models.Financial> _financials;
         private List<ToolRental.Core.Models.Financial> _allFinancials;
+        private ObservableCollection<ServiceDisplayModel> _services;
+        private List<ServiceDisplayModel> _allServices;
 
         public DataManagerWindow()
         {
@@ -28,6 +31,7 @@ namespace berles2
             LoadDevices();
             LoadRentals();
             LoadFinancials();
+            LoadServices();
         }
 
         private void InitializeDatabase()
@@ -241,7 +245,7 @@ namespace berles2
                             existingDevice.RentPrice = device.RentPrice;
                             existingDevice.Available = device.Available;
                             existingDevice.Notes = device.Notes;
-                           // existingDevice.PicturePath = device.PicturePath;
+                            // existingDevice.PicturePath = device.PicturePath;
 
                             _context.SaveChanges();
                             LoadDevices();
@@ -438,8 +442,6 @@ namespace berles2
             }
         }
 
-        
-
         private void DeleteFinancialButton_Click(object sender, RoutedEventArgs e)
         {
             if (FinancialsDataGrid.SelectedItem is ToolRental.Core.Models.Financial selectedFinancial)
@@ -519,6 +521,126 @@ namespace berles2
         }
 
         // ===========================================
+        // SZERVÍZ KEZELÉS
+        // ===========================================
+        private void LoadServices()
+        {
+            try
+            {
+                var services = _context.Services
+                    .Include(s => s.ServiceDevices)
+                    .ThenInclude(sd => sd.Device)
+                    .OrderByDescending(s => s.ServiceDate)
+                    .Select(s => new ServiceDisplayModel
+                    {
+                        Id = s.Id,
+                        TicketNr = s.TicketNr,
+                        ServiceDate = s.ServiceDate,
+                        ServiceType = s.ServiceType,
+                        Technician = s.Technician,
+                        CostAmount = s.CostAmount,
+                        Description = s.Description,
+                        DeviceNames = string.Join(", ", s.ServiceDevices.Select(sd => sd.Device.DeviceName))
+                    })
+                    .ToList();
+
+                _allServices = services;
+                _services = new ObservableCollection<ServiceDisplayModel>(services);
+                ServicesDataGrid.ItemsSource = _services;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba a szervíz jegyek betöltésekor: {ex.Message}",
+                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ServicesDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            bool hasSelection = ServicesDataGrid.SelectedItem != null;
+            EditServiceButton.IsEnabled = hasSelection;
+            DeleteServiceButton.IsEnabled = hasSelection;
+        }
+
+        private void AddServiceButton_Click(object sender, RoutedEventArgs e)
+        {
+            var serviceDialog = new ServiceDialog();
+            if (serviceDialog.ShowDialog() == true)
+            {
+                LoadServices();
+                MessageBox.Show("Szervíz jegy sikeresen létrehozva!",
+                              "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void EditServiceButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Szerkesztés később implementálható
+            MessageBox.Show("Szervíz jegy szerkesztése később implementálásra kerül.",
+                          "Fejlesztés alatt", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+
+        private void DeleteServiceButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ServicesDataGrid.SelectedItem is ServiceDisplayModel selectedService)
+            {
+                var result = MessageBox.Show($"Biztosan törölni szeretnéd a(z) {selectedService.TicketNr} szervíz jegyet?\n\nEz a műveletet NEM lehet visszavonni!",
+                                           "Szervíz jegy törlése", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        var service = _context.Services.Find(selectedService.Id);
+                        if (service != null)
+                        {
+                            _context.Services.Remove(service);
+                            _context.SaveChanges();
+                            LoadServices();
+                            MessageBox.Show("Szervíz jegy sikeresen törölve!",
+                                          "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Hiba a törlés során: {ex.Message}",
+                                      "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+        }
+
+        private void ServiceSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string searchText = ServiceSearchTextBox.Text.ToLower();
+
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                _services.Clear();
+                foreach (var service in _allServices)
+                {
+                    _services.Add(service);
+                }
+            }
+            else
+            {
+                var filteredServices = _allServices.Where(s =>
+                    s.TicketNr.ToLower().Contains(searchText) ||
+                    s.Description.ToLower().Contains(searchText) ||
+                    s.ServiceType.ToLower().Contains(searchText) ||
+                    s.Technician.ToLower().Contains(searchText) ||
+                    s.DeviceNames.ToLower().Contains(searchText)
+                ).ToList();
+
+                _services.Clear();
+                foreach (var service in filteredServices)
+                {
+                    _services.Add(service);
+                }
+            }
+        }
+
+        // ===========================================
         // ABLAK KEZELÉS
         // ===========================================
         private void CloseButton_Click(object sender, RoutedEventArgs e)
@@ -533,6 +655,10 @@ namespace berles2
         }
     }
 
+    // ===========================================
+    // SEGÉD OSZTÁLYOK
+    // ===========================================
+
     // SEGÉD OSZTÁLY A BÉRLÉSEK MEGJELENÍTÉSÉHEZ
     public class RentalDisplayModel
     {
@@ -545,5 +671,18 @@ namespace berles2
         public string PaymentMode { get; set; } = string.Empty;
         public string Comment { get; set; } = string.Empty;
         public string DevicesText { get; set; } = string.Empty;
+    }
+
+    // SEGÉD OSZTÁLY SZERVÍZ MEGJELENÍTÉSHEZ
+    public class ServiceDisplayModel
+    {
+        public int Id { get; set; }
+        public string TicketNr { get; set; } = string.Empty;
+        public DateTime ServiceDate { get; set; }
+        public string ServiceType { get; set; } = string.Empty;
+        public string Technician { get; set; } = string.Empty;
+        public decimal CostAmount { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public string DeviceNames { get; set; } = string.Empty;
     }
 }

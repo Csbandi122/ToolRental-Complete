@@ -1,0 +1,138 @@
+﻿<Window x:Class="berles2.ServiceDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:berles2"
+        mc:Ignorable="d"
+        Title="Szervíz jegy" Height="700" Width="600"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- CÍMSOR -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,20">
+            <TextBlock Text="🔧" FontSize="24" Margin="0,0,10,0" VerticalAlignment="Center"/>
+            <TextBlock x:Name="TitleTextBlock" Text="Új szervíz jegy létrehozása" 
+                       FontSize="18" FontWeight="Bold" VerticalAlignment="Center" Foreground="#FF6B1F"/>
+        </StackPanel>
+
+        <!-- FŐTARTALOM -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel>
+                <!-- ALAPADATOK -->
+                <GroupBox Header="Alapadatok" FontWeight="Bold" Margin="0,0,0,15">
+                    <StackPanel Margin="10">
+                        <!-- JEGY SZÁM -->
+                        <Label Content="Jegy szám:" FontWeight="Bold"/>
+                        <TextBox x:Name="TicketNrTextBox" Height="30" Margin="0,0,0,10" IsReadOnly="True"
+                                 Background="#F0F0F0" Text="SRV0001"/>
+
+                        <!-- SZERVÍZ TÍPUS -->
+                        <Label Content="Szervíz típus *:" FontWeight="Bold"/>
+                        <ComboBox x:Name="ServiceTypeComboBox" Height="30" Margin="0,0,0,10" SelectedIndex="0">
+                            <ComboBoxItem Content="karbantartás"/>
+                            <ComboBoxItem Content="javítás"/>
+                            <ComboBoxItem Content="upgrade"/>
+                        </ComboBox>
+
+                        <!-- TECHNIKUS -->
+                        <Label Content="Technikus:" FontWeight="Bold"/>
+                        <TextBox x:Name="TechnicianTextBox" Height="30" Margin="0,0,0,10" Text="András"/>
+
+                        <!-- DÁTUM -->
+                        <Label Content="Szervíz dátum *:" FontWeight="Bold"/>
+                        <DatePicker x:Name="ServiceDatePicker" Height="30" Margin="0,0,0,10"/>
+
+                        <!-- KÖLTSÉG -->
+                        <Label Content="Költség *:" FontWeight="Bold"/>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,10">
+                            <TextBox x:Name="CostAmountTextBox" Width="200" Height="30" VerticalContentAlignment="Center"
+                                     TextChanged="CostAmountTextBox_TextChanged"/>
+                            <TextBlock Text="Ft" VerticalAlignment="Center" Margin="10,0,0,0" FontWeight="Bold"/>
+                            <TextBlock x:Name="CostPreviewTextBlock" Text="" VerticalAlignment="Center" 
+                                       Margin="20,0,0,0" FontWeight="Bold" Foreground="Red"/>
+                        </StackPanel>
+
+                        <!-- LEÍRÁS -->
+                        <Label Content="Leírás *:" FontWeight="Bold"/>
+                        <TextBox x:Name="DescriptionTextBox" Height="80" Margin="0,0,0,15"
+                                 TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- ESZKÖZÖK VÁLASZTÁSA -->
+                <GroupBox Header="Érintett eszközök" FontWeight="Bold">
+                    <StackPanel Margin="10">
+                        <Border BorderThickness="1" BorderBrush="Gray" Height="150" Margin="0,0,0,15">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="30"/>
+                                    <RowDefinition Height="*"/>
+                                </Grid.RowDefinitions>
+
+                                <!-- KERESÉS -->
+                                <TextBox x:Name="DeviceSearchTextBox" Grid.Row="0" 
+                                         Height="28" Margin="5" VerticalContentAlignment="Center"
+                                         TextChanged="DeviceSearchTextBox_TextChanged"/>
+
+                                <!-- ESZKÖZLISTA -->
+                                <ListBox x:Name="DevicesListBox" Grid.Row="1" 
+                                         Margin="5" SelectionMode="Multiple"
+                                         SelectionChanged="DevicesListBox_SelectionChanged">
+                                    <ListBox.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <CheckBox x:Name="DeviceCheckBox" 
+                                                         IsChecked="{Binding IsSelected}" 
+                                                         Margin="0,0,10,0"/>
+                                                <TextBlock Text="{Binding DeviceName}" FontWeight="Bold" Margin="0,0,10,0"/>
+                                                <TextBlock Text="{Binding Serial}" Foreground="Gray" Margin="0,0,10,0"/>
+                                                <TextBlock Text="{Binding DeviceTypeNavigation.TypeName}" 
+                                                          Foreground="Blue" FontStyle="Italic"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ListBox.ItemTemplate>
+                                </ListBox>
+                            </Grid>
+                        </Border>
+
+                        <!-- KIVÁLASZTOTT ESZKÖZÖK MEGJELENÍTÉSE -->
+                        <Border x:Name="SelectedDevicesBorder" BorderThickness="1" BorderBrush="Orange" 
+                                Background="#FFF8E1" Padding="10" Margin="0,0,0,15"
+                                Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock Text="Kiválasztott eszközök:" FontWeight="Bold" 
+                                          Foreground="Orange" Margin="0,0,0,5"/>
+                                <TextBlock x:Name="SelectedDevicesText" Text="" 
+                                          Foreground="DarkOrange" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="Kötelező mezők: szervíz típus, dátum, költség, leírás, legalább 1 eszköz" 
+                                  FontSize="12" Foreground="Blue" FontStyle="Italic"/>
+                    </StackPanel>
+                </GroupBox>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- GOMBOK -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" 
+                   HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button x:Name="SaveButton" Content="Mentés" 
+                    Width="100" Height="35" Margin="0,0,10,0"
+                    Background="#FF6B1F" Foreground="White" FontWeight="Bold"
+                    Click="SaveButton_Click"/>
+
+            <Button x:Name="CancelButton" Content="Mégsem" 
+                    Width="100" Height="35"
+                    Background="#757575" Foreground="White" FontWeight="Bold"
+                    Click="CancelButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
