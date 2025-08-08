@@ -16,6 +16,10 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using System.Diagnostics;
 using SystemIO = System.IO;
 using WpfBorder = System.Windows.Controls.Border;
+using MailKit.Net.Smtp;
+using MimeKit;
+using WordInterop = Microsoft.Office.Interop.Word;
+
 
 // ALIASOK - mint a régi kódban
 using OpenXmlTable = DocumentFormat.OpenXml.Wordprocessing.Table;
@@ -567,16 +571,31 @@ namespace berles2
 
         private void EmailButton_Click(object sender, RoutedEventArgs e)
         {
-            // Később implementáljuk
-            MessageBox.Show("E-mail küldés funkció - hamarosan implementálva!",
-                          "Fejlesztés alatt", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+            try
+            {
+                // 1. PDF generálás a Word dokumentumból
+                string pdfPath = ConvertWordToPdf();
+                if (string.IsNullOrEmpty(pdfPath))
+                    return;
 
-        private void InvoiceButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Később implementáljuk
-            MessageBox.Show("Számla generálás funkció - hamarosan implementálva!",
-                          "Fejlesztés alatt", MessageBoxButton.OK, MessageBoxImage.Information);
+                // 2. Email küldés
+                SendContractEmail(pdfPath);
+
+                // 3. Gombok állapotának frissítése
+                EmailButton.IsEnabled = false;
+                EmailButton.Background = System.Windows.Media.Brushes.Gray;
+
+                InvoiceButton.IsEnabled = true;
+                InvoiceButton.Background = System.Windows.Media.Brushes.Orange;
+
+                MessageBox.Show("Email sikeresen elküldve!",
+                              "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba az email küldésekor: {ex.Message}",
+                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void FinishButton_Click(object sender, RoutedEventArgs e)
@@ -838,5 +857,177 @@ namespace berles2
             clean = clean.Replace(" ", "_");
             return clean;
         }
+        // ===========================================
+        // PDF GENERÁLÁS ÉS EMAIL KÜLDÉS
+        // ===========================================
+
+        private string ConvertWordToPdf()
+        {
+            try
+            {
+                // 1. Word fájl elérési útjának megkeresése
+                string exeDirectory = SystemIO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
+                string contractsWordFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-word");
+
+                string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
+                string rentalDate = DateTime.Now.ToString("yyyy-MM-dd");
+                string wordFileName = $"szerződés_{customerName}_{rentalDate}.docx";
+                string wordPath = SystemIO.Path.Combine(contractsWordFolder, wordFileName);
+
+                if (!SystemIO.File.Exists(wordPath))
+                {
+                    MessageBox.Show("A Word szerződés fájl nem található! Először generálja le a szerződést.",
+                                  "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return "";
+                }
+
+                // 2. PDF mappa létrehozása
+                string contractsPdfFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-pdf");
+                SystemIO.Directory.CreateDirectory(contractsPdfFolder);
+
+                // 3. PDF fájl neve
+                string pdfFileName = $"szerződés_{customerName}_{rentalDate}.pdf";
+                string pdfPath = SystemIO.Path.Combine(contractsPdfFolder, pdfFileName);
+
+                // 4. Word -> PDF konverzió
+                WordInterop.Application wordApp = new WordInterop.Application();
+                WordInterop.Document doc = null;
+
+                try
+                {
+                    wordApp.Visible = false;
+                    doc = wordApp.Documents.Open(wordPath);
+                    doc.SaveAs2(pdfPath, WordInterop.WdSaveFormat.wdFormatPDF);
+                }
+                finally
+                {
+                    doc?.Close();
+                    wordApp?.Quit();
+                }
+
+                return pdfPath;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba a PDF generálásakor: {ex.Message}",
+                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                return "";
+            }
+        }
+
+        private void SendContractEmail(string pdfPath)
+        {
+            // 1. Beállítások betöltése
+            var setting = _context.Settings.FirstOrDefault();
+            if (setting == null)
+            {
+                MessageBox.Show("Email beállítások nincsenek megadva!",
+                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // 2. Email címzett meghatározása
+            string recipientEmail = _selectedExistingCustomer?.Email ?? CustomerEmailTextBox.Text;
+            if (string.IsNullOrWhiteSpace(recipientEmail))
+            {
+                MessageBox.Show("Az ügyfél email címe nincs megadva!",
+                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // 3. Email üzenet készítése
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(setting.SenderName, setting.SenderEmail));
+            message.To.Add(new MailboxAddress("", recipientEmail));
+
+            // CC hozzáadása ha van
+            if (!string.IsNullOrWhiteSpace(setting.CcAddress))
+            {
+                message.Cc.Add(new MailboxAddress("", setting.CcAddress));
+            }
+
+            message.Subject = setting.EmailSubject;
+
+            // 4. Email tartalom betöltése
+            string emailBody = GetEmailBody(setting);
+
+            // 5. Mellékletek hozzáadása
+            var bodyBuilder = new BodyBuilder { HtmlBody = emailBody };
+
+            // PDF szerződés csatolása
+            if (SystemIO.File.Exists(pdfPath))
+            {
+                bodyBuilder.Attachments.Add(pdfPath);
+            }
+
+            // ÁSZF csatolása ha van
+            if (!string.IsNullOrWhiteSpace(setting.AszfFile) && SystemIO.File.Exists(setting.AszfFile))
+            {
+                bodyBuilder.Attachments.Add(setting.AszfFile);
+            }
+
+            message.Body = bodyBuilder.ToMessageBody();
+
+            // 6. Email küldés
+            using (var client = new SmtpClient())
+            {
+                client.Connect(setting.EmailSmtp, setting.SmtpPort, MailKit.Security.SecureSocketOptions.StartTls);
+                client.Authenticate(setting.SenderEmail, setting.EmailPassword);
+                client.Send(message);
+                client.Disconnect(true);
+            }
+        }
+
+        private string GetEmailBody(Setting setting)
+        {
+            try
+            {
+                // Email template betöltése ha van
+                if (!string.IsNullOrWhiteSpace(setting.ContractEmailTemplate) && SystemIO.File.Exists(setting.ContractEmailTemplate))
+                {
+                    string template = SystemIO.File.ReadAllText(setting.ContractEmailTemplate);
+
+                    // Változók helyettesítése a template-ben
+                    template = template.Replace("{{CUSTOMER_NAME}}", _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
+                    template = template.Replace("{{COMPANY_NAME}}", setting.CompanyName);
+                    template = template.Replace("{{RENTAL_DATE}}", DateTime.Now.ToString("yyyy. MM. dd."));
+
+                    return template;
+                }
+                else
+                {
+                    // Alapértelmezett email tartalom ha nincs template
+                    string customerName = _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text;
+                    return $@"
+            <html>
+            <body>
+                <h2>Kedves {customerName}!</h2>
+                <p>Köszönjük, hogy választotta a {setting.CompanyName} szolgáltatásait!</p>
+                <p>Mellékletben megtalálja:</p>
+                <ul>
+                    <li>A bérlési szerződést PDF formátumban</li>
+                    <li>Az Általános Szerződési Feltételeket</li>
+                </ul>
+                <p>Kérjük, olvassa át figyelmesen a dokumentumokat.</p>
+                <p>Köszönjük a bizalmát!</p>
+                <br>
+                <p>Üdvözlettel,<br>{setting.CompanyName}</p>
+            </body>
+            </html>";
+                }
+            }
+            catch (Exception)
+            {
+                // Ha bármi probléma van, egyszerű szöveges üzenet
+                string customerName = _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text;
+                return $"Kedves {customerName}!\n\nMellékletben megtalálja a bérlési szerződést és az ÁSZF-et.\n\nKöszönjük!\n{setting.CompanyName}";
+            }
+        }
+            private void InvoiceButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Később implementáljuk
+            MessageBox.Show("Számla generálás funkció - hamarosan implementálva!",
+                          "Fejlesztés alatt", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
     }
-}
+    }
