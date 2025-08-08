@@ -29,6 +29,7 @@ using OpenXmlText = DocumentFormat.OpenXml.Wordprocessing.Text;
 using SystemIO = System.IO;
 using Word = Microsoft.Office.Interop.Word;
 using WpfBorder = System.Windows.Controls.Border;
+using System.Linq;
 
 
 namespace berles2
@@ -841,7 +842,158 @@ namespace berles2
             return cell;
         }
 
+        private async Task GenerateInvoiceXml()
+        {
+            // 1. Beállítások betöltése
+            var setting = _context.Settings.FirstOrDefault();
+            if (setting == null || string.IsNullOrWhiteSpace(setting.InvoiceXml))
+            {
+                throw new Exception("Nincs beállítva számla XML template! Kérlek állítsd be a beállításokban.");
+            }
 
+            if (!SystemIO.File.Exists(setting.InvoiceXml))
+            {
+                throw new Exception($"A számla XML template nem található: {setting.InvoiceXml}");
+            }
+
+            // 2. Kimeneti mappa létrehozása
+            string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
+            string invoiceFolder = SystemIO.Path.Combine(exeDirectory, "files", "Invoice_xml");
+            SystemIO.Directory.CreateDirectory(invoiceFolder);
+
+            // 3. Fájlnév generálása
+            string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
+            string rentalDate = DateTime.Now.ToString("yyyy-MM-dd");
+            string fileName = $"szamla_{customerName}_{rentalDate}.xml";
+            string outputPath = SystemIO.Path.Combine(invoiceFolder, fileName);
+
+            // 4. Template beolvasása
+            string xmlContent = SystemIO.File.ReadAllText(setting.InvoiceXml);
+
+            // 5. Változók kiszámítása
+            string paymentDueDate = DateTime.Now.AddDays(8).ToString("yyyy-MM-dd"); // 8 nap fizetési határidő
+            string paymentMode = (PaymentModeComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Készpénz";
+
+            // Nettó ár kiszámítása (bruttó / 1.27, mivel 27% ÁFA)
+            decimal totalAmount = _selectedDevices.Sum(d => d.RentPrice);
+            decimal netPrice = Math.Round(totalAmount / 1.27m, 0); // Egész számra kerekítés
+
+            // Kiválasztott eszközök listája
+            string devicesList = string.Join(", ", _selectedDevices.Select(d => d.DeviceName));
+
+            // 6. Változók helyettesítése
+            xmlContent = ReplaceInvoiceVariables(xmlContent, netPrice, paymentMode, paymentDueDate, devicesList);
+
+            // 7. XML fájl mentése
+            SystemIO.File.WriteAllText(outputPath, xmlContent, System.Text.Encoding.UTF8);
+
+            // 8. CURL parancs futtatása - számla küldés
+            string pdfPath = await SendInvoiceViaCurl(outputPath, customerName, rentalDate);
+
+            if (!string.IsNullOrEmpty(pdfPath))
+            {
+                // PDF automatikus megnyitás
+                Process.Start(new ProcessStartInfo
+                {
+                    FileName = pdfPath,
+                    UseShellExecute = true
+                });
+            }
+        }
+
+        private string ReplaceInvoiceVariables(string xmlContent, decimal netPrice, string paymentMode, string paymentDueDate, string devicesList)
+        {
+            // Ügyfél adatok
+            xmlContent = xmlContent.Replace("{{CUSTOMER_NAME}}", _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
+            xmlContent = xmlContent.Replace("{{CUSTOMER_ZIP}}", _selectedExistingCustomer?.Zipcode ?? CustomerZipTextBox.Text);
+            xmlContent = xmlContent.Replace("{{CUSTOMER_CITY}}", _selectedExistingCustomer?.City ?? CustomerCityTextBox.Text);
+            xmlContent = xmlContent.Replace("{{CUSTOMER_ADDRESS}}", _selectedExistingCustomer?.Address ?? CustomerAddressTextBox.Text);
+            xmlContent = xmlContent.Replace("{{CUSTOMER_EMAIL}}", _selectedExistingCustomer?.Email ?? CustomerEmailTextBox.Text);
+
+            // Bérlés és fizetés adatok
+            xmlContent = xmlContent.Replace("{{RENTAL_DATE}}", DateTime.Now.ToString("yyyy-MM-dd"));
+            xmlContent = xmlContent.Replace("{{PAYMENT_DUE_DATE}}", paymentDueDate);
+            xmlContent = xmlContent.Replace("{{PAYMENT_MODE}}", paymentMode);
+
+            // Pénzügyi adatok
+            xmlContent = xmlContent.Replace("{{NET_PRICE}}", netPrice.ToString("0"));
+
+            // Eszközök listája
+            xmlContent = xmlContent.Replace("{{SELECTED_DEVICES_LIST}}", devicesList);
+
+            return xmlContent;
+        }
+
+        private async Task<string> SendInvoiceViaCurl(string xmlPath, string customerName, string rentalDate)
+        {
+            try
+            {
+                // 1. PDF kimeneti mappa és fájlnév
+                string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                string invoicesFolder = SystemIO.Path.Combine(exeDirectory, "files", "invoices");
+                SystemIO.Directory.CreateDirectory(invoicesFolder);
+
+                string pdfFileName = $"szamla_{customerName}_{rentalDate}.pdf";
+                string pdfPath = SystemIO.Path.Combine(invoicesFolder, pdfFileName);
+
+                // 2. Cookies fájl (ideiglenes)
+                string cookiesPath = SystemIO.Path.Combine(exeDirectory, "cookies.txt");
+
+                // 3. CURL parancs összeállítása
+                string curlArguments = $"-s " +
+                                     $"-F \"action-xmlagentxmlfile=@{xmlPath}\" " +
+                                     $"-c \"{cookiesPath}\" " +
+                                     $"-o \"{pdfPath}\" " +
+                                     $"\"https://www.szamlazz.hu/szamla/\"";
+
+                // 4. CURL futtatása
+                ProcessStartInfo curlInfo = new ProcessStartInfo
+                {
+                    FileName = "curl",
+                    Arguments = curlArguments,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
+
+                using (Process curlProcess = Process.Start(curlInfo))
+                {
+                    if (curlProcess != null)
+                    {
+                        string output = await curlProcess.StandardOutput.ReadToEndAsync();
+                        string error = await curlProcess.StandardError.ReadToEndAsync();
+
+                        await curlProcess.WaitForExitAsync();
+
+                        // 5. Eredmény ellenőrzése
+                        if (curlProcess.ExitCode == 0 && SystemIO.File.Exists(pdfPath))
+                        {
+                            // Sikeres - cookies törlése
+                            try { SystemIO.File.Delete(cookiesPath); } catch { }
+
+                            MessageBox.Show($"Számla sikeresen elküldve és mentve!\nHelye: {pdfPath}",
+                                          "Számla siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                            return pdfPath;
+                        }
+                        else
+                        {
+                            throw new Exception($"CURL hiba:\nKimeneti kód: {curlProcess.ExitCode}\nHiba: {error}");
+                        }
+                    }
+                    else
+                    {
+                        throw new Exception("Nem sikerült elindítani a CURL parancsot.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba a számla küldésekor:\n{ex.Message}",
+                              "Számla hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                return string.Empty;
+            }
+        }
         private string GetCleanFileName(string input)
         {
             if (string.IsNullOrEmpty(input))
@@ -1047,11 +1199,25 @@ namespace berles2
                 return $"Kedves {customerName}!\n\nMellékletben megtalálja a bérlési szerződést és az ÁSZF-et.\n\nKöszönjük!\n{setting.CompanyName}";
             }
         }
-            private void InvoiceButton_Click(object sender, RoutedEventArgs e)
+        private async void InvoiceButton_Click(object sender, RoutedEventArgs e)
         {
-            // Később implementáljuk
-            MessageBox.Show("Számla generálás funkció - hamarosan implementálva!",
-                          "Fejlesztés alatt", MessageBoxButton.OK, MessageBoxImage.Information);
+            try
+            {
+                // 1. XML generálása és számla küldés
+                await GenerateInvoiceXml();
+
+                // 2. Gomb állapotának frissítése
+                InvoiceButton.IsEnabled = false;
+                InvoiceButton.Background = System.Windows.Media.Brushes.Gray;
+
+                MessageBox.Show("Számla XML sikeresen generálva és elmentve!",
+                              "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba a számla generálásakor: {ex.Message}",
+                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
         private string GetContractWordPath()
         {
