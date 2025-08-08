@@ -874,9 +874,11 @@ namespace berles2
             string paymentDueDate = DateTime.Now.AddDays(8).ToString("yyyy-MM-dd"); // 8 nap fizetési határidő
             string paymentMode = (PaymentModeComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Készpénz";
 
-            // Nettó ár kiszámítása (bruttó / 1.27, mivel 27% ÁFA)
-            decimal totalAmount = _selectedDevices.Sum(d => d.RentPrice);
-            decimal netPrice = Math.Round(totalAmount / 1.27m, 0); // Egész számra kerekítés
+            // ALANYI ADÓMENTES - nettó = bruttó, de szorozva napokkal!
+            int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int days) ? days : 1;
+            decimal dailyTotal = _selectedDevices.Sum(d => d.RentPrice);
+            decimal totalAmount = dailyTotal * rentalDays;
+            decimal netPrice = totalAmount; // Alanyi adómentes - nincs ÁFA
 
             // Kiválasztott eszközök listája
             string devicesList = string.Join(", ", _selectedDevices.Select(d => d.DeviceName));
@@ -892,17 +894,20 @@ namespace berles2
 
             if (!string.IsNullOrEmpty(pdfPath))
             {
-                // PDF automatikus megnyitás
-                Process.Start(new ProcessStartInfo
-                {
-                    FileName = pdfPath,
-                    UseShellExecute = true
-                });
+                
             }
         }
 
         private string ReplaceInvoiceVariables(string xmlContent, decimal netPrice, string paymentMode, string paymentDueDate, string devicesList)
         {
+            // DEBUG - IDE, A METÓDUS ELEJÉRE!
+            string debugInfo = $"SZÁMLA ADATOK:\n\n" +
+                              $"Ügyfél: {_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text}\n" +
+                              $"Végösszeg: {netPrice:F0} Ft\n" +
+                              $"Napok: {RentalDaysTextBox.Text}\n" +
+                              $"Eszközök: {devicesList}";
+
+            MessageBox.Show(debugInfo, "Számla Debug", MessageBoxButton.OK, MessageBoxImage.Information);
             // Ügyfél adatok
             xmlContent = xmlContent.Replace("{{CUSTOMER_NAME}}", _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
             xmlContent = xmlContent.Replace("{{CUSTOMER_ZIP}}", _selectedExistingCustomer?.Zipcode ?? CustomerZipTextBox.Text);
@@ -928,7 +933,7 @@ namespace berles2
         {
             try
             {
-                // 1. PDF kimeneti mappa és fájlnév
+                // 1. PDF kimeneti mappa (az exe mellett, files\invoices)
                 string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
                 string invoicesFolder = SystemIO.Path.Combine(exeDirectory, "files", "invoices");
                 SystemIO.Directory.CreateDirectory(invoicesFolder);
@@ -936,11 +941,11 @@ namespace berles2
                 string pdfFileName = $"szamla_{customerName}_{rentalDate}.pdf";
                 string pdfPath = SystemIO.Path.Combine(invoicesFolder, pdfFileName);
 
-                // 2. Cookies fájl (ideiglenes)
-                string cookiesPath = SystemIO.Path.Combine(exeDirectory, "cookies.txt");
+                // 2. Cookies fájl (exe mappa mellett)
+                string cookiesPath = SystemIO.Path.Combine(exeDirectory, "curl_cookies.txt");
 
-                // 3. CURL parancs összeállítása
-                string curlArguments = $"-s " +
+                // 3. CURL argumentumok - JAVÍTOTT, mint a működő CMD parancs
+                string curlArguments = $"-v -L " +
                                      $"-F \"action-xmlagentxmlfile=@{xmlPath}\" " +
                                      $"-c \"{cookiesPath}\" " +
                                      $"-o \"{pdfPath}\" " +
@@ -954,7 +959,8 @@ namespace berles2
                     UseShellExecute = false,
                     CreateNoWindow = true,
                     RedirectStandardOutput = true,
-                    RedirectStandardError = true
+                    RedirectStandardError = true,
+                    WorkingDirectory = exeDirectory
                 };
 
                 using (Process curlProcess = Process.Start(curlInfo))
@@ -967,9 +973,9 @@ namespace berles2
                         await curlProcess.WaitForExitAsync();
 
                         // 5. Eredmény ellenőrzése
-                        if (curlProcess.ExitCode == 0 && SystemIO.File.Exists(pdfPath))
+                        if (curlProcess.ExitCode == 0 && SystemIO.File.Exists(pdfPath) && new SystemIO.FileInfo(pdfPath).Length > 0)
                         {
-                            // Sikeres - cookies törlése
+                            // Cookies törlése
                             try { SystemIO.File.Delete(cookiesPath); } catch { }
 
                             MessageBox.Show($"Számla sikeresen elküldve és mentve!\nHelye: {pdfPath}",
@@ -978,7 +984,7 @@ namespace berles2
                         }
                         else
                         {
-                            throw new Exception($"CURL hiba:\nKimeneti kód: {curlProcess.ExitCode}\nHiba: {error}");
+                            throw new Exception($"CURL hiba:\nKimeneti kód: {curlProcess.ExitCode}\nPDF létrejött: {SystemIO.File.Exists(pdfPath)}\nHiba: {error}");
                         }
                     }
                     else
@@ -1252,5 +1258,6 @@ namespace berles2
             var reportingWindow = new ReportingWindow();
             reportingWindow.ShowDialog();
         }
+
     }
     }
