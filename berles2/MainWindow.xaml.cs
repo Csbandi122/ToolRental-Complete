@@ -1,4 +1,11 @@
-﻿using System.Text;
+﻿using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using MailKit.Net.Smtp;
+using Microsoft.EntityFrameworkCore;
+using MimeKit;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -8,28 +15,21 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using Microsoft.EntityFrameworkCore;
-using ToolRental.Data;
 using ToolRental.Core.Models;
-using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
-using System.Diagnostics;
-using SystemIO = System.IO;
-using WpfBorder = System.Windows.Controls.Border;
-using MailKit.Net.Smtp;
-using MimeKit;
-using WordInterop = Microsoft.Office.Interop.Word;
-
-
-// ALIASOK - mint a régi kódban
-using OpenXmlTable = DocumentFormat.OpenXml.Wordprocessing.Table;
-using OpenXmlTableRow = DocumentFormat.OpenXml.Wordprocessing.TableRow;
-using OpenXmlTableCell = DocumentFormat.OpenXml.Wordprocessing.TableCell;
-using OpenXmlParagraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
-using OpenXmlRun = DocumentFormat.OpenXml.Wordprocessing.Run;
-using OpenXmlText = DocumentFormat.OpenXml.Wordprocessing.Text;
+using ToolRental.Data;
 using BorderValues = DocumentFormat.OpenXml.Wordprocessing.BorderValues;
 using OpenXmlBold = DocumentFormat.OpenXml.Wordprocessing.Bold;
+using OpenXmlParagraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
+using OpenXmlRun = DocumentFormat.OpenXml.Wordprocessing.Run;
+// ALIASOK - mint a régi kódban
+using OpenXmlTable = DocumentFormat.OpenXml.Wordprocessing.Table;
+using OpenXmlTableCell = DocumentFormat.OpenXml.Wordprocessing.TableCell;
+using OpenXmlTableRow = DocumentFormat.OpenXml.Wordprocessing.TableRow;
+using OpenXmlText = DocumentFormat.OpenXml.Wordprocessing.Text;
+using SystemIO = System.IO;
+using Word = Microsoft.Office.Interop.Word;
+using WpfBorder = System.Windows.Controls.Border;
+
 
 namespace berles2
 {
@@ -889,15 +889,15 @@ namespace berles2
                 string pdfFileName = $"szerződés_{customerName}_{rentalDate}.pdf";
                 string pdfPath = SystemIO.Path.Combine(contractsPdfFolder, pdfFileName);
 
-                // 4. Word -> PDF konverzió
-                WordInterop.Application wordApp = new WordInterop.Application();
-                WordInterop.Document doc = null;
+                // 4. Word -> PDF konverzió (MŰKÖDŐ VERZIÓ!)
+                Word.Application wordApp = new Word.Application();
+                Word.Document doc = null;
 
                 try
                 {
                     wordApp.Visible = false;
                     doc = wordApp.Documents.Open(wordPath);
-                    doc.SaveAs2(pdfPath, WordInterop.WdSaveFormat.wdFormatPDF);
+                    doc.SaveAs2(pdfPath, Word.WdSaveFormat.wdFormatPDF);
                 }
                 finally
                 {
@@ -914,6 +914,8 @@ namespace berles2
                 return "";
             }
         }
+
+
 
         private void SendContractEmail(string pdfPath)
         {
@@ -1028,6 +1030,34 @@ namespace berles2
             // Később implementáljuk
             MessageBox.Show("Számla generálás funkció - hamarosan implementálva!",
                           "Fejlesztés alatt", MessageBoxButton.OK, MessageBoxImage.Information);
+        }
+        private string GetContractWordPath()
+        {
+            try
+            {
+                string exeDirectory = SystemIO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
+                string contractsWordFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-word");
+
+                string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
+                string rentalDate = DateTime.Now.ToString("yyyy-MM-dd");
+                string wordFileName = $"szerződés_{customerName}_{rentalDate}.docx";
+                string wordPath = SystemIO.Path.Combine(contractsWordFolder, wordFileName);
+
+                if (!SystemIO.File.Exists(wordPath))
+                {
+                    MessageBox.Show("A Word szerződés fájl nem található! Először generálja le a szerződést.",
+                                  "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return "";
+                }
+
+                return wordPath;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba a szerződés fájl keresésekor: {ex.Message}",
+                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                return "";
+            }
         }
     }
     }
