@@ -310,8 +310,7 @@ namespace berles2
                     EmailButton.IsEnabled = true;
                     EmailButton.Background = System.Windows.Media.Brushes.Blue;
 
-                    MessageBox.Show("Bérlés sikeresen mentve és szerződés elkészítve!",
-                                  "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                    
                 }
                 catch (Exception ex)
                 {
@@ -695,8 +694,7 @@ namespace berles2
                     UseShellExecute = true
                 });
 
-                MessageBox.Show($"Szerződés sikeresen elkészítve és megnyitva!\n\nFájl helye: {outputPath}",
-                              "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+               
             }
             catch (Exception ex)
             {
