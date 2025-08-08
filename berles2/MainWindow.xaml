@@ -180,8 +180,19 @@
 
         <!-- ALSÓ GOMBOK SZEKCIÓ -->
         <Border Grid.Row="2" Background="#F5F5F5" Padding="20,10">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <!-- SZERZŐDÉS GOMB (aktív) -->
+            <Grid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <!-- REPORTING GOMB (bal oldal) -->
+                    <Button x:Name="ReportingButton" Content="📊 Riportok" 
+                Width="120" Height="40" Margin="0,0,10,0"
+                Background="#9C27B0" Foreground="White" FontWeight="Bold"
+                Click="ReportingButton_Click"/>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+
+
+                    <!-- SZERZŐDÉS GOMB (aktív) -->
                 <Button x:Name="ContractButton" Content="📋 Szerződés" 
             Width="120" Height="40" Margin="0,0,10,0"
             Background="#4CAF50" Foreground="White" FontWeight="Bold"
@@ -204,7 +215,8 @@
             Width="120" Height="40"
             Background="#FF5722" Foreground="White" FontWeight="Bold"
             Click="FinishButton_Click"/>
-            </StackPanel>
+                </StackPanel>
+            </Grid>
         </Border>
     </Grid>
 </Window>

@@ -1247,5 +1247,10 @@ namespace berles2
                 return "";
             }
         }
+        private void ReportingButton_Click(object sender, RoutedEventArgs e)
+        {
+            var reportingWindow = new ReportingWindow();
+            reportingWindow.ShowDialog();
+        }
     }
     }
