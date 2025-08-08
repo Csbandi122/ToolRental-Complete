@@ -970,13 +970,35 @@ namespace berles2
 
             message.Body = bodyBuilder.ToMessageBody();
 
-            // 6. Email küldés
+            // 6. Email küldés - BŐVEBB HIBAKEZELÉSSELlient.Connect(setting.EmailSmtp, setting.SmtpPort, MailKit.Security.Secure
             using (var client = new SmtpClient())
             {
-                client.Connect(setting.EmailSmtp, setting.SmtpPort, MailKit.Security.SecureSocketOptions.StartTls);
-                client.Authenticate(setting.SenderEmail, setting.EmailPassword);
-                client.Send(message);
-                client.Disconnect(true);
+                try
+                {
+                    Console.WriteLine($"Kapcsolódás: {setting.EmailSmtp}:{setting.SmtpPort}");
+                    var socketOptions = setting.SmtpPort == 465 ? MailKit.Security.SecureSocketOptions.SslOnConnect : MailKit.Security.SecureSocketOptions.StartTls;
+
+                    client.Connect(setting.EmailSmtp, setting.SmtpPort, socketOptions);
+
+                    // opcionális: ha nem OAUTH2-t használsz, leveheted client.AuthenticationMechanisms.Remove("XOAUTH2");
+
+                    Console.WriteLine($"Autentikáció: {setting.SenderEmail}"); client.Authenticate(setting.SenderEmail, setting.EmailPassword);
+
+                    Console.WriteLine("Email küldés...");
+                    client.Send(message);
+                    client.Disconnect(true);
+
+                    Console.WriteLine("Email sikeresen elküldve!");
+                }
+                catch (Exception smtpEx)
+                {
+                    throw new Exception($"SMTP hiba részletesen:\n" +
+                                      $"Szerver: {setting.EmailSmtp}:{setting.SmtpPort}\n" +
+                                      $"Email: {setting.SenderEmail}\n" +
+                                      $"SSL: StartTls\n" +
+                                      $"Hiba: {smtpEx.Message}\n" +
+                                      $"Típus: {smtpEx.GetType().Name}");
+                }
             }
         }
 
