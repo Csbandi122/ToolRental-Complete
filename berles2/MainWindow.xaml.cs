@@ -608,8 +608,8 @@ namespace berles2
             if (result == MessageBoxResult.Yes)
             {
                 ClearAllForms();
-                MessageBox.Show("Az ablak inicializálva! Új bérlést kezdhetsz.",
-                              "Kész", MessageBoxButton.OK, MessageBoxImage.Information);
+                //MessageBox.Show("Az ablak inicializálva! Új bérlést kezdhetsz.",
+                  //            "Kész", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 

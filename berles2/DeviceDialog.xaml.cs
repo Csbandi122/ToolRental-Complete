@@ -13,13 +13,13 @@ namespace berles2
     {
         public Device Device { get; private set; }
         private bool _isEditMode;
-        private ToolRentalDbContext _context;
+       
 
         // Konstruktor új eszköz hozzáadásához
         public DeviceDialog()
         {
             InitializeComponent();
-            InitializeDatabase();
+            
             _isEditMode = false;
             Device = new Device();
             TitleTextBlock.Text = "Új eszköz hozzáadása";
@@ -30,7 +30,7 @@ namespace berles2
         public DeviceDialog(Device device)
         {
             InitializeComponent();
-            InitializeDatabase();
+            
             _isEditMode = true;
             Device = new Device
             {
@@ -51,18 +51,14 @@ namespace berles2
             LoadDeviceData();
         }
 
-        private void InitializeDatabase()
-        {
-            var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
-            optionsBuilder.UseSqlite("Data Source=ToolRental.db");
-            _context = new ToolRentalDbContext(optionsBuilder.Options);
-        }
+
 
         private void LoadDeviceTypes()
         {
             try
             {
-                var deviceTypes = _context.DeviceTypes.OrderBy(dt => dt.TypeName).ToList();
+                using var context = GetDbContext();
+                var deviceTypes = context.DeviceTypes.OrderBy(dt => dt.TypeName).ToList();
                 DeviceTypeComboBox.ItemsSource = deviceTypes;
             }
             catch (Exception ex)
@@ -215,8 +211,15 @@ namespace berles2
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
-            _context?.Dispose();
+            
             base.OnClosing(e);
+        }
+        
+        private ToolRentalDbContext GetDbContext()
+        {
+            var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
+            optionsBuilder.UseSqlite("Data Source=ToolRental.db");
+            return new ToolRentalDbContext(optionsBuilder.Options);
         }
     }
 }
