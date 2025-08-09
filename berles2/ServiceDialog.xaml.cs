@@ -235,8 +235,8 @@ namespace berles2
 
                     _context.SaveChanges();
 
-                    MessageBox.Show("Szervíz jegy sikeresen mentve!",
-                                  "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                    //MessageBox.Show("Szervíz jegy sikeresen mentve!",
+                      //            "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
 
                     this.DialogResult = true;
                     this.Close();
