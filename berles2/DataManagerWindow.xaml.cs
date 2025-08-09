@@ -18,8 +18,8 @@ namespace berles2
         private List<Device> _allDevices;
         private ObservableCollection<RentalDisplayModel> _rentals;
         private List<RentalDisplayModel> _allRentals;
-        private ObservableCollection<ToolRental.Core.Models.Financial> _financials;
-        private List<ToolRental.Core.Models.Financial> _allFinancials;
+        private ObservableCollection<FinancialDisplayModel> _financials;
+        private List<FinancialDisplayModel> _allFinancials;
         private ObservableCollection<ServiceDisplayModel> _services;
         private List<ServiceDisplayModel> _allServices;
 
@@ -387,8 +387,26 @@ namespace berles2
         {
             try
             {
-                _allFinancials = _context.Financials.OrderByDescending(f => f.Date).ToList();
-                _financials = new ObservableCollection<ToolRental.Core.Models.Financial>(_allFinancials);
+                var financials = _context.Financials
+                    .Include(f => f.FinancialDevices)
+                        .ThenInclude(fd => fd.Device)
+                    .OrderByDescending(f => f.Date)
+                    .Select(f => new FinancialDisplayModel
+                    {
+                        Id = f.Id,
+                        Date = f.Date,
+                        EntryType = f.EntryType,
+                        SourceType = f.SourceType,
+                        SourceId = f.SourceId, // ← ÚJ SOR!
+                        TicketNr = f.TicketNr,
+                        Amount = f.Amount,
+                        Comment = f.Comment,
+                        DevicesText = string.Join(", ", f.FinancialDevices.Select(fd => fd.Device.DeviceName))
+                    })
+                    .ToList();
+
+                _allFinancials = financials;
+                _financials = new ObservableCollection<FinancialDisplayModel>(_allFinancials);
                 FinancialsDataGrid.ItemsSource = _financials;
             }
             catch (Exception ex)
@@ -397,12 +415,66 @@ namespace berles2
                               "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        
 
-        private void FinancialsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void DeleteFinancialButton_Click(object sender, RoutedEventArgs e)
         {
-            bool hasSelection = FinancialsDataGrid.SelectedItem != null;
-            DeleteFinancialButton.IsEnabled = hasSelection;
+            if (FinancialsDataGrid.SelectedItem is FinancialDisplayModel selectedFinancial)
+            {
+                // Bérléshez kapcsolódó tételeket nem lehet törölni
+                if (selectedFinancial.SourceType == "bérlés" && selectedFinancial.SourceId.HasValue)
+                {
+                    MessageBox.Show("Bérléshez kapcsolódó pénzügyi tételeket nem lehet törölni!\n" +
+                                  "A tétel automatikusan létrejött a bérléskor.",
+                                  "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                var result = MessageBox.Show(
+                    $"Biztosan törli ezt a pénzügyi tételt?\n\n" +
+                    $"Dátum: {selectedFinancial.Date:yyyy.MM.dd}\n" +
+                    $"Típus: {selectedFinancial.EntryType}\n" +
+                    $"Összeg: {selectedFinancial.Amount:N0} Ft\n" +
+                    $"Megjegyzés: {selectedFinancial.Comment}",
+                    "Megerősítés", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    try
+                    {
+                        // Eredeti Financial entitás lekérése az Id alapján
+                        var originalFinancial = _context.Financials.Find(selectedFinancial.Id);
+                        if (originalFinancial != null)
+                        {
+                            _context.Financials.Remove(originalFinancial);
+                            _context.SaveChanges();
+                            LoadFinancials();
+                            MessageBox.Show("Pénzügyi tétel sikeresen törölve!", "Siker",
+                                          MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Hiba a törléskor: {ex.Message}",
+                                      "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+            }
+            }
+        
+
+        private void FinancialTypeFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            FilterFinancials();
         }
+
+        private void SearchFinancialTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            FilterFinancials();
+        }
+        // ===========================================
+        // PÉNZÜGYEK ESEMÉNYKEZELŐK
+        // ===========================================
 
         private void AddFinancialButton_Click(object sender, RoutedEventArgs e)
         {
@@ -442,54 +514,10 @@ namespace berles2
             }
         }
 
-        private void DeleteFinancialButton_Click(object sender, RoutedEventArgs e)
+        private void FinancialsDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (FinancialsDataGrid.SelectedItem is ToolRental.Core.Models.Financial selectedFinancial)
-            {
-                // Bérléshez kapcsolódó tételeket nem lehet törölni
-                if (selectedFinancial.SourceType == "bérlés" && selectedFinancial.SourceId.HasValue)
-                {
-                    MessageBox.Show("Bérléshez kapcsolódó pénzügyi tételeket nem lehet törölni!\n" +
-                                  "A tétel automatikusan létrejött a bérléskor.",
-                                  "Figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                var result = MessageBox.Show(
-                    $"Biztosan törli ezt a pénzügyi tételt?\n\n" +
-                    $"Dátum: {selectedFinancial.Date:yyyy.MM.dd}\n" +
-                    $"Típus: {selectedFinancial.EntryType}\n" +
-                    $"Összeg: {selectedFinancial.Amount:N0} Ft\n" +
-                    $"Megjegyzés: {selectedFinancial.Comment}",
-                    "Megerősítés", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    try
-                    {
-                        _context.Financials.Remove(selectedFinancial);
-                        _context.SaveChanges();
-                        LoadFinancials();
-                        MessageBox.Show("Pénzügyi tétel sikeresen törölve!", "Siker",
-                                      MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Hiba a törléskor: {ex.Message}",
-                                      "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-            }
-        }
-
-        private void FinancialTypeFilterComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            FilterFinancials();
-        }
-
-        private void SearchFinancialTextBox_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            FilterFinancials();
+            bool hasSelection = FinancialsDataGrid.SelectedItem != null;
+            DeleteFinancialButton.IsEnabled = hasSelection;
         }
 
         private void FilterFinancials()
@@ -671,6 +699,19 @@ namespace berles2
         public string PaymentMode { get; set; } = string.Empty;
         public string Comment { get; set; } = string.Empty;
         public string DevicesText { get; set; } = string.Empty;
+    }
+    // FinancialDisplayModel osztály a pénzügyek megjelenítéséhez
+    public class FinancialDisplayModel
+    {
+        public int Id { get; set; }
+        public DateTime Date { get; set; }
+        public string EntryType { get; set; } = string.Empty; // bevétel/költség
+        public string SourceType { get; set; } = string.Empty; // bérlés/szervíz/egyéb
+        public int? SourceId { get; set; } // ← ÚJ MEZŐ!
+        public string TicketNr { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public string? Comment { get; set; }
+        public string DevicesText { get; set; } = string.Empty; // ← ÚJ!
     }
 
     // SEGÉD OSZTÁLY SZERVÍZ MEGJELENÍTÉSHEZ

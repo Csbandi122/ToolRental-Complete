@@ -40,6 +40,7 @@ namespace berles2
         private List<Device> _selectedDevices = new List<Device>();
         private List<Device> _allDevices = new List<Device>();
         private Customer? _selectedExistingCustomer = null;
+        private string? _lastContractTimestamp = null; // Utolsó szerződés időbélyege
 
         public MainWindow()
         {
@@ -47,6 +48,7 @@ namespace berles2
             InitializeDatabase();
             InitializeForm();
             LoadDevices();
+            this.Activated += MainWindow_Activated;
         }
 
         private void InitializeDatabase()
@@ -55,6 +57,11 @@ namespace berles2
             var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
             optionsBuilder.UseSqlite("Data Source=ToolRental.db");
             _context = new ToolRentalDbContext(optionsBuilder.Options);
+        }
+        private void MainWindow_Activated(object sender, EventArgs e)
+        {
+            // Eszközök frissítése amikor az ablak fókuszba kerül
+            LoadDevices();
         }
 
         private void InitializeForm()
@@ -697,7 +704,8 @@ namespace berles2
 
                 // 3. Fájlnév generálása
                 string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
-                string rentalDate = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
+                _lastContractTimestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
+                string rentalDate = _lastContractTimestamp;
                 string fileName = $"szerződés_{customerName}_{rentalDate}.docx";
                 string outputPath = SystemIO.Path.Combine(contractsFolder, fileName);
 
@@ -900,14 +908,7 @@ namespace berles2
 
         private string ReplaceInvoiceVariables(string xmlContent, decimal netPrice, string paymentMode, string paymentDueDate, string devicesList)
         {
-            // DEBUG - IDE, A METÓDUS ELEJÉRE!
-            string debugInfo = $"SZÁMLA ADATOK:\n\n" +
-                              $"Ügyfél: {_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text}\n" +
-                              $"Végösszeg: {netPrice:F0} Ft\n" +
-                              $"Napok: {RentalDaysTextBox.Text}\n" +
-                              $"Eszközök: {devicesList}";
-
-            MessageBox.Show(debugInfo, "Számla Debug", MessageBoxButton.OK, MessageBoxImage.Information);
+            
             // Ügyfél adatok
             xmlContent = xmlContent.Replace("{{CUSTOMER_NAME}}", _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
             xmlContent = xmlContent.Replace("{{CUSTOMER_ZIP}}", _selectedExistingCustomer?.Zipcode ?? CustomerZipTextBox.Text);
@@ -1028,7 +1029,7 @@ namespace berles2
                 string contractsWordFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-word");
 
                 string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
-                string rentalDate = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
+                string rentalDate = _lastContractTimestamp ?? DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
                 string wordFileName = $"szerződés_{customerName}_{rentalDate}.docx";
                 string wordPath = SystemIO.Path.Combine(contractsWordFolder, wordFileName);
 
@@ -1216,8 +1217,7 @@ namespace berles2
                 InvoiceButton.IsEnabled = false;
                 InvoiceButton.Background = System.Windows.Media.Brushes.Gray;
 
-                MessageBox.Show("Számla XML sikeresen generálva és elmentve!",
-                              "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                
             }
             catch (Exception ex)
             {

@@ -270,7 +270,8 @@
                                     <Binding Path="Amount" StringFormat="{}{0:N0} Ft"/>
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="Megjegyzés" Binding="{Binding Comment}" Width="*"/>
+                            <DataGridTextColumn Header="Kapcsolódó eszközök" Binding="{Binding DevicesText}" Width="*"/>
+                            <DataGridTextColumn Header="Megjegyzés" Binding="{Binding Comment}" Width="200"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
