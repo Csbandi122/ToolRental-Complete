@@ -697,7 +697,7 @@ namespace berles2
 
                 // 3. Fájlnév generálása
                 string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
-                string rentalDate = DateTime.Now.ToString("yyyy-MM-dd");
+                string rentalDate = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
                 string fileName = $"szerződés_{customerName}_{rentalDate}.docx";
                 string outputPath = SystemIO.Path.Combine(contractsFolder, fileName);
 
@@ -863,7 +863,7 @@ namespace berles2
 
             // 3. Fájlnév generálása
             string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
-            string rentalDate = DateTime.Now.ToString("yyyy-MM-dd");
+            string rentalDate = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
             string fileName = $"szamla_{customerName}_{rentalDate}.xml";
             string outputPath = SystemIO.Path.Combine(invoiceFolder, fileName);
 
@@ -916,7 +916,7 @@ namespace berles2
             xmlContent = xmlContent.Replace("{{CUSTOMER_EMAIL}}", _selectedExistingCustomer?.Email ?? CustomerEmailTextBox.Text);
 
             // Bérlés és fizetés adatok
-            xmlContent = xmlContent.Replace("{{RENTAL_DATE}}", DateTime.Now.ToString("yyyy-MM-dd"));
+            xmlContent = xmlContent.Replace("{{RENTAL_DATE}}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm"));
             xmlContent = xmlContent.Replace("{{PAYMENT_DUE_DATE}}", paymentDueDate);
             xmlContent = xmlContent.Replace("{{PAYMENT_MODE}}", paymentMode);
 
@@ -1028,7 +1028,7 @@ namespace berles2
                 string contractsWordFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-word");
 
                 string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
-                string rentalDate = DateTime.Now.ToString("yyyy-MM-dd");
+                string rentalDate = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
                 string wordFileName = $"szerződés_{customerName}_{rentalDate}.docx";
                 string wordPath = SystemIO.Path.Combine(contractsWordFolder, wordFileName);
 
@@ -1233,7 +1233,7 @@ namespace berles2
                 string contractsWordFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-word");
 
                 string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
-                string rentalDate = DateTime.Now.ToString("yyyy-MM-dd");
+                string rentalDate = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
                 string wordFileName = $"szerződés_{customerName}_{rentalDate}.docx";
                 string wordPath = SystemIO.Path.Combine(contractsWordFolder, wordFileName);
 

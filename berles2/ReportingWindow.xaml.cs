@@ -361,24 +361,38 @@ namespace berles2
                         .Where(rd => rd.DeviceId == device.Id)
                         .Count();
 
-                    // JAVÍTOTT bevételszámítás - elosztja az összeget
-                    var revenue = _context.FinancialDevices
+                    // ÁTMENETI EGYSZERŰ MEGOLDÁS - bérlési bevételek helyes számítása
+                    var revenue = 0m;
+
+                    // Bérlések száma és bevétel számítása
+                    var deviceRentals = _context.RentalDevices
+                        .Where(rd => rd.DeviceId == device.Id)
+                        .Include(rd => rd.Rental)
+                        .ToList();
+
+                    foreach (var rentalDevice in deviceRentals)
+                    {
+                        // Minden bérlésre: eszköz bérleti díj × napok száma
+                        revenue += device.RentPrice * rentalDevice.Rental.RentalDays;
+                    }
+
+                    // Egyéb bevételek (elosztva)
+                    var otherRevenue = _context.FinancialDevices
                         .Where(fd => fd.DeviceId == device.Id)
                         .Join(_context.Financials,
                               fd => fd.FinancialId,
                               f => f.Id,
                               (fd, f) => new { fd, f })
-                        .Where(x => x.f.EntryType == "bevétel")
-                        .ToList() // Memóriába töltés a további számításokhoz
+                        .Where(x => x.f.EntryType == "bevétel" && x.f.SourceType != "bérlés")
+                        .ToList()
                         .Sum(x =>
                         {
-                            // Hány eszközre vonatkozik ez a Financial rekord?
                             var deviceCount = _context.FinancialDevices
                                 .Count(fd => fd.FinancialId == x.f.Id);
-
-                            // Elosztjuk az összeget az eszközök számával
                             return deviceCount > 0 ? x.f.Amount / deviceCount : 0;
                         });
+
+                    revenue += otherRevenue;
 
                     // JAVÍTOTT költségszámítás - elosztja az összeget
                     var expense = _context.FinancialDevices
