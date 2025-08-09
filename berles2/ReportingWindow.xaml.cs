@@ -361,25 +361,43 @@ namespace berles2
                         .Where(rd => rd.DeviceId == device.Id)
                         .Count();
 
-                    // Bevétel (Financial táblából, FinancialDevice kapcsolaton keresztül)
+                    // JAVÍTOTT bevételszámítás - elosztja az összeget
                     var revenue = _context.FinancialDevices
                         .Where(fd => fd.DeviceId == device.Id)
                         .Join(_context.Financials,
                               fd => fd.FinancialId,
                               f => f.Id,
-                              (fd, f) => f)
-                        .Where(f => f.EntryType == "bevétel")
-                        .Sum(f => (decimal?)f.Amount) ?? 0;
+                              (fd, f) => new { fd, f })
+                        .Where(x => x.f.EntryType == "bevétel")
+                        .ToList() // Memóriába töltés a további számításokhoz
+                        .Sum(x =>
+                        {
+                            // Hány eszközre vonatkozik ez a Financial rekord?
+                            var deviceCount = _context.FinancialDevices
+                                .Count(fd => fd.FinancialId == x.f.Id);
 
-                    // Költség (szervíz költségek stb.)
+                            // Elosztjuk az összeget az eszközök számával
+                            return deviceCount > 0 ? x.f.Amount / deviceCount : 0;
+                        });
+
+                    // JAVÍTOTT költségszámítás - elosztja az összeget
                     var expense = _context.FinancialDevices
                         .Where(fd => fd.DeviceId == device.Id)
                         .Join(_context.Financials,
                               fd => fd.FinancialId,
                               f => f.Id,
-                              (fd, f) => f)
-                        .Where(f => f.EntryType == "költség")
-                        .Sum(f => (decimal?)f.Amount) ?? 0;
+                              (fd, f) => new { fd, f })
+                        .Where(x => x.f.EntryType == "költség")
+                        .ToList() // Memóriába töltés a további számításokhoz
+                        .Sum(x =>
+                        {
+                            // Hány eszközre vonatkozik ez a Financial rekord?
+                            var deviceCount = _context.FinancialDevices
+                                .Count(fd => fd.FinancialId == x.f.Id);
+
+                            // Elosztjuk az összeget az eszközök számával
+                            return deviceCount > 0 ? x.f.Amount / deviceCount : 0;
+                        });
 
                     deviceStats.Add(new DeviceStats
                     {

@@ -3,6 +3,9 @@
   "WorkspaceRootPath": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\reportingwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\datamanagerwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -13,9 +16,6 @@
     },
     {
       "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\reportingwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\reportingwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
@@ -94,7 +94,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 20,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -110,13 +110,13 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 0,
               "Title": "ReportingWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\ReportingWindow.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\ReportingWindow.xaml.cs",
               "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\ReportingWindow.xaml.cs",
               "RelativeToolTip": "..\\berles2\\ReportingWindow.xaml.cs",
-              "ViewState": "AgIAAC8AAAAAAAAAAAAgwEYAAAAdAAAAAAAAAA==",
+              "ViewState": "AgIAAGkBAAAAAAAAAAAcwHQBAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-08T16:10:34.172Z",
               "EditorCaption": ""
@@ -130,8 +130,7 @@
               "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\ReportingWindow.xaml",
               "RelativeToolTip": "..\\berles2\\ReportingWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-08T16:08:00.361Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-08T16:08:00.361Z"
             },
             {
               "$type": "Document",
@@ -214,8 +213,7 @@
               "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\SettingsDialog.xaml",
               "RelativeToolTip": "..\\berles2\\SettingsDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-07T16:11:14.545Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-07T16:11:14.545Z"
             },
             {
               "$type": "Document",
@@ -238,8 +236,7 @@
               "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\ServiceDialog.xaml",
               "RelativeToolTip": "..\\berles2\\ServiceDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-07T11:33:25.339Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-07T11:33:25.339Z"
             },
             {
               "$type": "Document",
@@ -314,28 +311,27 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "DataManagerWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DataManagerWindow.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\DataManagerWindow.xaml.cs",
               "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DataManagerWindow.xaml.cs",
               "RelativeToolTip": "..\\berles2\\DataManagerWindow.xaml.cs",
-              "ViewState": "AgIAAKMCAAAAAAAAAAAwwK4CAAAFAAAAAAAAAA==",
+              "ViewState": "AgIAAKMCAAAAAAAAAAAwwKgCAAAxAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-08-06T20:42:05.282Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "DataManagerWindow.xaml",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DataManagerWindow.xaml",
               "RelativeDocumentMoniker": "..\\berles2\\DataManagerWindow.xaml",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DataManagerWindow.xaml*",
-              "RelativeToolTip": "..\\berles2\\DataManagerWindow.xaml*",
+              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DataManagerWindow.xaml",
+              "RelativeToolTip": "..\\berles2\\DataManagerWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-06T20:41:45.68Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-06T20:41:45.68Z"
             },
             {
               "$type": "Document",
@@ -397,28 +393,26 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "MainWindow.xaml",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\MainWindow.xaml",
               "RelativeDocumentMoniker": "..\\berles2\\MainWindow.xaml",
               "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\MainWindow.xaml",
               "RelativeToolTip": "..\\berles2\\MainWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-06T20:24:07.547Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-06T20:24:07.547Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "MainWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\MainWindow.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\MainWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\MainWindow.xaml.cs*",
-              "RelativeToolTip": "..\\berles2\\MainWindow.xaml.cs*",
+              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\MainWindow.xaml.cs",
+              "RelativeToolTip": "..\\berles2\\MainWindow.xaml.cs",
               "ViewState": "AgIAAHUAAAAAAAAAAAAUwIEAAAAIAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-06T20:27:18.656Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-08-06T20:27:18.656Z"
             },
             {
               "$type": "Document",
