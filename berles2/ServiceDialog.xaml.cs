@@ -103,7 +103,8 @@ namespace berles2
                         DeviceName = d.DeviceName,
                         Serial = d.Serial,
                         DeviceTypeNavigation = d.DeviceTypeNavigation,
-                        IsSelected = false
+                        IsSelected = false,
+                        Available = d.Available
                     })
                     .ToList();
 
@@ -137,7 +138,9 @@ namespace berles2
             ).ToList();
 
             _filteredDevices.Clear();
-            foreach (var device in filtered)
+            // Rendezés: elérhető eszközök felül, nem elérhető alul
+            var sortedDevices = filtered.OrderByDescending(d => d.Available).ThenBy(d => d.DeviceName);
+            foreach (var device in sortedDevices)
             {
                 _filteredDevices.Add(device);
             }
@@ -314,6 +317,7 @@ namespace berles2
             public string DeviceName { get; set; } = string.Empty;
             public string Serial { get; set; } = string.Empty;
             public DeviceType? DeviceTypeNavigation { get; set; }
+            public bool Available { get; set; } = true;
 
             private bool _isSelected;
             public bool IsSelected
