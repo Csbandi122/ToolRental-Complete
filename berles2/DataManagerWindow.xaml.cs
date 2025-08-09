@@ -586,7 +586,7 @@ namespace berles2
         private void ServicesDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             bool hasSelection = ServicesDataGrid.SelectedItem != null;
-            EditServiceButton.IsEnabled = hasSelection;
+            
             DeleteServiceButton.IsEnabled = hasSelection;
         }
 
@@ -601,36 +601,50 @@ namespace berles2
             }
         }
 
-        private void EditServiceButton_Click(object sender, RoutedEventArgs e)
-        {
-            // Szerkesztés később implementálható
-            MessageBox.Show("Szervíz jegy szerkesztése később implementálásra kerül.",
-                          "Fejlesztés alatt", MessageBoxButton.OK, MessageBoxImage.Information);
-        }
+
 
         private void DeleteServiceButton_Click(object sender, RoutedEventArgs e)
         {
             if (ServicesDataGrid.SelectedItem is ServiceDisplayModel selectedService)
             {
-                var result = MessageBox.Show($"Biztosan törölni szeretnéd a(z) {selectedService.TicketNr} szervíz jegyet?\n\nEz a műveletet NEM lehet visszavonni!",
+                var result = MessageBox.Show($"Biztosan törölni szeretnéd a(z) {selectedService.TicketNr} szervíz jegyet?\n\nEz a műveletet NEM lehet visszavonni!\n\nFIGYELEM: A kapcsolódó pénzügyi tétel is törlődni fog!",
                                            "Szervíz jegy törlése", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
                 if (result == MessageBoxResult.Yes)
                 {
+                    using var transaction = _context.Database.BeginTransaction();
                     try
                     {
                         var service = _context.Services.Find(selectedService.Id);
                         if (service != null)
                         {
+                            // 1. Kapcsolódó pénzügyi tétel keresése és törlése
+                            var relatedFinancial = _context.Financials
+                                .FirstOrDefault(f => f.SourceType == "szervíz" && f.SourceId == service.Id);
+
+                            if (relatedFinancial != null)
+                            {
+                                _context.Financials.Remove(relatedFinancial);
+                            }
+
+                            // 2. Szervíz jegy törlése
                             _context.Services.Remove(service);
+
+                            // 3. Változások mentése
                             _context.SaveChanges();
+                            transaction.Commit();
+
+                            // 4. Listák frissítése
                             LoadServices();
-                            MessageBox.Show("Szervíz jegy sikeresen törölve!",
+                            LoadFinancials(); // Pénzügyek lista is frissüljön
+
+                            MessageBox.Show("Szervíz jegy és a kapcsolódó pénzügyi tétel sikeresen törölve!",
                                           "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
                         }
                     }
                     catch (Exception ex)
                     {
+                        transaction.Rollback();
                         MessageBox.Show($"Hiba a törlés során: {ex.Message}",
                                       "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                     }

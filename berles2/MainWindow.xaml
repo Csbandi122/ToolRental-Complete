@@ -98,8 +98,11 @@
                                 Padding="10" Margin="0,0,0,10" CornerRadius="5">
                             <StackPanel>
                                 <TextBlock x:Name="SelectedCustomerText" 
-                                          Text="Kiválasztott ügyfél: [Név]" 
-                                          FontWeight="Bold" Foreground="#2E7D32"/>
+          Text="Kiválasztott ügyfél: [Név]" 
+          FontWeight="Bold" Foreground="#2E7D32"
+          TextTrimming="CharacterEllipsis"
+          ToolTip="{Binding RelativeSource={RelativeSource Self}, Path=Text}"
+          MaxWidth="400"/>
                                 <Button x:Name="ClearSelectedCustomerButton" Content="❌ Törlés" 
                                         Width="80" Height="25" Margin="0,5,0,0" 
                                         Background="#F44336" Foreground="White" FontSize="11"

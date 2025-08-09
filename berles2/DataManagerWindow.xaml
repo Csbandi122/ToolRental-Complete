@@ -292,10 +292,7 @@
                     Background="#FF6B1F" Foreground="White" FontWeight="Bold"
                     Click="AddServiceButton_Click"/>
 
-                        <Button x:Name="EditServiceButton" Content="✏️ Szerkesztés" 
-                    Width="120" Height="35" Margin="0,0,10,0" IsEnabled="False"
-                    Background="#2196F3" Foreground="White" FontWeight="Bold"
-                    Click="EditServiceButton_Click"/>
+                       
 
                         <Button x:Name="DeleteServiceButton" Content="🗑️ Törlés" 
                     Width="100" Height="35" Margin="0,0,20,0" IsEnabled="False"
