@@ -13,13 +13,13 @@ namespace berles2
     {
         protected override void OnStartup(StartupEventArgs e)
         {
-            // Adatbázis és tesztadatok inicializálása
+            // Adatbázis létrehozása üres állapotban
             using (var context = new ToolRentalDbContext(
                 new DbContextOptionsBuilder<ToolRentalDbContext>()
                     .UseSqlite("Data Source=ToolRental.db")
                     .Options))
             {
-                SeedData.Initialize(context);
+                context.Database.EnsureCreated();
             }
 
             base.OnStartup(e);
