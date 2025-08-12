@@ -181,11 +181,11 @@
 
                     <!-- BÉRLÉSEK TÁBLÁZAT -->
                     <DataGrid Grid.Row="1" x:Name="RentalsDataGrid" 
-                             Margin="0,10,0,0" AutoGenerateColumns="False"
-                             CanUserAddRows="False" CanUserDeleteRows="False"
-                             IsReadOnly="True" SelectionMode="Single"
-                             GridLinesVisibility="Horizontal" AlternatingRowBackground="#F5F5F5">
-                            Hyperlink.Click="RentalsDataGrid_Hyperlink_Click">
+         Margin="0,10,0,0" AutoGenerateColumns="False"
+         CanUserAddRows="False" CanUserDeleteRows="False"
+         IsReadOnly="True" SelectionMode="Single"
+         GridLinesVisibility="Horizontal" AlternatingRowBackground="#F5F5F5"
+         Hyperlink.Click="RentalsDataGrid_Hyperlink_Click">
                         
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
@@ -205,24 +205,56 @@
                             <DataGridTextColumn Header="Fizetési mód" Binding="{Binding PaymentMode}" Width="100"/>
                             <DataGridTextColumn Header="Bérelt eszközök" Binding="{Binding DevicesText}" Width="200"/>
                             <DataGridTextColumn Header="Megjegyzés" Binding="{Binding Comment}" Width="*"/>
-                            <DataGridHyperlinkColumn Header="Szerződés" Width="120">
-                                <DataGridHyperlinkColumn.Binding>
-                                    <Binding Path="Contract"/>
-                                </DataGridHyperlinkColumn.Binding>
-                                <DataGridHyperlinkColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="ToolTip" Value="{Binding Contract}"/>
-                                        <Setter Property="Text" Value="PDF megnyitása"/>
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Contract}" Value="">
-                                                <Setter Property="Text" Value="Nincs PDF"/>
-                                                <Setter Property="Foreground" Value="Gray"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </DataGridHyperlinkColumn.ElementStyle>
-                            </DataGridHyperlinkColumn>
-                            <DataGridTextColumn Header="Számla" Binding="{Binding Invoice}" Width="120"/>
+                            <DataGridTemplateColumn Header="Szerződés" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Foreground="Blue" 
+                       TextDecorations="Underline"
+                       Cursor="Hand"
+                       ToolTip="{Binding Contract}"
+                       MouseLeftButtonUp="ContractLink_Click">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Contract}" Value="">
+                                                            <Setter Property="Text" Value="Nincs PDF"/>
+                                                            <Setter Property="Foreground" Value="Gray"/>
+                                                            <Setter Property="TextDecorations" Value="None"/>
+                                                            <Setter Property="Cursor" Value="Arrow"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                    <Setter Property="Text" Value="PDF megnyitása"/>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Számla" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Foreground="Blue" 
+                       TextDecorations="Underline"
+                       Cursor="Hand"
+                       ToolTip="{Binding Invoice}"
+                       MouseLeftButtonUp="InvoiceLink_Click">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Invoice}" Value="">
+                                                            <Setter Property="Text" Value="Nincs számla"/>
+                                                            <Setter Property="Foreground" Value="Gray"/>
+                                                            <Setter Property="TextDecorations" Value="None"/>
+                                                            <Setter Property="Cursor" Value="Arrow"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                    <Setter Property="Text" Value="Számla megnyitása"/>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridCheckBoxColumn Header="Értékelés küldve" Binding="{Binding ReviewEmailSent}" Width="120"/>
                         </DataGrid.Columns>
                     </DataGrid>

@@ -4,9 +4,11 @@ using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Xaml;
 using ToolRental.Core.Models;
 using ToolRental.Data;
+using System.Windows.Input;
 
 namespace berles2
 {
@@ -23,8 +25,7 @@ namespace berles2
         private List<FinancialDisplayModel> _allFinancials;
         private ObservableCollection<ServiceDisplayModel> _services;
         private List<ServiceDisplayModel> _allServices;
-        public string? Contract { get; set; } = string.Empty;
-        public string? Invoice { get; set; } = string.Empty;
+        
         public bool ReviewEmailSent { get; set; } = false;
 
         public DataManagerWindow()
@@ -341,8 +342,6 @@ namespace berles2
                         PaymentMode = r.PaymentMode,
                         Comment = r.Comment ?? "",
                         DevicesText = string.Join(", ", r.RentalDevices.Select(rd => rd.Device.DeviceName)),
-
-                        // ÚJ MEZŐK BETÖLTÉSE:
                         Contract = r.Contract ?? "",
                         Invoice = r.Invoice ?? "",
                         ReviewEmailSent = r.ReviewEmailSent
@@ -719,6 +718,64 @@ namespace berles2
                 }
             }
         }
+        private void ContractLink_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is TextBlock textBlock &&
+                textBlock.DataContext is RentalDisplayModel rental &&
+                !string.IsNullOrWhiteSpace(rental.Contract))
+            {
+                try
+                {
+                    if (System.IO.File.Exists(rental.Contract))
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = rental.Contract,
+                            UseShellExecute = true
+                        });
+                    }
+                    else
+                    {
+                        MessageBox.Show("A PDF fájl nem található a következő helyen:\n" + rental.Contract,
+                                      "Fájl nem található", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Hiba a PDF megnyitásakor: {ex.Message}",
+                                  "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
+        private void InvoiceLink_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is TextBlock textBlock &&
+                textBlock.DataContext is RentalDisplayModel rental &&
+                !string.IsNullOrWhiteSpace(rental.Invoice))
+            {
+                try
+                {
+                    if (System.IO.File.Exists(rental.Invoice))
+                    {
+                        Process.Start(new ProcessStartInfo
+                        {
+                            FileName = rental.Invoice,
+                            UseShellExecute = true
+                        });
+                    }
+                    else
+                    {
+                        MessageBox.Show("A számla fájl nem található a következő helyen:\n" + rental.Invoice,
+                                      "Fájl nem található", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Hiba a számla megnyitásakor: {ex.Message}",
+                                  "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
 
         // ===========================================
         // ABLAK KEZELÉS
@@ -781,4 +838,5 @@ namespace berles2
         public string Description { get; set; } = string.Empty;
         public string DeviceNames { get; set; } = string.Empty;
     }
+
 }

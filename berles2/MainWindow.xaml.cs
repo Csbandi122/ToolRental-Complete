@@ -879,7 +879,7 @@ namespace berles2
             string xmlContent = SystemIO.File.ReadAllText(setting.InvoiceXml);
 
             // 5. Változók kiszámítása
-            string paymentDueDate = DateTime.Now.AddDays(8).ToString("yyyy-MM-dd"); // 8 nap fizetési határidő
+            string paymentDueDate = DateTime.Now.ToString("yyyy-MM-dd"); // Azonnali fizetés (0 nap)
             string paymentMode = (PaymentModeComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Készpénz";
 
             // ALANYI ADÓMENTES - nettó = bruttó, de szorozva napokkal!
@@ -902,7 +902,11 @@ namespace berles2
 
             if (!string.IsNullOrEmpty(pdfPath))
             {
-                
+                // ÚJ: Számla elérési út mentése az adatbázisba
+                SaveInvoicePath(pdfPath);
+
+                MessageBox.Show("Számla sikeresen generálva és mentve!",
+                              "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -916,8 +920,8 @@ namespace berles2
             xmlContent = xmlContent.Replace("{{CUSTOMER_ADDRESS}}", _selectedExistingCustomer?.Address ?? CustomerAddressTextBox.Text);
             xmlContent = xmlContent.Replace("{{CUSTOMER_EMAIL}}", _selectedExistingCustomer?.Email ?? CustomerEmailTextBox.Text);
 
-            // Bérlés és fizetés adatok
-            xmlContent = xmlContent.Replace("{{RENTAL_DATE}}", DateTime.Now.ToString("yyyy-MM-dd_HH-mm"));
+            // Bérlés és fizetés adatok - JAVÍTOTT dátum formátumok
+            xmlContent = xmlContent.Replace("{{RENTAL_DATE}}", DateTime.Now.ToString("yyyy-MM-dd"));
             xmlContent = xmlContent.Replace("{{PAYMENT_DUE_DATE}}", paymentDueDate);
             xmlContent = xmlContent.Replace("{{PAYMENT_MODE}}", paymentMode);
 
@@ -1278,6 +1282,26 @@ namespace berles2
             {
                 // Csak logolás, ne akadályozza meg az email küldést
                 System.Diagnostics.Debug.WriteLine($"Hiba a PDF útvonal mentésekor: {ex.Message}");
+            }
+        }
+        private void SaveInvoicePath(string invoicePath)
+        {
+            try
+            {
+                // Legutolsó rental keresése a ticket szám alapján
+                string currentTicketNr = TicketNumberTextBox.Text;
+                var rental = _context.Rentals.FirstOrDefault(r => r.TicketNr == currentTicketNr);
+
+                if (rental != null)
+                {
+                    rental.Invoice = invoicePath;
+                    _context.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Csak logolás, ne akadályozza meg a számlázást
+                System.Diagnostics.Debug.WriteLine($"Hiba a számla útvonal mentésekor: {ex.Message}");
             }
         }
 
