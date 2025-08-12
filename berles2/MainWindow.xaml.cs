@@ -1086,6 +1086,7 @@ namespace berles2
                               "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
+            SaveContractPath(pdfPath);
 
             // 2. Email címzett meghatározása
             string recipientEmail = _selectedExistingCustomer?.Email ?? CustomerEmailTextBox.Text;
@@ -1257,6 +1258,27 @@ namespace berles2
         {
             var reportingWindow = new ReportingWindow();
             reportingWindow.ShowDialog();
+        }
+
+        private void SaveContractPath(string pdfPath)
+        {
+            try
+            {
+                // Legutolsó rental keresése a ticket szám alapján
+                string currentTicketNr = TicketNumberTextBox.Text;
+                var rental = _context.Rentals.FirstOrDefault(r => r.TicketNr == currentTicketNr);
+
+                if (rental != null)
+                {
+                    rental.Contract = pdfPath;
+                    _context.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Csak logolás, ne akadályozza meg az email küldést
+                System.Diagnostics.Debug.WriteLine($"Hiba a PDF útvonal mentésekor: {ex.Message}");
+            }
         }
 
     }

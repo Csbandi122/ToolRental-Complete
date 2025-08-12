@@ -185,6 +185,8 @@
                              CanUserAddRows="False" CanUserDeleteRows="False"
                              IsReadOnly="True" SelectionMode="Single"
                              GridLinesVisibility="Horizontal" AlternatingRowBackground="#F5F5F5">
+                            Hyperlink.Click="RentalsDataGrid_Hyperlink_Click">
+                        
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="ID" Binding="{Binding Id}" Width="50"/>
                             <DataGridTextColumn Header="Jegy szám" Binding="{Binding TicketNr}" Width="80"/>
@@ -203,6 +205,25 @@
                             <DataGridTextColumn Header="Fizetési mód" Binding="{Binding PaymentMode}" Width="100"/>
                             <DataGridTextColumn Header="Bérelt eszközök" Binding="{Binding DevicesText}" Width="200"/>
                             <DataGridTextColumn Header="Megjegyzés" Binding="{Binding Comment}" Width="*"/>
+                            <DataGridHyperlinkColumn Header="Szerződés" Width="120">
+                                <DataGridHyperlinkColumn.Binding>
+                                    <Binding Path="Contract"/>
+                                </DataGridHyperlinkColumn.Binding>
+                                <DataGridHyperlinkColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="ToolTip" Value="{Binding Contract}"/>
+                                        <Setter Property="Text" Value="PDF megnyitása"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Contract}" Value="">
+                                                <Setter Property="Text" Value="Nincs PDF"/>
+                                                <Setter Property="Foreground" Value="Gray"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </DataGridHyperlinkColumn.ElementStyle>
+                            </DataGridHyperlinkColumn>
+                            <DataGridTextColumn Header="Számla" Binding="{Binding Invoice}" Width="120"/>
+                            <DataGridCheckBoxColumn Header="Értékelés küldve" Binding="{Binding ReviewEmailSent}" Width="120"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
