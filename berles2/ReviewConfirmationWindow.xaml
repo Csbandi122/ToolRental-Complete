@@ -1,0 +1,57 @@
+﻿<Window x:Class="berles2.ReviewConfirmationWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Értékelő emailek küldése" Height="500" Width="700"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
+        </Grid.RowDefinitions>
+
+        <!-- FEJLÉC -->
+        <Border Grid.Row="0" Background="#FF9800" Padding="15">
+            <TextBlock Text="⭐ Értékelő emailek küldése" FontSize="20" FontWeight="Bold" 
+                      Foreground="White" VerticalAlignment="Center"/>
+        </Border>
+
+        <!-- TARTALOM -->
+        <ScrollViewer Grid.Row="1" Margin="20">
+            <StackPanel>
+                <TextBlock Text="Az alábbi bérlésekkel kapcsolatban kerül kiküldésre értékelő email:" 
+                          FontSize="14" FontWeight="Bold" Margin="0,0,0,15"/>
+
+                <DataGrid x:Name="RentalsDataGrid" AutoGenerateColumns="False" 
+                         IsReadOnly="True" HeadersVisibility="Column"
+                         GridLinesVisibility="Horizontal" RowHeight="35">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Ticket szám" Binding="{Binding TicketNr}" Width="100"/>
+                        <DataGridTextColumn Header="Ügyfél neve" Binding="{Binding Customer.Name}" Width="150"/>
+                        <DataGridTextColumn Header="Email cím" Binding="{Binding Customer.Email}" Width="200"/>
+                        <DataGridTextColumn Header="Bérlés kezdete" Binding="{Binding RentStart, StringFormat=yyyy.MM.dd}" Width="120"/>
+                        <DataGridTextColumn Header="Bérlés vége" Binding="{Binding RentEnd, StringFormat=yyyy.MM.dd}" Width="120"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <TextBlock Text="Folytatja az email küldést?" FontSize="14" FontWeight="Bold" 
+                          Margin="0,20,0,0" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </ScrollViewer>
+
+        <!-- GOMBOK -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" 
+                   Background="#F5F5F5" Margin="0,10,0,0">
+            <Button x:Name="SendButton" Content="✅ Igen, küldje ki" 
+                    Width="150" Height="40" Margin="10"
+                    Background="#4CAF50" Foreground="White" FontWeight="Bold"
+                    Click="SendButton_Click"/>
+
+            <Button x:Name="CancelButton" Content="❌ Mégse" 
+                    Width="100" Height="40" Margin="10"
+                    Background="#757575" Foreground="White" FontWeight="Bold"
+                    Click="CancelButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

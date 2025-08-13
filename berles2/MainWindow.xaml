@@ -191,6 +191,11 @@
                 Width="120" Height="40" Margin="0,0,10,0"
                 Background="#9C27B0" Foreground="White" FontWeight="Bold"
                 Click="ReportingButton_Click"/>
+                    <!-- ÉRTÉKELÉS GOMB -->
+                    <Button x:Name="ReviewButton" Content="⭐ Értékelés" 
+Width="120" Height="40" Margin="0,0,10,0"
+Background="#FF9800" Foreground="White" FontWeight="Bold"
+Click="ReviewButton_Click"/>
                 </StackPanel>
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">

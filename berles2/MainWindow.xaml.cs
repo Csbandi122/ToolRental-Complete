@@ -161,7 +161,162 @@ namespace berles2
                 DevicesWrapPanel.Children.Add(deviceWidget);
             }
         }
+        private void ReviewButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                SendReviewEmails();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba az értékelő emailek küldésekor: {ex.Message}",
+                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+        private void SendReviewEmails()
+        {
+            // 1. Beállítások ellenőrzése
+            var setting = _context.Settings.FirstOrDefault();
+            if (setting == null || string.IsNullOrWhiteSpace(setting.ReviewEmailTemplate) ||
+                string.IsNullOrWhiteSpace(setting.ReviewEmailSubject))
+            {
+                MessageBox.Show("Értékelő email beállítások hiányoznak! Kérjük állítsa be a Beállításokban.",
+                              "Hiányzó beállítások", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
 
+            // 2. Megfelelő bérlések keresése
+            var reviewCandidates = _context.Rentals
+    .Include(r => r.Customer)
+    .Where(r => !r.ReviewEmailSent) // TESZTELÉSHEZ: csak azt nézzük, hogy még nem küldtük ki
+    .ToList();
+
+            if (reviewCandidates.Count == 0)
+            {
+                MessageBox.Show("Nincs olyan bérlés, amelyhez értékelő emailt kellene küldeni.",
+                              "Nincs feladat", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            // 3. Megerősítő ablak megjelenítése
+            var confirmationWindow = new ReviewConfirmationWindow(reviewCandidates);
+            if (confirmationWindow.ShowDialog() == true)
+            {
+                // 4. Email küldés és flag frissítés
+                SendReviewEmailsToCustomers(reviewCandidates, setting);
+            }
+        }
+        private void SendReviewEmailsToCustomers(List<Rental> rentals, Setting setting)
+        {
+            int successCount = 0;
+            int errorCount = 0;
+            string errorMessages = "";
+
+            foreach (var rental in rentals)
+            {
+                try
+                {
+                    // Email küldés
+                    SendSingleReviewEmail(rental, setting);
+
+                    // Flag frissítése sikeres küldés után
+                    rental.ReviewEmailSent = true;
+                    successCount++;
+                }
+                catch (Exception ex)
+                {
+                    errorCount++;
+                    errorMessages += $"- {rental.Customer.Name} ({rental.TicketNr}): {ex.Message}\n";
+                }
+            }
+
+            // Adatbázis mentése
+            try
+            {
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba az adatbázis frissítésekor: {ex.Message}",
+                              "Adatbázis hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            // Eredmény megjelenítése
+            string resultMessage = $"Email küldés befejezve!\n\n" +
+                                  $"Sikeresen elküldve: {successCount} db\n" +
+                                  $"Hibák: {errorCount} db";
+
+            if (errorCount > 0)
+            {
+                resultMessage += $"\n\nHiba részletek:\n{errorMessages}";
+                MessageBox.Show(resultMessage, "Email küldés eredménye",
+                              MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
+            else
+            {
+                MessageBox.Show(resultMessage, "Email küldés eredménye",
+                              MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+        private void SendSingleReviewEmail(Rental rental, Setting setting)
+        {
+            // 1. Email template betöltése
+            string emailBody;
+            if (!string.IsNullOrWhiteSpace(setting.ReviewEmailTemplate) &&
+                SystemIO.File.Exists(setting.ReviewEmailTemplate))
+            {
+                emailBody = SystemIO.File.ReadAllText(setting.ReviewEmailTemplate);
+
+                // Változók helyettesítése
+                emailBody = emailBody.Replace("{{CUSTOMER_NAME}}", rental.Customer.Name);
+                emailBody = emailBody.Replace("{{COMPANY_NAME}}", setting.CompanyName);
+                emailBody = emailBody.Replace("{{RENTAL_DATE}}", rental.RentStart.ToString("yyyy. MM. dd."));
+                emailBody = emailBody.Replace("{{GOOGLE_REVIEW_LINK}}", setting.GoogleReview ?? "");
+            }
+            else
+            {
+                // Alapértelmezett template ha nincs fájl
+                emailBody = $@"
+        <html>
+        <body>
+            <h2>Kedves {rental.Customer.Name}!</h2>
+            <p>Köszönjük, hogy választotta a {setting.CompanyName} szolgáltatásait!</p>
+            <p>Kérjük, segítsen nekünk a szolgáltatásunk fejlesztésében egy rövid értékeléssel!</p>
+            {(!string.IsNullOrWhiteSpace(setting.GoogleReview) ? $"<p><a href='{setting.GoogleReview}'>Értékelés írása itt</a></p>" : "")}
+            <p>Köszönjük!</p>
+            <br>
+            <p>Üdvözlettel,<br>{setting.CompanyName}</p>
+        </body>
+        </html>";
+            }
+
+            // 2. Email üzenet készítése
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress(setting.SenderName, setting.SenderEmail));
+            message.To.Add(new MailboxAddress("", rental.Customer.Email));
+
+            if (!string.IsNullOrWhiteSpace(setting.CcAddress))
+            {
+                message.Cc.Add(new MailboxAddress("", setting.CcAddress));
+            }
+
+            message.Subject = setting.ReviewEmailSubject;
+            message.Body = new TextPart("html") { Text = emailBody };
+
+            // 3. Email küldés
+            using (var client = new SmtpClient())
+            {
+                var socketOptions = setting.SmtpPort == 465 ?
+                    MailKit.Security.SecureSocketOptions.SslOnConnect :
+                    MailKit.Security.SecureSocketOptions.StartTls;
+
+                client.Connect(setting.EmailSmtp, setting.SmtpPort, socketOptions);
+                client.Authenticate(setting.SenderEmail, setting.EmailPassword);
+                client.Send(message);
+                client.Disconnect(true);
+            }
+        }
         private WpfBorder CreateDeviceWidget(Device device)
         {
             var border = new WpfBorder
