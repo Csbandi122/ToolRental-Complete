@@ -41,6 +41,7 @@ namespace berles2
         private List<Device> _allDevices = new List<Device>();
         private Customer? _selectedExistingCustomer = null;
         private string? _lastContractTimestamp = null; // Utolsó szerződés időbélyege
+        private System.Windows.Threading.DispatcherTimer _searchTimer;
 
         public MainWindow()
         {
@@ -49,6 +50,9 @@ namespace berles2
             InitializeForm();
             LoadDevices();
             this.Activated += MainWindow_Activated;
+            _searchTimer = new System.Windows.Threading.DispatcherTimer();
+            _searchTimer.Interval = TimeSpan.FromMilliseconds(300);
+            _searchTimer.Tick += SearchTimer_Tick;
         }
 
         private void InitializeDatabase()
@@ -153,16 +157,59 @@ namespace berles2
                 MessageBox.Show($"Hiba az eszközök betöltésekor: {ex.Message}");
             }
         }
+        // Szűrt eszközlista tárolására
+        private List<Device> _filteredDevices = new List<Device>();
 
-        private void DisplayDevices()
+        // A keresőmező változásakor fut le
+        private void DeviceSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            _searchTimer.Stop();
+            _searchTimer.Start();
+        }
+        private void SearchTimer_Tick(object sender, EventArgs e)
+        {
+            _searchTimer.Stop();
+            FilterDevices();
+        }
+        // Eszközök szűrése
+        private void FilterDevices()
+        {
+            if (_allDevices == null) return;
+
+            string searchText = DeviceSearchTextBox.Text?.ToLower() ?? "";
+
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                _filteredDevices = _allDevices.ToList();
+            }
+            else
+            {
+                _filteredDevices = _allDevices.Where(d =>
+                    d.DeviceName.ToLower().Contains(searchText) ||
+                    d.Serial.ToLower().Contains(searchText) ||
+                    d.DeviceTypeNavigation?.TypeName.ToLower().Contains(searchText) == true
+                ).ToList();
+            }
+
+            DisplayFilteredDevices();
+        }
+
+        // Szűrt eszközök megjelenítése
+        private void DisplayFilteredDevices()
         {
             DevicesWrapPanel.Children.Clear();
 
-            foreach (var device in _allDevices)
+            foreach (var device in _filteredDevices)
             {
                 var deviceWidget = CreateDeviceWidget(device);
                 DevicesWrapPanel.Children.Add(deviceWidget);
             }
+        }
+        private void DisplayDevices()
+        {
+            _filteredDevices = _allDevices.ToList();
+            DisplayFilteredDevices();
+        
         }
         private void ReviewButton_Click(object sender, RoutedEventArgs e)
         {

@@ -173,13 +173,33 @@
             </GroupBox>
 
             <!-- BÉRELT ESZKÖZÖK SZEKCIÓ -->
-            <GroupBox Grid.Column="2" Header="Bérelt eszközök" Margin="10,0,0,0"
-                      FontSize="14" FontWeight="Bold">
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <WrapPanel x:Name="DevicesWrapPanel" Margin="10" 
-                              Orientation="Horizontal"/>
-                </ScrollViewer>
-            </GroupBox>
+            <Grid Grid.Column="2" Margin="10,0,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <!-- Keresőmező -->
+                    <RowDefinition Height="*"/>
+                    <!-- Eszközök lista -->
+                </Grid.RowDefinitions>
+
+                <!-- Keresőmező -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,10">
+                    <TextBox x:Name="DeviceSearchTextBox" 
+                 Width="250" Height="30" 
+                 VerticalContentAlignment="Center"
+                 TextChanged="DeviceSearchTextBox_TextChanged"/>
+                    <TextBlock Text="🔍 Eszköz keresés" 
+                   VerticalAlignment="Center" 
+                   Margin="10,0,0,0" FontWeight="Bold"/>
+                </StackPanel>
+
+                <!-- Eszközök lista -->
+                <GroupBox Grid.Row="1" Header="Bérelt eszközök" FontSize="14" FontWeight="Bold">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <WrapPanel x:Name="DevicesWrapPanel" Margin="10" 
+                      Orientation="Horizontal"/>
+                    </ScrollViewer>
+                </GroupBox>
+            </Grid>
         </Grid>
 
         <!-- ALSÓ GOMBOK SZEKCIÓ -->
