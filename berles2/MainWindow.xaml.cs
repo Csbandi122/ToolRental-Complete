@@ -137,6 +137,9 @@ namespace berles2
         {
             try
             {
+                // Entity Framework cache törlése
+                _context.ChangeTracker.Clear();
+
                 // Csak elérhető eszközök betöltése
                 _allDevices = _context.Devices
                     .Include(d => d.DeviceTypeNavigation)
