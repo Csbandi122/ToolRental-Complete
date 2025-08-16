@@ -461,7 +461,13 @@ namespace berles2
             // Kattintás esemény
             border.MouseLeftButtonDown += (sender, e) => ToggleDeviceSelection(device, border);
             border.Tag = device;
-
+            // ELLENŐRZÉS: ha már ki van választva, állítsd be a vizuális állapotot
+            if (_selectedDevices.Contains(device))
+            {
+                border.Background = Brushes.LightBlue;
+                border.BorderBrush = Brushes.Blue;
+                border.BorderThickness = new Thickness(3);
+            }
             return border;
         }
 
