@@ -1334,6 +1334,7 @@ namespace berles2
                     template = template.Replace("{{CUSTOMER_NAME}}", _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
                     template = template.Replace("{{COMPANY_NAME}}", setting.CompanyName);
                     template = template.Replace("{{RENTAL_DATE}}", DateTime.Now.ToString("yyyy. MM. dd."));
+                    template = template.Replace("{{GOOGLE_REVIEW_LINK}}", setting.GoogleReview ?? "");
 
                     return template;
                 }
