@@ -133,7 +133,7 @@ namespace berles2
             }
         }
 
-        private void LoadDevices()
+        public void LoadDevices()
         {
             try
             {

@@ -145,6 +145,8 @@ namespace berles2
                 Device.Available = AvailableCheckBox.IsChecked ?? true;
                 Device.Picture = string.IsNullOrWhiteSpace(PicturePathTextBox.Text) ? null : PicturePathTextBox.Text.Trim();
                 Device.Notes = NotesTextBox.Text.Trim();
+                // DEBUG - megnézzük mi van a Picture mezőben
+                MessageBox.Show($"DeviceDialog - Mentett kép útvonal: '{Device.Picture}'", "Debug 1");
 
                 DialogResult = true;
                 Close();

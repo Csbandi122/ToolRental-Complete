@@ -216,9 +216,20 @@ namespace berles2
                 try
                 {
                     var device = deviceDialog.Device;
+
+                    // DEBUG - megnézzük mi van a device.Picture mezőben
+                    MessageBox.Show($"DataManager - Mentendő kép útvonal: '{device.Picture}'", "Debug 2");
+
                     _context.Devices.Add(device);
                     _context.SaveChanges();
                     LoadDevices();
+
+                    // Fő ablak frissítése
+                    if (Application.Current.MainWindow is MainWindow mainWindow)
+                    {
+                        mainWindow.LoadDevices();
+                    }
+
                     MessageBox.Show("Eszköz sikeresen hozzáadva!", "Siker",
                                   MessageBoxButton.OK, MessageBoxImage.Information);
                 }
@@ -250,10 +261,17 @@ namespace berles2
                             existingDevice.RentPrice = device.RentPrice;
                             existingDevice.Available = device.Available;
                             existingDevice.Notes = device.Notes;
-                            // existingDevice.PicturePath = device.PicturePath;
+                            existingDevice.Picture = device.Picture;
 
                             _context.SaveChanges();
                             LoadDevices();
+
+                            // Fő ablak frissítése
+                            if (Application.Current.MainWindow is MainWindow mainWindow)
+                            {
+                                mainWindow.LoadDevices();
+                            }
+
                             MessageBox.Show("Eszköz sikeresen módosítva!", "Siker",
                                           MessageBoxButton.OK, MessageBoxImage.Information);
                         }
