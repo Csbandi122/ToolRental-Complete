@@ -1123,8 +1123,8 @@ namespace berles2
                 // ÚJ: Számla elérési út mentése az adatbázisba
                 SaveInvoicePath(pdfPath);
 
-                MessageBox.Show("Számla sikeresen generálva és mentve!",
-                              "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+               // MessageBox.Show("Számla sikeresen generálva és mentve!",
+                 //             "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -1168,7 +1168,7 @@ namespace berles2
                 string cookiesPath = SystemIO.Path.Combine(exeDirectory, "curl_cookies.txt");
 
                 // 3. CURL argumentumok - JAVÍTOTT, mint a működő CMD parancs
-                string curlArguments = $"-v -L " +
+                string curlArguments = $"-v " +
                                      $"-F \"action-xmlagentxmlfile=@{xmlPath}\" " +
                                      $"-c \"{cookiesPath}\" " +
                                      $"-o \"{pdfPath}\" " +
