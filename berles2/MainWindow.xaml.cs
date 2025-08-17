@@ -237,9 +237,10 @@ namespace berles2
 
             // 2. Megfelelő bérlések keresése
             var reviewCandidates = _context.Rentals
-    .Include(r => r.Customer)
-    .Where(r => !r.ReviewEmailSent) // TESZTELÉSHEZ: csak azt nézzük, hogy még nem küldtük ki
-    .ToList();
+                .Include(r => r.Customer)
+                .Where(r => !r.ReviewEmailSent &&
+                            r.RentStart.AddDays(r.RentalDays).AddDays(3) <= DateTime.Now) // 3 nap után küldünk értékelést
+                .ToList();
 
             if (reviewCandidates.Count == 0)
             {
@@ -1191,6 +1192,16 @@ namespace berles2
                         // 5. Eredmény ellenőrzése
                         if (curlProcess.ExitCode == 0 && SystemIO.File.Exists(pdfPath) && new SystemIO.FileInfo(pdfPath).Length > 0)
                         {
+                            // Fájl tartalmának ellenőrzése - PDF vagy hibaüzenet?
+                            string fileContent = SystemIO.File.ReadAllText(pdfPath, System.Text.Encoding.UTF8);
+
+                            if (fileContent.Contains("[ERR]") || fileContent.Contains("Számla mentés sikertelen"))
+                            {
+                                // Hibaüzenet van a fájlban - töröljük és dobjunk exception-t
+                                try { SystemIO.File.Delete(pdfPath); } catch { }
+                                throw new Exception($"Számla kibocsátási hiba:\n{fileContent.Substring(0, Math.Min(300, fileContent.Length))}");
+                            }
+
                             // Cookies törlése
                             try { SystemIO.File.Delete(cookiesPath); } catch { }
 
