@@ -90,22 +90,23 @@ namespace berles2
         {
             try
             {
-                // Legutolsó rental ticket szám keresése
-                var lastRental = _context.Rentals
-                    .OrderByDescending(r => r.Id)
-                    .FirstOrDefault();
+                // JAVÍTOTT: TicketNr alapján keresés, nem Id alapján!
+                var allTicketNumbers = _context.Rentals
+                    .Where(r => r.TicketNr.StartsWith("RNT"))
+                    .Select(r => r.TicketNr)
+                    .ToList();
 
-                int nextNumber = 1;
-                if (lastRental != null && !string.IsNullOrEmpty(lastRental.TicketNr))
+                int maxNumber = 0;
+                foreach (var ticketNr in allTicketNumbers)
                 {
-                    // RNT0001 formátumból a számot kivesszük
-                    var numberPart = lastRental.TicketNr.Replace("RNT", "");
-                    if (int.TryParse(numberPart, out int lastNumber))
+                    var numberPart = ticketNr.Replace("RNT", "");
+                    if (int.TryParse(numberPart, out int number))
                     {
-                        nextNumber = lastNumber + 1;
+                        maxNumber = Math.Max(maxNumber, number);
                     }
                 }
 
+                int nextNumber = maxNumber + 1;
                 TicketNumberTextBox.Text = $"RNT{nextNumber:D4}";
             }
             catch (Exception ex)
@@ -517,30 +518,35 @@ namespace berles2
 
         private void ContractButton_Click(object sender, RoutedEventArgs e)
         {
-            // Validáció és bérlés mentése
+            // GOMB AZONNALI LETILTÁSA dupla kattintás ellen
+            ContractButton.IsEnabled = false;
+
             if (ValidateForm())
             {
                 try
                 {
                     SaveRental();
-
-                    // WORD SZERZŐDÉS GENERÁLÁS - ÚJ FUNKCIÓ!
                     GenerateWordContract();
 
                     // Sikeres mentés után gombok állapotának frissítése
-                    ContractButton.IsEnabled = false;
                     ContractButton.Background = System.Windows.Media.Brushes.Gray;
-
                     EmailButton.IsEnabled = true;
                     EmailButton.Background = System.Windows.Media.Brushes.Blue;
-
-                    
                 }
                 catch (Exception ex)
                 {
+                    // HIBA ESETÉN VISSZAENGEDÉLYEZNI A GOMBOT!
+                    ContractButton.IsEnabled = true;
+                    ContractButton.Background = System.Windows.Media.Brushes.Green;
+
                     MessageBox.Show($"Hiba történt a bérlés létrehozásakor: {ex.Message}",
                                   "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+            }
+            else
+            {
+                // VALIDÁCIÓ SIKERTELEN - GOMB VISSZAENGEDÉLYEZÉSE
+                ContractButton.IsEnabled = true;
             }
         }
 
@@ -1083,7 +1089,7 @@ namespace berles2
 
             // 3. Fájlnév generálása
             string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
-            string rentalDate = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
+            string rentalDate = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
             string fileName = $"szamla_{customerName}_{rentalDate}.xml";
             string outputPath = SystemIO.Path.Combine(invoiceFolder, fileName);
 
@@ -1436,19 +1442,23 @@ namespace berles2
         }
         private async void InvoiceButton_Click(object sender, RoutedEventArgs e)
         {
+            // GOMB AZONNALI LETILTÁSA dupla kattintás ellen
+            InvoiceButton.IsEnabled = false;
+
             try
             {
-                // 1. XML generálása és számla küldés
+                // XML generálása és számla küldés
                 await GenerateInvoiceXml();
 
-                // 2. Gomb állapotának frissítése
-                InvoiceButton.IsEnabled = false;
+                // Sikeres küldés után gomb állapotának frissítése
                 InvoiceButton.Background = System.Windows.Media.Brushes.Gray;
-
-                
             }
             catch (Exception ex)
             {
+                // HIBA ESETÉN VISSZAENGEDÉLYEZNI A GOMBOT!
+                InvoiceButton.IsEnabled = true;
+                InvoiceButton.Background = System.Windows.Media.Brushes.Blue;
+
                 MessageBox.Show($"Hiba a számla generálásakor: {ex.Message}",
                               "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
