@@ -169,6 +169,11 @@
                     <TextBox x:Name="TotalAmountTextBox" Height="30" 
                              IsReadOnly="True" Background="#F0F0F0" 
                              FontWeight="Bold" FontSize="16"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
+                        <Label Content="Kedvezmény (%):" VerticalAlignment="Center"/>
+                        <TextBox x:Name="DiscountTextBox" Width="50" Height="20" 
+             Text="0" TextAlignment="Center" Margin="10,0,0,0"/>
+                    </StackPanel>
                 </StackPanel>
             </GroupBox>
 

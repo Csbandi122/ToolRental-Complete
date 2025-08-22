@@ -84,6 +84,8 @@ namespace berles2
 
             // Végösszeg frissítése biztonságosan
             UpdateTotalAmount();
+            // Kedvezmény mező eseménykezelő
+            DiscountTextBox.TextChanged += DiscountTextBox_TextChanged;
         }
 
         private void GenerateNextTicketNumber()
@@ -273,6 +275,7 @@ namespace berles2
 
                     // Flag frissítése sikeres küldés után
                     rental.ReviewEmailSent = true;
+                    _context.Update(rental);  // ← ÚJ SOR!
                     successCount++;
                 }
                 catch (Exception ex)
@@ -507,7 +510,7 @@ namespace berles2
         private void UpdateTotalAmount()
         {
             // Null ellenőrzés - ha még nem lettek inicializálva a vezérlők
-            if (RentalDaysTextBox == null || TotalAmountTextBox == null)
+            if (RentalDaysTextBox == null || TotalAmountTextBox == null || DiscountTextBox == null)
                 return;
 
             int rentalDays = 1;
@@ -516,12 +519,65 @@ namespace berles2
                 rentalDays = Math.Max(1, days);
             }
 
-            decimal total = _selectedDevices.Sum(d => d.RentPrice) * rentalDays;
+            // Kedvezmény kiolvasása
+            int discount = 0;
+            if (int.TryParse(DiscountTextBox.Text, out int disc))
+            {
+                discount = Math.Max(0, Math.Min(100, disc)); // 0-100 között
+            }
+
+            // Eredeti napi összeg
+            decimal dailyTotal = _selectedDevices.Sum(d => d.RentPrice);
+
+            // Kedvezmény alkalmazása
+            decimal discountedDailyTotal = dailyTotal * (100 - discount) / 100;
+
+            // Végösszeg napokkal szorozva
+            decimal total = discountedDailyTotal * rentalDays;
+
             TotalAmountTextBox.Text = $"{total:N0} Ft";
         }
 
         private void RentalDaysTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
+            UpdateTotalAmount();
+        }
+        private void DiscountTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Csak számokat engedünk 0-100 között
+            if (sender is TextBox textBox)
+            {
+                string text = textBox.Text;
+
+                // Ha üres, akkor 0
+                if (string.IsNullOrEmpty(text))
+                {
+                    text = "0";
+                }
+
+                // Csak számokat engedünk
+                if (int.TryParse(text, out int value))
+                {
+                    // 0-100 közé korlátozás
+                    if (value < 0)
+                    {
+                        textBox.Text = "0";
+                        textBox.SelectionStart = textBox.Text.Length;
+                    }
+                    else if (value > 100)
+                    {
+                        textBox.Text = "100";
+                        textBox.SelectionStart = textBox.Text.Length;
+                    }
+                }
+                else
+                {
+                    // Ha nem szám, visszaállítjuk 0-ra
+                    textBox.Text = "0";
+                    textBox.SelectionStart = textBox.Text.Length;
+                }
+            }
+
             UpdateTotalAmount();
         }
 
@@ -616,7 +672,18 @@ namespace berles2
 
                 // 2. Rental létrehozása
                 int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int days) ? Math.Max(1, days) : 1;
-                decimal totalAmount = _selectedDevices.Sum(d => d.RentPrice) * rentalDays;
+
+                // Kedvezmény figyelembevétele
+                int discount = 0;
+                if (int.TryParse(DiscountTextBox.Text, out int disc))
+                {
+                    discount = Math.Max(0, Math.Min(100, disc));
+                }
+
+                decimal dailyTotal = _selectedDevices.Sum(d => d.RentPrice);
+                decimal discountedDailyTotal = dailyTotal * (100 - discount) / 100;
+                decimal totalAmount = discountedDailyTotal * rentalDays;
+
                 string ticketNr = TicketNumberTextBox.Text;
 
                 var rental = new Rental
@@ -985,9 +1052,16 @@ namespace berles2
                             originalText = originalText.Replace("{{RENTAL_DAYS}}", RentalDaysTextBox.Text);
                             originalText = originalText.Replace("{{DEVICE_COUNT}}", _selectedDevices.Count.ToString());
 
-                            // Végösszeg
+                            // Végösszeg kedvezménnyel
                             int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int days) ? days : 1;
-                            decimal totalAmount = _selectedDevices.Sum(d => d.RentPrice) * rentalDays;
+                            int discount = 0;
+                            if (int.TryParse(DiscountTextBox.Text, out int disc))
+                            {
+                                discount = Math.Max(0, Math.Min(100, disc));
+                            }
+                            decimal dailyTotal = _selectedDevices.Sum(d => d.RentPrice);
+                            decimal discountedDailyTotal = dailyTotal * (100 - discount) / 100;
+                            decimal totalAmount = discountedDailyTotal * rentalDays;
                             originalText = originalText.Replace("{{TOTAL_AMOUNT}}", $"{totalAmount:N0}");
 
                             text.Text = originalText;
@@ -1040,8 +1114,17 @@ namespace berles2
                         dataRow.AppendChild(CreateTableCell(device.DeviceTypeNavigation?.TypeName ?? "N/A", false));
                         dataRow.AppendChild(CreateTableCell(device.DeviceName, false));
                         dataRow.AppendChild(CreateTableCell(device.Serial, false));
-                        dataRow.AppendChild(CreateTableCell(device.Price.ToString("F0") + " Ft", false));
-                        dataRow.AppendChild(CreateTableCell(device.RentPrice.ToString("F0") + " Ft/nap", false));
+                        dataRow.AppendChild(CreateTableCell($"{device.Price:N0} Ft", false));
+
+                        // Kedvezményes ár számítása
+                        int discount = 0;
+                        if (int.TryParse(DiscountTextBox.Text, out int disc))
+                        {
+                            discount = Math.Max(0, Math.Min(100, disc));
+                        }
+                        decimal discountedPrice = device.RentPrice * (100 - discount) / 100;
+                        dataRow.AppendChild(CreateTableCell($"{discountedPrice:N0} Ft", false));
+
                         table.AppendChild(dataRow);
                     }
 
@@ -1109,10 +1192,16 @@ namespace berles2
             string paymentDueDate = DateTime.Now.ToString("yyyy-MM-dd"); // Azonnali fizetés (0 nap)
             string paymentMode = (PaymentModeComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Készpénz";
 
-            // ALANYI ADÓMENTES - nettó = bruttó, de szorozva napokkal!
+            // ALANYI ADÓMENTES - nettó = bruttó, kedvezménnyel!
             int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int days) ? days : 1;
+            int discount = 0;
+            if (int.TryParse(DiscountTextBox.Text, out int disc))
+            {
+                discount = Math.Max(0, Math.Min(100, disc));
+            }
             decimal dailyTotal = _selectedDevices.Sum(d => d.RentPrice);
-            decimal totalAmount = dailyTotal * rentalDays;
+            decimal discountedDailyTotal = dailyTotal * (100 - discount) / 100;
+            decimal totalAmount = discountedDailyTotal * rentalDays;
             decimal netPrice = totalAmount; // Alanyi adómentes - nincs ÁFA
 
             // Kiválasztott eszközök listája
