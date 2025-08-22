@@ -154,6 +154,9 @@ namespace berles2
                     .ToList();
 
                 DisplayDevices();
+
+                // Végösszeg frissítése a kiválasztott eszközök alapján
+                UpdateTotalAmount();
             }
             catch (Exception ex)
             {
@@ -476,7 +479,7 @@ namespace berles2
             border.MouseLeftButtonDown += (sender, e) => ToggleDeviceSelection(device, border);
             border.Tag = device;
             // ELLENŐRZÉS: ha már ki van választva, állítsd be a vizuális állapotot
-            if (_selectedDevices.Contains(device))
+            if (_selectedDevices.Any(d => d.Id == device.Id))
             {
                 border.Background = Brushes.LightBlue;
                 border.BorderBrush = Brushes.Blue;
@@ -487,10 +490,11 @@ namespace berles2
 
         private void ToggleDeviceSelection(Device device, WpfBorder border)
         {
-            if (_selectedDevices.Contains(device))
+            var existingDevice = _selectedDevices.FirstOrDefault(d => d.Id == device.Id);
+            if (existingDevice != null)
             {
                 // Kijelölés megszüntetése
-                _selectedDevices.Remove(device);
+                _selectedDevices.Remove(existingDevice);
                 border.Background = Brushes.White;
                 border.BorderBrush = Brushes.Gray;
                 border.BorderThickness = new Thickness(1);
@@ -597,6 +601,8 @@ namespace berles2
                     ContractButton.Background = System.Windows.Media.Brushes.Gray;
                     EmailButton.IsEnabled = true;
                     EmailButton.Background = System.Windows.Media.Brushes.Blue;
+                    // MINDEN MEZŐ LETILTÁSA - a szerződés már végleges!
+                    LockAllInputFields();
                 }
                 catch (Exception ex)
                 {
@@ -626,6 +632,14 @@ namespace berles2
             if (string.IsNullOrWhiteSpace(CustomerEmailTextBox.Text))
             {
                 MessageBox.Show("Az e-mail cím megadása kötelező!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            // Email formátum ellenőrzése
+            string email = CustomerEmailTextBox.Text.Trim();
+            if (!email.Contains("@") || !email.Contains(".") || email.IndexOf("@") > email.LastIndexOf("."))
+            {
+                MessageBox.Show("Kérem adjon meg egy érvényes e-mail címet! (például: pelda@email.hu)", "Hibás e-mail formátum", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;
             }
 
@@ -939,6 +953,7 @@ namespace berles2
 
             // Ticket szám újragenerálása
             GenerateNextTicketNumber();  // ← JAVÍTVA!
+            UnlockAllInputFields();
 
             // Kiválasztott ügyfél törlése
             _selectedExistingCustomer = null;
@@ -1647,6 +1662,52 @@ namespace berles2
                 // Csak logolás, ne akadályozza meg az email küldést
                 System.Diagnostics.Debug.WriteLine($"Hiba a PDF útvonal mentésekor: {ex.Message}");
             }
+        }
+        private void LockAllInputFields()
+        {
+            // Ügyfél adatok letiltása
+            CustomerNameTextBox.IsEnabled = false;
+            CustomerZipTextBox.IsEnabled = false;
+            CustomerCityTextBox.IsEnabled = false;
+            CustomerAddressTextBox.IsEnabled = false;
+            CustomerEmailTextBox.IsEnabled = false;
+            CustomerIdNumberTextBox.IsEnabled = false;
+            CustomerCommentTextBox.IsEnabled = false;
+            SelectExistingCustomerButton.IsEnabled = false;
+            ClearSelectedCustomerButton.IsEnabled = false;
+
+            // Bérlési adatok letiltása
+            RentalDaysTextBox.IsEnabled = false;
+            DiscountTextBox.IsEnabled = false;
+            PaymentModeComboBox.IsEnabled = false;
+            RentalCommentTextBox.IsEnabled = false;
+
+            // Eszköz keresés és kiválasztás letiltása
+            DeviceSearchTextBox.IsEnabled = false;
+            DevicesWrapPanel.IsEnabled = false;
+        }
+        private void UnlockAllInputFields()
+        {
+            // Ügyfél adatok engedélyezése
+            CustomerNameTextBox.IsEnabled = true;
+            CustomerZipTextBox.IsEnabled = true;
+            CustomerCityTextBox.IsEnabled = true;
+            CustomerAddressTextBox.IsEnabled = true;
+            CustomerEmailTextBox.IsEnabled = true;
+            CustomerIdNumberTextBox.IsEnabled = true;
+            CustomerCommentTextBox.IsEnabled = true;
+            SelectExistingCustomerButton.IsEnabled = true;
+            ClearSelectedCustomerButton.IsEnabled = true;
+
+            // Bérlési adatok engedélyezése
+            RentalDaysTextBox.IsEnabled = true;
+            DiscountTextBox.IsEnabled = true;
+            PaymentModeComboBox.IsEnabled = true;
+            RentalCommentTextBox.IsEnabled = true;
+
+            // Eszköz keresés és kiválasztás engedélyezése
+            DeviceSearchTextBox.IsEnabled = true;
+            DevicesWrapPanel.IsEnabled = true;
         }
         private void SaveInvoicePath(string invoicePath)
         {
