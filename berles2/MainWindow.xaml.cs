@@ -310,6 +310,15 @@ namespace berles2
                 MessageBox.Show(resultMessage, "Email küldés eredménye",
                               MessageBoxButton.OK, MessageBoxImage.Information);
             }
+            // DataManagerWindow frissítése ha nyitva van
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window is DataManagerWindow dataManagerWindow)
+                {
+                    dataManagerWindow.LoadRentals();
+                    break;
+                }
+            }
         }
         private void SendSingleReviewEmail(Rental rental, Setting setting)
         {
@@ -1159,10 +1168,16 @@ namespace berles2
                 // 1. PDF kimeneti mappa (az exe mellett, files\invoices)
                 string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
                 string invoicesFolder = SystemIO.Path.Combine(exeDirectory, "files", "invoices");
+                string curlAnswerFolder = SystemIO.Path.Combine(exeDirectory, "files", "curl_answer");
                 SystemIO.Directory.CreateDirectory(invoicesFolder);
+                SystemIO.Directory.CreateDirectory(curlAnswerFolder);
 
                 string pdfFileName = $"szamla_{customerName}_{rentalDate}.pdf";
                 string pdfPath = SystemIO.Path.Combine(invoicesFolder, pdfFileName);
+
+                // CURL válasz fájl
+                string curlAnswerFileName = $"curl_valasz_{customerName}_{rentalDate}.txt";
+                string curlAnswerPath = SystemIO.Path.Combine(curlAnswerFolder, curlAnswerFileName);
 
                 // 2. Cookies fájl (exe mappa mellett)
                 string cookiesPath = SystemIO.Path.Combine(exeDirectory, "curl_cookies.txt");
@@ -1194,6 +1209,33 @@ namespace berles2
                         string error = await curlProcess.StandardError.ReadToEndAsync();
 
                         await curlProcess.WaitForExitAsync();
+
+                        // CURL válasz mentése fájlba
+                        try
+                        {
+                            string curlResponse = $"=== CURL VÁLASZ RÉSZLETES LOG ===\n" +
+                                                $"Dátum: {DateTime.Now}\n" +
+                                                $"Ügyfél: {customerName}\n" +
+                                                $"XML fájl: {xmlPath}\n" +
+                                                $"PDF cél: {pdfPath}\n" +
+                                                $"Exit kód: {curlProcess.ExitCode}\n\n" +
+                                                $"=== CURL PARANCS ===\n" +
+                                                $"curl {curlArguments}\n\n" +
+                                                $"=== STANDARD OUTPUT ===\n" +
+                                                $"{output}\n\n" +
+                                                $"=== STANDARD ERROR ===\n" +
+                                                $"{error}\n\n" +
+                                                $"=== VÉGEREDMÉNY ===\n" +
+                                                $"PDF létrejött: {SystemIO.File.Exists(pdfPath)}\n" +
+                                                $"PDF mérete: {(SystemIO.File.Exists(pdfPath) ? new SystemIO.FileInfo(pdfPath).Length : 0)} byte\n";
+
+                            SystemIO.File.WriteAllText(curlAnswerPath, curlResponse, System.Text.Encoding.UTF8);
+                        }
+                        catch (Exception logEx)
+                        {
+                            // Ha a log mentés nem sikerül, ne akadályozza meg a számlázást
+                            Console.WriteLine($"CURL log mentési hiba: {logEx.Message}");
+                        }
 
                         // 5. Eredmény ellenőrzése
                         if (curlProcess.ExitCode == 0 && SystemIO.File.Exists(pdfPath) && new SystemIO.FileInfo(pdfPath).Length > 0)

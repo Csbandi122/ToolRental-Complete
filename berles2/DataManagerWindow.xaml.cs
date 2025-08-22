@@ -340,7 +340,7 @@ namespace berles2
         // ===========================================
         // BÉRLÉSEK KEZELÉS
         // ===========================================
-        private void LoadRentals()
+        public void LoadRentals()
         {
             try
             {
