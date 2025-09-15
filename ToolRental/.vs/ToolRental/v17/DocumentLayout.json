@@ -1,96 +1,12 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental\\",
+  "WorkspaceRootPath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\berles2\\reportingwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\datamanagerwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\reportingwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\devicedialog.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\reviewconfirmationwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\datamanagerwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\customerselectdialog.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{48DB4282-8F2F-A2FA-8928-80A276922C26}|..\\ToolRental.Data\\ToolRental.Data.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\toolrental.data\\seeddata.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{48DB4282-8F2F-A2FA-8928-80A276922C26}|..\\ToolRental.Data\\ToolRental.Data.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\toolrental.data\\toolrentaldbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\servicedialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\servicedialog.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\financialdialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\financialdialog.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\reportingwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\customerdialog.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\settingsdialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\berles2.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{48DB4282-8F2F-A2FA-8928-80A276922C26}|..\\ToolRental.Data\\ToolRental.Data.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\toolrental.data\\migrations\\20250807162215_updatesettingsmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7E81EE20-5EFE-B6EE-E635-E72B8933CA1F}|..\\ToolRental.Core\\ToolRental.Core.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\toolrental.core\\models\\setting.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\settingsdialog.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{48DB4282-8F2F-A2FA-8928-80A276922C26}|..\\ToolRental.Data\\ToolRental.Data.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\toolrental.data\\migrations\\20250807152808_addservicedevicetable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7E81EE20-5EFE-B6EE-E635-E72B8933CA1F}|..\\ToolRental.Core\\ToolRental.Core.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\toolrental.core\\models\\device.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7E81EE20-5EFE-B6EE-E635-E72B8933CA1F}|..\\ToolRental.Core\\ToolRental.Core.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\toolrental.core\\models\\service.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{7E81EE20-5EFE-B6EE-E635-E72B8933CA1F}|..\\ToolRental.Core\\ToolRental.Core.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\toolrental.core\\models\\servicedevice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\customerselectdialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\devicedialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\berles2\\customerdialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{48DB4282-8F2F-A2FA-8928-80A276922C26}|..\\ToolRental.Data\\ToolRental.Data.csproj|c:\\users\\acseke\\source\\repos\\toolrental projekt\\toolrental.data\\migrations\\20250807161458_addsettingsfields.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\berles2\\devicedialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     }
   ],
   "DocumentGroupContainers": [
@@ -100,7 +16,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -112,363 +28,32 @@
             },
             {
               "$type": "Bookmark",
-              "Name": "ST:0:0:{cce594b6-0c39-4442-ba28-10c64ac7e89f}"
-            },
-            {
-              "$type": "Bookmark",
               "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "MainWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\MainWindow.xaml.cs",
-              "RelativeDocumentMoniker": "..\\berles2\\MainWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\MainWindow.xaml.cs",
-              "RelativeToolTip": "..\\berles2\\MainWindow.xaml.cs",
-              "ViewState": "AgIAAJAGAAAAAAAAAAAIwJ4GAAAYAAAAAAAAAA==",
+              "Title": "ReportingWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ReportingWindow.xaml.cs",
+              "RelativeDocumentMoniker": "..\\berles2\\ReportingWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ReportingWindow.xaml.cs",
+              "RelativeToolTip": "..\\berles2\\ReportingWindow.xaml.cs",
+              "ViewState": "AgIAAHYBAAAAAAAAAAAwwIoBAAA/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-22T13:03:16.769Z",
+              "WhenOpened": "2025-09-15T09:39:59.558Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "MainWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\MainWindow.xaml",
-              "RelativeDocumentMoniker": "..\\berles2\\MainWindow.xaml",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\MainWindow.xaml",
-              "RelativeToolTip": "..\\berles2\\MainWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-22T12:01:38.479Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "ReviewConfirmationWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\ReviewConfirmationWindow.xaml",
-              "RelativeDocumentMoniker": "..\\berles2\\ReviewConfirmationWindow.xaml",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\ReviewConfirmationWindow.xaml",
-              "RelativeToolTip": "..\\berles2\\ReviewConfirmationWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-13T06:40:52.441Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "App.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\App.xaml.cs",
-              "RelativeDocumentMoniker": "..\\berles2\\App.xaml.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\App.xaml.cs",
-              "RelativeToolTip": "..\\berles2\\App.xaml.cs",
-              "ViewState": "AgIAAAQAAAAAAAAAAAAAwBsAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-09T12:41:55.223Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ReportingWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\ReportingWindow.xaml.cs",
-              "RelativeDocumentMoniker": "..\\berles2\\ReportingWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\ReportingWindow.xaml.cs",
-              "RelativeToolTip": "..\\berles2\\ReportingWindow.xaml.cs",
-              "ViewState": "AgIAALwBAAAAAAAAAAAowMIBAAA8AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-08T16:10:34.172Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 15,
-              "Title": "ReportingWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\ReportingWindow.xaml",
-              "RelativeDocumentMoniker": "..\\berles2\\ReportingWindow.xaml",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\ReportingWindow.xaml",
-              "RelativeToolTip": "..\\berles2\\ReportingWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-08T16:08:00.361Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 18,
-              "Title": "berles2.csproj",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\berles2.csproj",
-              "RelativeDocumentMoniker": "..\\berles2\\berles2.csproj",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\berles2.csproj",
-              "RelativeToolTip": "..\\berles2\\berles2.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABwAAAAPAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2025-08-08T07:55:28.463Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "SeedData.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Data\\SeedData.cs",
-              "RelativeDocumentMoniker": "..\\ToolRental.Data\\SeedData.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Data\\SeedData.cs",
-              "RelativeToolTip": "..\\ToolRental.Data\\SeedData.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAcwA4AAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T20:43:14.746Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 19,
-              "Title": "20250807162215_UpdateSettingsModel.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Data\\Migrations\\20250807162215_UpdateSettingsModel.cs",
-              "RelativeDocumentMoniker": "..\\ToolRental.Data\\Migrations\\20250807162215_UpdateSettingsModel.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Data\\Migrations\\20250807162215_UpdateSettingsModel.cs",
-              "RelativeToolTip": "..\\ToolRental.Data\\Migrations\\20250807162215_UpdateSettingsModel.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T16:22:15.695Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 29,
-              "Title": "20250807161458_AddSettingsFields.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Data\\Migrations\\20250807161458_AddSettingsFields.cs",
-              "RelativeDocumentMoniker": "..\\ToolRental.Data\\Migrations\\20250807161458_AddSettingsFields.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Data\\Migrations\\20250807161458_AddSettingsFields.cs",
-              "RelativeToolTip": "..\\ToolRental.Data\\Migrations\\20250807161458_AddSettingsFields.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAIBZwCUAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T16:14:58.79Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 20,
-              "Title": "Setting.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Core\\Models\\Setting.cs",
-              "RelativeDocumentMoniker": "..\\ToolRental.Core\\Models\\Setting.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Core\\Models\\Setting.cs",
-              "RelativeToolTip": "..\\ToolRental.Core\\Models\\Setting.cs",
-              "ViewState": "AgIAABcAAAAAAAAAAAAQwCUAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T16:14:07.089Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 21,
-              "Title": "SettingsDialog.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\SettingsDialog.xaml.cs",
-              "RelativeDocumentMoniker": "..\\berles2\\SettingsDialog.xaml.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\SettingsDialog.xaml.cs",
-              "RelativeToolTip": "..\\berles2\\SettingsDialog.xaml.cs",
-              "ViewState": "AgIAAEcBAAAAAAAAAAAcwFgBAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T16:11:48.202Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 17,
-              "Title": "SettingsDialog.xaml",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\SettingsDialog.xaml",
-              "RelativeDocumentMoniker": "..\\berles2\\SettingsDialog.xaml",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\SettingsDialog.xaml",
-              "RelativeToolTip": "..\\berles2\\SettingsDialog.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-07T16:11:14.545Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 22,
-              "Title": "20250807152808_AddServiceDeviceTable.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Data\\Migrations\\20250807152808_AddServiceDeviceTable.cs",
-              "RelativeDocumentMoniker": "..\\ToolRental.Data\\Migrations\\20250807152808_AddServiceDeviceTable.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Data\\Migrations\\20250807152808_AddServiceDeviceTable.cs",
-              "RelativeToolTip": "..\\ToolRental.Data\\Migrations\\20250807152808_AddServiceDeviceTable.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T15:28:09.016Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "ServiceDialog.xaml",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\ServiceDialog.xaml",
-              "RelativeDocumentMoniker": "..\\berles2\\ServiceDialog.xaml",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\ServiceDialog.xaml",
-              "RelativeToolTip": "..\\berles2\\ServiceDialog.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-07T11:33:25.339Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 25,
-              "Title": "ServiceDevice.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Core\\Models\\ServiceDevice.cs",
-              "RelativeDocumentMoniker": "..\\ToolRental.Core\\Models\\ServiceDevice.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Core\\Models\\ServiceDevice.cs",
-              "RelativeToolTip": "..\\ToolRental.Core\\Models\\ServiceDevice.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T11:30:59.672Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "ToolRentalDbContext.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Data\\ToolRentalDbContext.cs",
-              "RelativeDocumentMoniker": "..\\ToolRental.Data\\ToolRentalDbContext.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Data\\ToolRentalDbContext.cs",
-              "RelativeToolTip": "..\\ToolRental.Data\\ToolRentalDbContext.cs",
-              "ViewState": "AgIAACgAAAAAAAAAAAAswD0AAAAMAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T11:28:54.376Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 23,
-              "Title": "Device.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Core\\Models\\Device.cs",
-              "RelativeDocumentMoniker": "..\\ToolRental.Core\\Models\\Device.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Core\\Models\\Device.cs",
-              "RelativeToolTip": "..\\ToolRental.Core\\Models\\Device.cs",
-              "ViewState": "AgIAAAgAAAAAAAAAAAAxwBcAAAABAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T11:28:19.11Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 24,
-              "Title": "Service.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Core\\Models\\Service.cs",
-              "RelativeDocumentMoniker": "..\\ToolRental.Core\\Models\\Service.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\ToolRental.Core\\Models\\Service.cs",
-              "RelativeToolTip": "..\\ToolRental.Core\\Models\\Service.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAABjAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T11:27:43.661Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 14,
-              "Title": "FinancialDialog.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\FinancialDialog.xaml.cs",
-              "RelativeDocumentMoniker": "..\\berles2\\FinancialDialog.xaml.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\FinancialDialog.xaml.cs",
-              "RelativeToolTip": "..\\berles2\\FinancialDialog.xaml.cs",
-              "ViewState": "AgIAANMAAAAAAAAAAAAgwOsAAAANAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T10:51:47.224Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "FinancialDialog.xaml",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\FinancialDialog.xaml",
-              "RelativeDocumentMoniker": "..\\berles2\\FinancialDialog.xaml",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\FinancialDialog.xaml",
-              "RelativeToolTip": "..\\berles2\\FinancialDialog.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-07T10:51:23.402Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "DataManagerWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DataManagerWindow.xaml.cs",
-              "RelativeDocumentMoniker": "..\\berles2\\DataManagerWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DataManagerWindow.xaml.cs",
-              "RelativeToolTip": "..\\berles2\\DataManagerWindow.xaml.cs",
-              "ViewState": "AgIAAEcBAAAAAAAAAAD4v1kBAAANAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-06T20:42:05.282Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "DataManagerWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DataManagerWindow.xaml",
-              "RelativeDocumentMoniker": "..\\berles2\\DataManagerWindow.xaml",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DataManagerWindow.xaml",
-              "RelativeToolTip": "..\\berles2\\DataManagerWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-06T20:41:45.68Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "ServiceDialog.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\ServiceDialog.xaml.cs",
-              "RelativeDocumentMoniker": "..\\berles2\\ServiceDialog.xaml.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\ServiceDialog.xaml.cs",
-              "RelativeToolTip": "..\\berles2\\ServiceDialog.xaml.cs",
-              "ViewState": "AgIAAJ0AAAAAAAAAAAAcwJEAAAANAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T11:33:51.7Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "CustomerSelectDialog.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerSelectDialog.xaml.cs",
-              "RelativeDocumentMoniker": "..\\berles2\\CustomerSelectDialog.xaml.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerSelectDialog.xaml.cs",
-              "RelativeToolTip": "..\\berles2\\CustomerSelectDialog.xaml.cs",
-              "ViewState": "AgIAACoAAAAAAAAAAAAwwDkAAAAQAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-07T10:20:16.175Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 26,
-              "Title": "CustomerSelectDialog.xaml",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerSelectDialog.xaml",
-              "RelativeDocumentMoniker": "..\\berles2\\CustomerSelectDialog.xaml",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerSelectDialog.xaml",
-              "RelativeToolTip": "..\\berles2\\CustomerSelectDialog.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-07T10:19:49.998Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "DeviceDialog.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DeviceDialog.xaml.cs",
-              "RelativeDocumentMoniker": "..\\berles2\\DeviceDialog.xaml.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DeviceDialog.xaml.cs",
-              "RelativeToolTip": "..\\berles2\\DeviceDialog.xaml.cs",
-              "ViewState": "AgIAAHcAAAAAAAAAAAAkwJQAAABmAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-06T20:49:01.695Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 28,
-              "Title": "CustomerDialog.xaml",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerDialog.xaml",
-              "RelativeDocumentMoniker": "..\\berles2\\CustomerDialog.xaml",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerDialog.xaml",
-              "RelativeToolTip": "..\\berles2\\CustomerDialog.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-06T20:42:31.268Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 27,
               "Title": "DeviceDialog.xaml",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DeviceDialog.xaml",
+              "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\DeviceDialog.xaml",
               "RelativeDocumentMoniker": "..\\berles2\\DeviceDialog.xaml",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\DeviceDialog.xaml",
+              "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\DeviceDialog.xaml",
               "RelativeToolTip": "..\\berles2\\DeviceDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-08-06T20:48:39.562Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 16,
-              "Title": "CustomerDialog.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerDialog.xaml.cs",
-              "RelativeDocumentMoniker": "..\\berles2\\CustomerDialog.xaml.cs",
-              "ToolTip": "C:\\Users\\acseke\\source\\repos\\Toolrental Projekt\\berles2\\CustomerDialog.xaml.cs",
-              "RelativeToolTip": "..\\berles2\\CustomerDialog.xaml.cs",
-              "ViewState": "AgIAAEgAAAAAAAAAAAAswFcAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-08-06T20:42:48.69Z"
+              "WhenOpened": "2025-09-15T09:25:10.12Z",
+              "EditorCaption": ""
             }
           ]
         }

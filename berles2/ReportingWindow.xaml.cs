@@ -372,8 +372,39 @@ namespace berles2
 
                     foreach (var rentalDevice in deviceRentals)
                     {
-                        // Minden bérlésre: eszköz bérleti díj × napok száma
-                        revenue += device.RentPrice * rentalDevice.Rental.RentalDays;
+                        var rental = rentalDevice.Rental;
+
+                        // Megkeressük a Financial rekordot ehhez a bérléshez
+                        var financial = _context.Financials
+                            .FirstOrDefault(f => f.SourceType == "bérlés" && f.SourceId == rental.Id);
+
+                        if (financial != null)
+                        {
+                            // Eredeti napi összeg kiszámítása (összes eszköz ára ebben a bérlésben)
+                            var originalDailyTotal = _context.RentalDevices
+                                .Where(rd => rd.RentalId == rental.Id)
+                                .Include(rd => rd.Device)
+                                .Sum(rd => rd.Device.RentPrice);
+
+                            if (originalDailyTotal > 0)
+                            {
+                                // Tényleges napi összeg (kedvezménnyel)
+                                var actualDailyTotal = financial.Amount / rental.RentalDays;
+
+                                // Arányos elosztás: ez az eszköz milyen arányban részesedik
+                                var deviceRatio = device.RentPrice / originalDailyTotal;
+
+                                // Eszköz tényleges bevétele (kedvezménnyel)
+                                var deviceRevenue = actualDailyTotal * deviceRatio * rental.RentalDays;
+
+                                revenue += deviceRevenue;
+                            }
+                        }
+                        else
+                        {
+                            // Ha nincs Financial rekord, akkor az eredeti logika (fallback)
+                            revenue += device.RentPrice * rental.RentalDays;
+                        }
                     }
 
                     // Egyéb bevételek (elosztva)
