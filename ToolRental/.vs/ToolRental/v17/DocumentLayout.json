@@ -3,6 +3,15 @@
   "WorkspaceRootPath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\berles2\\confirmationdialog.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\berles2\\confirmationdialog.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\berles2\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\berles2\\reportingwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
@@ -16,7 +25,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 3,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -32,28 +41,65 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "MainWindow.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\MainWindow.xaml.cs",
+              "RelativeDocumentMoniker": "..\\berles2\\MainWindow.xaml.cs",
+              "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\MainWindow.xaml.cs",
+              "RelativeToolTip": "..\\berles2\\MainWindow.xaml.cs",
+              "ViewState": "AgIAAGkCAAAAAAAAAAAkwHcCAAAaAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-23T09:29:38.204Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "ConfirmationDialog.xaml.cs",
+              "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ConfirmationDialog.xaml.cs",
+              "RelativeDocumentMoniker": "..\\berles2\\ConfirmationDialog.xaml.cs",
+              "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ConfirmationDialog.xaml.cs",
+              "RelativeToolTip": "..\\berles2\\ConfirmationDialog.xaml.cs",
+              "ViewState": "AgIAAHsAAAAAAAAAAAAkwI8AAAAhAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-23T09:29:21.571Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ConfirmationDialog.xaml",
+              "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ConfirmationDialog.xaml",
+              "RelativeDocumentMoniker": "..\\berles2\\ConfirmationDialog.xaml",
+              "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ConfirmationDialog.xaml",
+              "RelativeToolTip": "..\\berles2\\ConfirmationDialog.xaml",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
+              "WhenOpened": "2025-09-23T09:28:48.995Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
               "Title": "ReportingWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ReportingWindow.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\ReportingWindow.xaml.cs",
               "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ReportingWindow.xaml.cs",
               "RelativeToolTip": "..\\berles2\\ReportingWindow.xaml.cs",
-              "ViewState": "AgIAAHYBAAAAAAAAAAAwwIoBAAA/AAAAAAAAAA==",
+              "ViewState": "AgIAAHwBAAAAAAAAAAAmwIoBAAA/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-15T09:39:59.558Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 4,
               "Title": "DeviceDialog.xaml",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\DeviceDialog.xaml",
               "RelativeDocumentMoniker": "..\\berles2\\DeviceDialog.xaml",
               "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\DeviceDialog.xaml",
               "RelativeToolTip": "..\\berles2\\DeviceDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-09-15T09:25:10.12Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-15T09:25:10.12Z"
             }
           ]
         }

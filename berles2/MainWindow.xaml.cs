@@ -594,15 +594,50 @@ namespace berles2
             {
                 try
                 {
-                    SaveRental();
-                    GenerateWordContract();
+                    // === ÚJ RÉSZ: Megerősítő ablak megjelenítése ===
 
-                    // Sikeres mentés után gombok állapotának frissítése
-                    ContractButton.Background = System.Windows.Media.Brushes.Gray;
-                    EmailButton.IsEnabled = true;
-                    EmailButton.Background = System.Windows.Media.Brushes.Blue;
-                    // MINDEN MEZŐ LETILTÁSA - a szerződés már végleges!
-                    LockAllInputFields();
+                    // Lakcím összeállítása
+                    string fullAddress = $"{CustomerZipTextBox.Text} {CustomerCityTextBox.Text}, {CustomerAddressTextBox.Text}";
+
+                    // Végösszeg kiszámítása
+                    int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int days) ? Math.Max(1, days) : 1;
+                    int discount = int.TryParse(DiscountTextBox.Text, out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
+                    decimal dailyTotal = _selectedDevices.Sum(d => d.RentPrice);
+                    decimal discountedDailyTotal = dailyTotal * (100 - discount) / 100;
+                    decimal totalAmount = discountedDailyTotal * rentalDays;
+
+                    // Megerősítő dialog megnyitása
+                    var confirmDialog = new ConfirmationDialog(
+                        _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text,
+                        fullAddress,
+                        _selectedExistingCustomer?.Email ?? CustomerEmailTextBox.Text,
+                        _selectedDevices,
+                        totalAmount
+                    );
+
+                    // Ablak megjelenítése és válasz kezelése
+                    bool? result = confirmDialog.ShowDialog();
+
+                    if (result == true && confirmDialog.Confirmed)
+                    {
+                        // === OK GOMB - FOLYTATÁS ===
+                        SaveRental();
+                        GenerateWordContract();
+
+                        // Sikeres mentés után gombok állapotának frissítése
+                        ContractButton.Background = System.Windows.Media.Brushes.Gray;
+                        EmailButton.IsEnabled = true;
+                        EmailButton.Background = System.Windows.Media.Brushes.Blue;
+
+                        // MINDEN MEZŐ LETILTÁSA - a szerződés már végleges!
+                        LockAllInputFields();
+                    }
+                    else
+                    {
+                        // === MÉGSEM GOMB - VISSZALÉPÉS ===
+                        // Gomb visszaengedélyezése, hogy újra lehessen próbálkozni
+                        ContractButton.IsEnabled = true;
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -620,7 +655,6 @@ namespace berles2
                 ContractButton.IsEnabled = true;
             }
         }
-
         private bool ValidateForm()
         {
             if (string.IsNullOrWhiteSpace(CustomerNameTextBox.Text))
