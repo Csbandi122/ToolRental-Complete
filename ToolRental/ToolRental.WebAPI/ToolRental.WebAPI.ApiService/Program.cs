@@ -3,27 +3,27 @@ using ToolRental.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- Ezt a részt adjuk hozzá ---
 // Adatbázis kapcsolat beállítása az appsettings.json alapján
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ToolRentalDbContext>(options =>
     options.UseSqlite(connectionString));
-// --- Eddig a részig ---
 
-// Add services to the container.
-// EZ AZ ÚJ RÉSZ, AMI MEGOLDJA A CIKLUS HIBÁT
+// --- Szolgáltatások beállítása ---
+
+// JSON cikluskezelés beállítása (EZ A FONTOS RÉSZ!)
 builder.Services.Configure<Microsoft.AspNetCore.Http.Json.JsonOptions>(options =>
 {
     options.SerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
 });
-// EZT A SORT MÁR ISMERED:
-builder.Services.AddEndpointsApiExplorer();
+
+// Swagger/OpenAPI beállítása
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// --- Applikáció felépítése ---
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// HTTP pipeline beállítása
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -32,44 +32,42 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// Ez az alapértelmezett "időjárás" végpont, ezt ki is törölheted, de maradhat
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            "Sample"
-        ))
-        .ToArray();
-    return forecast;
-});
+// === API Végpontok (Endpoints) ===
 
-
-
-// --- Story 1.1: Ide jön az új kódunk az ügyfelek lekérdezéséhez ---
+// Story 1.1: Ügyfelek lekérdezése
 app.MapGet("/api/customers", async (ToolRentalDbContext db) =>
 {
     var customers = await db.Customers.ToListAsync();
     return Results.Ok(customers);
 });
-// --- Kód vége ---
 
-
-
-
-// Story 1.2: Eszközök lekérdezése (JAVÍTOTT VERZIÓ)
+// Story 1.2: Eszközök lekérdezése
 app.MapGet("/api/devices", async (ToolRentalDbContext db) =>
 {
     var devices = await db.Devices.Include(d => d.DeviceTypeNavigation).ToListAsync();
     return Results.Ok(devices);
 });
 
-app.Run();
+// CSERÉLD LE A TELJES /api/rentals BLOKKOT ERRE AZ ÚJ VERZIÓRA:
 
-// Ezt a rekordot a fájl legalján kell hagyni, ha a WeatherForecast végpont megmaradt
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
+// Story 1.3: Bérlések lekérdezése (ÚJ HIBAKERESŐ VERZIÓ)
+app.MapGet("/api/rentals", async (ToolRentalDbContext db) =>
 {
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+    var rentals = await db.Rentals
+        .Include(r => r.Customer)
+        .Include(r => r.RentalDevices)
+            .ThenInclude(rd => rd.Device)
+        .ToListAsync();
+
+    // Kézzel létrehozzuk a beállításokat, csak ehhez a végponthoz
+    var options = new System.Text.Json.JsonSerializerOptions
+    {
+        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
+    };
+
+    // A Results.Ok helyett a Results.Json-t használjuk a saját beállításainkkal
+    return Results.Json(rentals, options);
+});
+
+// Az applikáció futtatása
+app.Run();

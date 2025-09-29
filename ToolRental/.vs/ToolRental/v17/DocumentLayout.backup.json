@@ -75,7 +75,7 @@
               "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\Program.cs",
               "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\Program.cs*",
               "RelativeToolTip": "ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\Program.cs*",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAABkAAAAnAAAAAAAAAA==",
+              "ViewState": "AgIAACcAAAAAAAAAAAAiwEUAAAADAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-29T15:33:24.672Z",
               "EditorCaption": ""
@@ -90,7 +90,8 @@
               "RelativeToolTip": "ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-09-29T15:32:54.904Z"
+              "WhenOpened": "2025-09-29T15:32:54.904Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -114,7 +115,8 @@
               "RelativeToolTip": "..\\berles2\\MainWindow.xaml.cs",
               "ViewState": "AgIAAGkCAAAAAAAAAAAkwHcCAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-23T09:29:38.204Z"
+              "WhenOpened": "2025-09-23T09:29:38.204Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -126,7 +128,8 @@
               "RelativeToolTip": "..\\berles2\\ConfirmationDialog.xaml.cs",
               "ViewState": "AgIAAGAAAAAAAAAAAAAkwI8AAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-23T09:29:21.571Z"
+              "WhenOpened": "2025-09-23T09:29:21.571Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -137,7 +140,8 @@
               "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ConfirmationDialog.xaml",
               "RelativeToolTip": "..\\berles2\\ConfirmationDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-09-23T09:28:48.995Z"
+              "WhenOpened": "2025-09-23T09:28:48.995Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -149,7 +153,8 @@
               "RelativeToolTip": "..\\berles2\\ReportingWindow.xaml.cs",
               "ViewState": "AgIAAHwBAAAAAAAAAAAmwIoBAAA/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T09:39:59.558Z"
+              "WhenOpened": "2025-09-15T09:39:59.558Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -160,7 +165,8 @@
               "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\DeviceDialog.xaml",
               "RelativeToolTip": "..\\berles2\\DeviceDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-09-15T09:25:10.12Z"
+              "WhenOpened": "2025-09-15T09:25:10.12Z",
+              "EditorCaption": ""
             }
           ]
         }
