@@ -1,0 +1,66 @@
+﻿@page "/devices"
+@inject HttpClient Http
+
+<PageTitle>Eszközök</PageTitle>
+
+<h1>Eszközök</h1>
+
+@if (devices == null)
+{
+    <p><em>Adatok betöltése...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Név</th>
+                <th>Típus</th>
+                <th>Szériaszám</th>
+                <th>Bérleti díj (Ft/nap)</th>
+                <th>Státusz</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var device in devices)
+            {
+                <tr>
+                    <td>@device.DeviceName</td>
+                    <td>@device.DeviceTypeNavigation?.Name</td>
+                    <td>@device.Serial</td>
+                    <td>@device.RentPrice.ToString("N0") Ft</td>
+                    <td>@(device.Available ? "Szabad" : "Nem elérhető")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Device[]? devices;
+
+    protected override async Task OnInitializedAsync()
+    {
+        devices = await Http.GetFromJsonAsync<Device[]>("http://apiservice/api/devices");
+    }
+
+    // Osztályok, amik leírják, milyen adatokat várunk az API-tól
+    // Ezek pontos másolatai a ToolRental.Core modelljeidnek
+    public class Device
+    {
+        public int Id { get; set; }
+        public string DeviceName { get; set; } = string.Empty;
+        public int DeviceType { get; set; }
+        public string Serial { get; set; } = string.Empty;
+        public decimal Price { get; set; }
+        public decimal RentPrice { get; set; }
+        public bool Available { get; set; } = true;
+        public DeviceTypeNavigationDto? DeviceTypeNavigation { get; set; }
+    }
+
+    public class DeviceTypeNavigationDto
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+    }
+}

@@ -1,0 +1,64 @@
+﻿@page "/customers"
+@inject HttpClient Http
+
+<PageTitle>Ügyfelek</PageTitle>
+
+<h1>Ügyfelek</h1>
+<p>
+    <a href="/customers/new" class="btn btn-primary">Új ügyfél hozzáadása</a>
+</p>
+
+@if (customers == null)
+{
+    <p><em>Adatok betöltése...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Név</th>
+                <th>Irányítószám</th>
+                <th>Város</th>
+                <th>Cím</th>
+                <th>Email</th>
+                <th>Személyi ig. szám</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var customer in customers)
+            {
+                <tr>
+                    <td>@customer.Name</td>
+                    <td>@customer.Zipcode</td>
+                    <td>@customer.City</td>
+                    <td>@customer.Address</td>
+                    <td>@customer.Email</td>
+                    <td>@customer.IdNumber</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private Customer[]? customers;
+
+    protected override async Task OnInitializedAsync()
+    {
+        customers = await Http.GetFromJsonAsync<Customer[]>("http://apiservice/api/customers");
+    }
+
+    // VÉGLEGES osztály, ami pontosan a te Customer.cs fájlod alapján készült
+    public class Customer
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Zipcode { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string IdNumber { get; set; } = string.Empty;
+        public string? Comment { get; set; }
+    }
+}

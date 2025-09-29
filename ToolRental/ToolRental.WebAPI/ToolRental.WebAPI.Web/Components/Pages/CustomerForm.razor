@@ -1,0 +1,75 @@
+﻿@page "/customers/new"
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+
+<PageTitle>Új ügyfél</PageTitle>
+
+<h3>Új ügyfél rögzítése</h3>
+
+<EditForm Model="newCustomer" OnValidSubmit="HandleSubmit" FormName="NewCustomer">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="name" class="form-label">Név:</label>
+        <InputText id="name" @bind-Value="newCustomer.Name" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label for="zipcode" class="form-label">Irányítószám:</label>
+        <InputText id="zipcode" @bind-Value="newCustomer.Zipcode" class="form-control" />
+    </div>
+    
+    <div class="mb-3">
+        <label for="city" class="form-label">Város:</label>
+        <InputText id="city" @bind-Value="newCustomer.City" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label for="address" class="form-label">Cím (utca, házszám):</label>
+        <InputText id="address" @bind-Value="newCustomer.Address" class="form-control" />
+    </div>
+    
+    <div class="mb-3">
+        <label for="email" class="form-label">Email:</label>
+        <InputText id="email" @bind-Value="newCustomer.Email" class="form-control" />
+    </div>
+
+    <div class="mb-3">
+        <label for="idnumber" class="form-label">Személyi ig. szám:</label>
+        <InputText id="idnumber" @bind-Value="newCustomer.IdNumber" class="form-control" />
+    </div>
+    
+    <div class="mb-3">
+        <label for="comment" class="form-label">Megjegyzés:</label>
+        <InputTextArea id="comment" @bind-Value="newCustomer.Comment" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn btn-success">Mentés</button>
+</EditForm>
+
+
+@code {
+    private Customer newCustomer = new();
+
+    private async Task HandleSubmit()
+    {
+        // Elküldjük az új ügyfél adatait az API-nak
+        await Http.PostAsJsonAsync("http://apiservice/api/customers", newCustomer);
+
+        // A sikeres mentés után visszanavigálunk az ügyféllistához
+        NavigationManager.NavigateTo("/customers", true);
+    }
+
+    public class Customer
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string Zipcode { get; set; } = string.Empty;
+        public string City { get; set; } = string.Empty;
+        public string Address { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string IdNumber { get; set; } = string.Empty;
+        public string? Comment { get; set; }
+    }
+}

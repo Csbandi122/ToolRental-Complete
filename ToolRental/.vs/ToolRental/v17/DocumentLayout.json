@@ -3,8 +3,39 @@
   "WorkspaceRootPath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\",
   "Documents": [
     {
+      "AbsoluteMoniker": "D:0:0:{6F6D0D4A-007D-C43E-C8A5-2F774FF9E73E}|ToolRental.WebAPI\\ToolRental.WebAPI.Web\\ToolRental.WebAPI.Web.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\toolrental\\toolrental.webapi\\toolrental.webapi.web\\components\\pages\\customerform.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6F6D0D4A-007D-C43E-C8A5-2F774FF9E73E}|ToolRental.WebAPI\\ToolRental.WebAPI.Web\\ToolRental.WebAPI.Web.csproj|solutionrelative:toolrental.webapi\\toolrental.webapi.web\\components\\pages\\customerform.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{F85FBF2D-8646-AFF4-9EA1-70EED7C6C076}|ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\ToolRental.WebAPI.ApiService.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\toolrental\\toolrental.webapi\\toolrental.webapi.apiservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{F85FBF2D-8646-AFF4-9EA1-70EED7C6C076}|ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\ToolRental.WebAPI.ApiService.csproj|solutionrelative:toolrental.webapi\\toolrental.webapi.apiservice\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6F6D0D4A-007D-C43E-C8A5-2F774FF9E73E}|ToolRental.WebAPI\\ToolRental.WebAPI.Web\\ToolRental.WebAPI.Web.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\toolrental\\toolrental.webapi\\toolrental.webapi.web\\components\\pages\\customers.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6F6D0D4A-007D-C43E-C8A5-2F774FF9E73E}|ToolRental.WebAPI\\ToolRental.WebAPI.Web\\ToolRental.WebAPI.Web.csproj|solutionrelative:toolrental.webapi\\toolrental.webapi.web\\components\\pages\\customers.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6F6D0D4A-007D-C43E-C8A5-2F774FF9E73E}|ToolRental.WebAPI\\ToolRental.WebAPI.Web\\ToolRental.WebAPI.Web.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\toolrental\\toolrental.webapi\\toolrental.webapi.web\\components\\pages\\rentals.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6F6D0D4A-007D-C43E-C8A5-2F774FF9E73E}|ToolRental.WebAPI\\ToolRental.WebAPI.Web\\ToolRental.WebAPI.Web.csproj|solutionrelative:toolrental.webapi\\toolrental.webapi.web\\components\\pages\\rentals.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6F6D0D4A-007D-C43E-C8A5-2F774FF9E73E}|ToolRental.WebAPI\\ToolRental.WebAPI.Web\\ToolRental.WebAPI.Web.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\toolrental\\toolrental.webapi\\toolrental.webapi.web\\components\\pages\\devices.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6F6D0D4A-007D-C43E-C8A5-2F774FF9E73E}|ToolRental.WebAPI\\ToolRental.WebAPI.Web\\ToolRental.WebAPI.Web.csproj|solutionrelative:toolrental.webapi\\toolrental.webapi.web\\components\\pages\\devices.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F85FBF2D-8646-AFF4-9EA1-70EED7C6C076}|ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\ToolRental.WebAPI.ApiService.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\toolrental\\toolrental.webapi\\toolrental.webapi.apiservice\\dtos\\rentaldto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{F85FBF2D-8646-AFF4-9EA1-70EED7C6C076}|ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\ToolRental.WebAPI.ApiService.csproj|solutionrelative:toolrental.webapi\\toolrental.webapi.apiservice\\dtos\\rentaldto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6F6D0D4A-007D-C43E-C8A5-2F774FF9E73E}|ToolRental.WebAPI\\ToolRental.WebAPI.Web\\ToolRental.WebAPI.Web.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\toolrental\\toolrental.webapi\\toolrental.webapi.web\\components\\layout\\navmenu.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{6F6D0D4A-007D-C43E-C8A5-2F774FF9E73E}|ToolRental.WebAPI\\ToolRental.WebAPI.Web\\ToolRental.WebAPI.Web.csproj|solutionrelative:toolrental.webapi\\toolrental.webapi.web\\components\\layout\\navmenu.razor||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{7E81EE20-5EFE-B6EE-E635-E72B8933CA1F}|..\\ToolRental.Core\\ToolRental.Core.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\toolrental.core\\models\\rental.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{F85FBF2D-8646-AFF4-9EA1-70EED7C6C076}|ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\ToolRental.WebAPI.ApiService.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\toolrental\\toolrental.webapi\\toolrental.webapi.apiservice\\toolrental.webapi.apiservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{F85FBF2D-8646-AFF4-9EA1-70EED7C6C076}|ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\ToolRental.WebAPI.ApiService.csproj|solutionrelative:toolrental.webapi\\toolrental.webapi.apiservice\\toolrental.webapi.apiservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     },
     {
       "AbsoluteMoniker": "D:0:0:{7E81EE20-5EFE-B6EE-E635-E72B8933CA1F}|..\\ToolRental.Core\\ToolRental.Core.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\toolrental.core\\models\\device.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -12,10 +43,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{F85FBF2D-8646-AFF4-9EA1-70EED7C6C076}|ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\ToolRental.WebAPI.ApiService.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\toolrental\\toolrental.webapi\\toolrental.webapi.apiservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
       "RelativeMoniker": "D:0:0:{F85FBF2D-8646-AFF4-9EA1-70EED7C6C076}|ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\ToolRental.WebAPI.ApiService.csproj|solutionrelative:toolrental.webapi\\toolrental.webapi.apiservice\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{F85FBF2D-8646-AFF4-9EA1-70EED7C6C076}|ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\ToolRental.WebAPI.ApiService.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\toolrental\\toolrental.webapi\\toolrental.webapi.apiservice\\toolrental.webapi.apiservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{F85FBF2D-8646-AFF4-9EA1-70EED7C6C076}|ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\ToolRental.WebAPI.ApiService.csproj|solutionrelative:toolrental.webapi\\toolrental.webapi.apiservice\\toolrental.webapi.apiservice.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
     },
     {
       "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\rentallpro_final\\berles2\\confirmationdialog.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -40,7 +67,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
@@ -56,7 +83,97 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
+              "Title": "CustomerForm.razor",
+              "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\CustomerForm.razor",
+              "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\CustomerForm.razor",
+              "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\CustomerForm.razor",
+              "RelativeToolTip": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\CustomerForm.razor",
+              "ViewState": "AgIAACkAAAAAAAAAAAAYwEEAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-29T18:13:47.942Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Rentals.razor",
+              "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Rentals.razor",
+              "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Rentals.razor",
+              "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Rentals.razor",
+              "RelativeToolTip": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Rentals.razor",
+              "ViewState": "AgIAACYAAAAAAAAAAAAowEEAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-29T18:09:03.486Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "Devices.razor",
+              "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Devices.razor",
+              "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Devices.razor",
+              "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Devices.razor",
+              "RelativeToolTip": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Devices.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAwAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-29T18:05:35.263Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Customers.razor",
+              "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Customers.razor",
+              "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Customers.razor",
+              "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Customers.razor",
+              "RelativeToolTip": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Customers.razor",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABsAAAAPAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-29T17:57:06.662Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "NavMenu.razor",
+              "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Layout\\NavMenu.razor",
+              "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Layout\\NavMenu.razor",
+              "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Layout\\NavMenu.razor",
+              "RelativeToolTip": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Layout\\NavMenu.razor",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAABAAAAAjAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-29T17:48:10.689Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "Rental.cs",
+              "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Core\\Models\\Rental.cs",
+              "RelativeDocumentMoniker": "..\\ToolRental.Core\\Models\\Rental.cs",
+              "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Core\\Models\\Rental.cs",
+              "RelativeToolTip": "..\\ToolRental.Core\\Models\\Rental.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-29T17:37:18.231Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "RentalDto.cs",
+              "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\Dtos\\RentalDto.cs",
+              "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\Dtos\\RentalDto.cs",
+              "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\Dtos\\RentalDto.cs",
+              "RelativeToolTip": "ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\Dtos\\RentalDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABoAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-29T17:34:20.657Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
               "Title": "Device.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Core\\Models\\Device.cs",
               "RelativeDocumentMoniker": "..\\ToolRental.Core\\Models\\Device.cs",
@@ -64,25 +181,24 @@
               "RelativeToolTip": "..\\ToolRental.Core\\Models\\Device.cs",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-29T17:16:48.452Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-29T17:16:48.452Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\Program.cs",
               "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\Program.cs",
               "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\Program.cs",
               "RelativeToolTip": "ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\Program.cs",
-              "ViewState": "AgIAACcAAAAAAAAAAAAiwEUAAAADAAAAAAAAAA==",
+              "ViewState": "AgIAADYAAAAAAAAAAAAswE4AAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-29T15:33:24.672Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 10,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\appsettings.json",
               "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\appsettings.json",
@@ -90,12 +206,11 @@
               "RelativeToolTip": "ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\appsettings.json",
               "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
-              "WhenOpened": "2025-09-29T15:32:54.904Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-29T15:32:54.904Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 8,
               "Title": "ToolRental.WebAPI.ApiService.csproj",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\ToolRental.WebAPI.ApiService.csproj",
               "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\ToolRental.WebAPI.ApiService.csproj",
@@ -107,7 +222,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 13,
               "Title": "MainWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\MainWindow.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\MainWindow.xaml.cs",
@@ -115,12 +230,11 @@
               "RelativeToolTip": "..\\berles2\\MainWindow.xaml.cs",
               "ViewState": "AgIAAGkCAAAAAAAAAAAkwHcCAAAaAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-23T09:29:38.204Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-23T09:29:38.204Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 11,
               "Title": "ConfirmationDialog.xaml.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ConfirmationDialog.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\ConfirmationDialog.xaml.cs",
@@ -128,24 +242,22 @@
               "RelativeToolTip": "..\\berles2\\ConfirmationDialog.xaml.cs",
               "ViewState": "AgIAAGAAAAAAAAAAAAAkwI8AAAAhAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-23T09:29:21.571Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-23T09:29:21.571Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 12,
               "Title": "ConfirmationDialog.xaml",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ConfirmationDialog.xaml",
               "RelativeDocumentMoniker": "..\\berles2\\ConfirmationDialog.xaml",
               "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ConfirmationDialog.xaml",
               "RelativeToolTip": "..\\berles2\\ConfirmationDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-09-23T09:28:48.995Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-23T09:28:48.995Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 14,
               "Title": "ReportingWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ReportingWindow.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\ReportingWindow.xaml.cs",
@@ -153,20 +265,18 @@
               "RelativeToolTip": "..\\berles2\\ReportingWindow.xaml.cs",
               "ViewState": "AgIAAHwBAAAAAAAAAAAmwIoBAAA/AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T09:39:59.558Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-15T09:39:59.558Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 15,
               "Title": "DeviceDialog.xaml",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\DeviceDialog.xaml",
               "RelativeDocumentMoniker": "..\\berles2\\DeviceDialog.xaml",
               "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\DeviceDialog.xaml",
               "RelativeToolTip": "..\\berles2\\DeviceDialog.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2025-09-15T09:25:10.12Z",
-              "EditorCaption": ""
+              "WhenOpened": "2025-09-15T09:25:10.12Z"
             }
           ]
         }

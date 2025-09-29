@@ -1,0 +1,77 @@
+﻿@page "/rentals"
+@inject HttpClient Http
+
+<PageTitle>Bérlések</PageTitle>
+
+<h1>Bérlések</h1>
+
+@if (rentals == null)
+{
+    <p><em>Adatok betöltése...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Azonosító</th>
+                <th>Ügyfél</th>
+                <th>Kezdés Dátuma</th>
+                <th>Napok száma</th>
+                <th>Végösszeg</th>
+                <th>Kibérelt Eszközök</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var rental in rentals)
+            {
+                <tr>
+                    <td>@rental.TicketNr</td>
+                    <td>@rental.Customer.Name</td>
+                    <td>@rental.RentStart.ToString("yyyy-MM-dd")</td>
+                    <td>@rental.RentalDays</td>
+                    <td>@rental.TotalAmount.ToString("N0") Ft</td>
+                    <td>
+                        @foreach(var device in rental.Devices)
+                        {
+                            <div>@device.DeviceName</div>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private RentalDto[]? rentals;
+
+    protected override async Task OnInitializedAsync()
+    {
+        rentals = await Http.GetFromJsonAsync<RentalDto[]>("http://apiservice/api/rentals");
+    }
+
+    // Osztályok, amik leírják, milyen adatokat várunk az API-tól
+    // Ezek pontos másolatai az ApiService/Dtos mappában lévő DTO-knak
+    public class CustomerDto
+    {
+        public string Name { get; set; } = string.Empty;
+    }
+
+    public class DeviceDto
+    {
+        public string DeviceName { get; set; } = string.Empty;
+    }
+
+    public class RentalDto
+    {
+        public int Id { get; set; }
+        public string TicketNr { get; set; } = string.Empty;
+        public DateTime RentStart { get; set; }
+        public int RentalDays { get; set; }
+        public decimal TotalAmount { get; set; }
+        public CustomerDto Customer { get; set; } = new();
+        public List<DeviceDto> Devices { get; set; } = new();
+    }
+}

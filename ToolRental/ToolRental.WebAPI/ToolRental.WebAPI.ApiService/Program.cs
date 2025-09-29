@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using ToolRental.Core.Models;
 using ToolRental.Data;
+using ToolRental.WebAPI.ApiService.Dtos; // EZ AZ ÚJ SOR!
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,25 +50,40 @@ app.MapGet("/api/devices", async (ToolRentalDbContext db) =>
     return Results.Ok(devices);
 });
 
-// CSERÉLD LE A TELJES /api/rentals BLOKKOT ERRE AZ ÚJ VERZIÓRA:
 
-// Story 1.3: Bérlések lekérdezése (ÚJ HIBAKERESŐ VERZIÓ)
+
+// Story 1.3: Bérlések lekérdezése (DTO-kkal - HELYES)
 app.MapGet("/api/rentals", async (ToolRentalDbContext db) =>
 {
-    var rentals = await db.Rentals
+    var rentalsFromDb = await db.Rentals
         .Include(r => r.Customer)
         .Include(r => r.RentalDevices)
             .ThenInclude(rd => rd.Device)
         .ToListAsync();
 
-    // Kézzel létrehozzuk a beállításokat, csak ehhez a végponthoz
-    var options = new System.Text.Json.JsonSerializerOptions
+    // Átalakítás DTO-kká a te modelljeid alapján
+    var rentalDtos = rentalsFromDb.Select(r => new RentalDto
     {
-        ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles
-    };
+        Id = r.Id,
+        TicketNr = r.TicketNr,
+        RentStart = r.RentStart,          // JAVÍTVA
+        RentalDays = r.RentalDays,
+        TotalAmount = r.TotalAmount,      // JAVÍTVA
+        Customer = new CustomerDto { Name = r.Customer.Name },
+        Devices = r.RentalDevices.Select(rd => new DeviceDto { DeviceName = rd.Device.DeviceName }).ToList()
+    }).ToList();
 
-    // A Results.Ok helyett a Results.Json-t használjuk a saját beállításainkkal
-    return Results.Json(rentals, options);
+    return Results.Ok(rentalDtos);
+});
+
+
+
+// Story 3.2: Új ügyfél mentése
+app.MapPost("/api/customers", async (Customer customer, ToolRentalDbContext db) =>
+{
+    db.Customers.Add(customer);
+    await db.SaveChangesAsync();
+    return Results.Created($"/api/customers/{customer.Id}", customer);
 });
 
 // Az applikáció futtatása
