@@ -25,4 +25,10 @@
     <ProjectReference Include="..\ToolRental.Core\ToolRental.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="ToolRental.db">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

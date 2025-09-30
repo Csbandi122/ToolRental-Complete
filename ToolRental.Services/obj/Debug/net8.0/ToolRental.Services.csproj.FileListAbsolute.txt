@@ -51,3 +51,4 @@ C:\Users\cseke\source\repos\ToolRental-Complete\RentallPro_final\ToolRental.Serv
 C:\Users\cseke\source\repos\ToolRental-Complete\RentallPro_final\ToolRental.Services\obj\Debug\net8.0\refint\ToolRental.Services.dll
 C:\Users\cseke\source\repos\ToolRental-Complete\RentallPro_final\ToolRental.Services\obj\Debug\net8.0\ToolRental.Services.pdb
 C:\Users\cseke\source\repos\ToolRental-Complete\RentallPro_final\ToolRental.Services\obj\Debug\net8.0\ref\ToolRental.Services.dll
+C:\Users\cseke\source\repos\ToolRental-Complete\RentallPro_final\ToolRental.Services\bin\Debug\net8.0\ToolRental.db

@@ -52,7 +52,9 @@ app.MapGet("/api/devices", async (ToolRentalDbContext db) =>
 
 
 
-// Story 1.3: Bérlések lekérdezése (DTO-kkal - HELYES)
+/// CSERÉLD LE A TELJES /api/rentals BLOKKOT ERRE A VÉGLEGES VERZIÓRA:
+
+// Story 1.3: Bérlések lekérdezése (DTO-kkal - VÉGLEGES)
 app.MapGet("/api/rentals", async (ToolRentalDbContext db) =>
 {
     var rentalsFromDb = await db.Rentals
@@ -66,9 +68,9 @@ app.MapGet("/api/rentals", async (ToolRentalDbContext db) =>
     {
         Id = r.Id,
         TicketNr = r.TicketNr,
-        RentStart = r.RentStart,          // JAVÍTVA
+        RentStart = r.RentStart,      // JAVÍTVA
         RentalDays = r.RentalDays,
-        TotalAmount = r.TotalAmount,      // JAVÍTVA
+        TotalAmount = r.TotalAmount,  // JAVÍTVA
         Customer = new CustomerDto { Name = r.Customer.Name },
         Devices = r.RentalDevices.Select(rd => new DeviceDto { DeviceName = rd.Device.DeviceName }).ToList()
     }).ToList();
