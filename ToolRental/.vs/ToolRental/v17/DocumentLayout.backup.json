@@ -3,10 +3,16 @@
   "WorkspaceRootPath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\ToolRental\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\berles2\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\berles2\\databaseconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\berles2\\databaseconfig.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{48DB4282-8F2F-A2FA-8928-80A276922C26}|..\\ToolRental.Data\\ToolRental.Data.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\toolrental.data\\toolrental.data.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\berles2\\berles2.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{EDDB6EB4-FF5C-E1BE-EC4A-E26C451E92B7}|..\\berles2\\berles2.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\berles2\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{48DB4282-8F2F-A2FA-8928-80A276922C26}|..\\ToolRental.Data\\ToolRental.Data.csproj|c:\\users\\cseke\\source\\repos\\toolrental-complete\\toolrental.data\\designtimedbcontextfactory.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
@@ -101,7 +107,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 9,
           "Children": [
             {
               "$type": "Bookmark",
@@ -117,7 +123,33 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 1,
+              "Title": "ToolRental.Data",
+              "DocumentMoniker": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Data\\ToolRental.Data.csproj",
+              "RelativeDocumentMoniker": "..\\ToolRental.Data\\ToolRental.Data.csproj",
+              "ToolTip": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Data\\ToolRental.Data.csproj",
+              "RelativeToolTip": "..\\ToolRental.Data\\ToolRental.Data.csproj",
+              "ViewState": "AgIAABAAAAAAAAAAAAAewCEAAAAKAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-02-22T18:04:23.235Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "berles2",
+              "DocumentMoniker": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\berles2\\berles2.csproj",
+              "RelativeDocumentMoniker": "..\\berles2\\berles2.csproj",
+              "ToolTip": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\berles2\\berles2.csproj",
+              "RelativeToolTip": "..\\berles2\\berles2.csproj",
+              "ViewState": "AgIAAAEAAAAAAAAAAAAewBEAAAACAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-02-22T18:03:41.693Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
               "Title": "20260222173707_InitialSqlServer.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\ToolRental.Data\\Migrations\\20260222173707_InitialSqlServer.cs",
               "RelativeDocumentMoniker": "..\\ToolRental.Data\\Migrations\\20260222173707_InitialSqlServer.cs",
@@ -130,7 +162,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 4,
               "Title": "DesignTimeDbContextFactory.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\ToolRental.Data\\DesignTimeDbContextFactory.cs",
               "RelativeDocumentMoniker": "..\\ToolRental.Data\\DesignTimeDbContextFactory.cs",
@@ -143,7 +175,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 6,
               "Title": "MainWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\berles2\\MainWindow.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\MainWindow.xaml.cs",
@@ -156,12 +188,12 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 3,
               "Title": "App.xaml.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\berles2\\App.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\App.xaml.cs",
-              "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\berles2\\App.xaml.cs*",
-              "RelativeToolTip": "..\\berles2\\App.xaml.cs*",
+              "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\berles2\\App.xaml.cs",
+              "RelativeToolTip": "..\\berles2\\App.xaml.cs",
               "ViewState": "AgIAAAkAAAAAAAAAAAAUwBcAAAAMAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-22T17:28:03.221Z",
@@ -169,20 +201,20 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 0,
               "Title": "DatabaseConfig.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\berles2\\DatabaseConfig.cs",
               "RelativeDocumentMoniker": "..\\berles2\\DatabaseConfig.cs",
               "ToolTip": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\berles2\\DatabaseConfig.cs",
               "RelativeToolTip": "..\\berles2\\DatabaseConfig.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAUAAAAoAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2026-02-22T17:27:21.391Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 5,
+              "DocumentIndex": 7,
               "Title": "ReportingWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\berles2\\ReportingWindow.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\ReportingWindow.xaml.cs",
@@ -195,7 +227,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 8,
               "Title": "ReportingWindow.xaml",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\berles2\\ReportingWindow.xaml",
               "RelativeDocumentMoniker": "..\\berles2\\ReportingWindow.xaml",
@@ -207,7 +239,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 9,
               "Title": "DataManagerWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\berles2\\DataManagerWindow.xaml.cs",
               "RelativeDocumentMoniker": "..\\berles2\\DataManagerWindow.xaml.cs",
@@ -220,7 +252,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 10,
               "Title": "DataManagerWindow.xaml",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\berles2\\DataManagerWindow.xaml",
               "RelativeDocumentMoniker": "..\\berles2\\DataManagerWindow.xaml",
@@ -232,7 +264,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 9,
+              "DocumentIndex": 11,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Program.cs",
               "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Program.cs",
@@ -245,7 +277,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 13,
+              "DocumentIndex": 15,
               "Title": "ToolRental.db",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\bin\\Release\\net8.0-windows\\ToolRental.db",
               "RelativeDocumentMoniker": "..\\RentallPro_final\\berles2\\bin\\Release\\net8.0-windows\\ToolRental.db",
@@ -256,7 +288,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 14,
+              "DocumentIndex": 16,
               "Title": "CustomerForm.razor",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\CustomerForm.razor",
               "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\CustomerForm.razor",
@@ -268,7 +300,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 16,
+              "DocumentIndex": 18,
               "Title": "Rentals.razor",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Rentals.razor",
               "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Rentals.razor",
@@ -280,7 +312,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 17,
+              "DocumentIndex": 19,
               "Title": "Devices.razor",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Devices.razor",
               "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Devices.razor",
@@ -292,7 +324,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 15,
+              "DocumentIndex": 17,
               "Title": "Customers.razor",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Customers.razor",
               "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Pages\\Customers.razor",
@@ -304,7 +336,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 18,
+              "DocumentIndex": 20,
               "Title": "NavMenu.razor",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Layout\\NavMenu.razor",
               "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.Web\\Components\\Layout\\NavMenu.razor",
@@ -316,7 +348,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 20,
+              "DocumentIndex": 22,
               "Title": "Rental.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Core\\Models\\Rental.cs",
               "RelativeDocumentMoniker": "..\\RentallPro_final\\ToolRental.Core\\Models\\Rental.cs",
@@ -328,7 +360,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 12,
+              "DocumentIndex": 14,
               "Title": "RentalDto.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\Dtos\\RentalDto.cs",
               "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\Dtos\\RentalDto.cs",
@@ -340,7 +372,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 21,
+              "DocumentIndex": 23,
               "Title": "Device.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Core\\Models\\Device.cs",
               "RelativeDocumentMoniker": "..\\RentallPro_final\\ToolRental.Core\\Models\\Device.cs",
@@ -352,7 +384,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 10,
+              "DocumentIndex": 12,
               "Title": "Program.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\Program.cs",
               "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\Program.cs",
@@ -364,7 +396,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 11,
+              "DocumentIndex": 13,
               "Title": "appsettings.json",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\appsettings.json",
               "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\appsettings.json",
@@ -376,7 +408,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 19,
+              "DocumentIndex": 21,
               "Title": "ToolRental.WebAPI.ApiService.csproj",
               "DocumentMoniker": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental\\ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\ToolRental.WebAPI.ApiService.csproj",
               "RelativeDocumentMoniker": "ToolRental.WebAPI\\ToolRental.WebAPI.ApiService\\ToolRental.WebAPI.ApiService.csproj",
@@ -389,7 +421,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 22,
+              "DocumentIndex": 24,
               "Title": "MainWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\MainWindow.xaml.cs",
               "RelativeDocumentMoniker": "..\\RentallPro_final\\berles2\\MainWindow.xaml.cs",
@@ -401,7 +433,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 23,
+              "DocumentIndex": 25,
               "Title": "ConfirmationDialog.xaml.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ConfirmationDialog.xaml.cs",
               "RelativeDocumentMoniker": "..\\RentallPro_final\\berles2\\ConfirmationDialog.xaml.cs",
@@ -413,7 +445,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 24,
+              "DocumentIndex": 26,
               "Title": "ConfirmationDialog.xaml",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ConfirmationDialog.xaml",
               "RelativeDocumentMoniker": "..\\RentallPro_final\\berles2\\ConfirmationDialog.xaml",
@@ -424,7 +456,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 25,
+              "DocumentIndex": 27,
               "Title": "ReportingWindow.xaml.cs",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\ReportingWindow.xaml.cs",
               "RelativeDocumentMoniker": "..\\RentallPro_final\\berles2\\ReportingWindow.xaml.cs",
@@ -436,7 +468,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 26,
+              "DocumentIndex": 28,
               "Title": "DeviceDialog.xaml",
               "DocumentMoniker": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\berles2\\DeviceDialog.xaml",
               "RelativeDocumentMoniker": "..\\RentallPro_final\\berles2\\DeviceDialog.xaml",
