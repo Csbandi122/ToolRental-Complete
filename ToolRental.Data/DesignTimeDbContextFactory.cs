@@ -10,7 +10,7 @@ namespace ToolRental.Data
             var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
 
             // SQLITE connection string (nem SQL Server!)
-            optionsBuilder.UseSqlServer(@"Server=192.168.68.241,1433;Database=ToolRentalDB;User Id=toolrentaluser;Password=ToolRental2025!;TrustServerCertificate=True;");
+            optionsBuilder.UseSqlServer(@"Server=192.168.68.241,1433;Database=ToolRentalDB_TEST;User Id=toolrentaluser;Password=ToolRental2025!;TrustServerCertificate=True;");
             return new ToolRentalDbContext(optionsBuilder.Options);
         }
     }

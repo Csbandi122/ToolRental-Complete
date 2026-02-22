@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Adatbázis kapcsolat beállítása az appsettings.json alapján
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ToolRentalDbContext>(options =>
-    options.UseSqlite(connectionString));
+    options.UseSqlServer(connectionString));
 
 // --- Szolgáltatások beállítása ---
 

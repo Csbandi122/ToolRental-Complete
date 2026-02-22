@@ -215,7 +215,7 @@ namespace berles2
         {
             _filteredDevices = _allDevices.ToList();
             DisplayFilteredDevices();
-        
+
         }
         private void ReviewButton_Click(object sender, RoutedEventArgs e)
         {
@@ -958,7 +958,7 @@ namespace berles2
             {
                 ClearAllForms();
                 //MessageBox.Show("Az ablak inicializálva! Új bérlést kezdhetsz.",
-                  //            "Kész", MessageBoxButton.OK, MessageBoxImage.Information);
+                //            "Kész", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
@@ -1065,7 +1065,7 @@ namespace berles2
                     UseShellExecute = true
                 });
 
-               
+
             }
             catch (Exception ex)
             {
@@ -1270,14 +1270,14 @@ namespace berles2
                 // ÚJ: Számla elérési út mentése az adatbázisba
                 SaveInvoicePath(pdfPath);
 
-               // MessageBox.Show("Számla sikeresen generálva és mentve!",
-                 //             "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                // MessageBox.Show("Számla sikeresen generálva és mentve!",
+                //             "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
             }
         }
 
         private string ReplaceInvoiceVariables(string xmlContent, decimal netPrice, string paymentMode, string paymentDueDate, string devicesList)
         {
-            
+
             // Ügyfél adatok
             xmlContent = xmlContent.Replace("{{CUSTOMER_NAME}}", _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
             xmlContent = xmlContent.Replace("{{CUSTOMER_ZIP}}", _selectedExistingCustomer?.Zipcode ?? CustomerZipTextBox.Text);
@@ -1542,7 +1542,7 @@ namespace berles2
 
             message.Body = bodyBuilder.ToMessageBody();
 
-            // 6. Email küldés - BŐVEBB HIBAKEZELÉSSELlient.Connect(setting.EmailSmtp, setting.SmtpPort, MailKit.Security.Secure
+            // 6. Email küldés 
             using (var client = new SmtpClient())
             {
                 try
@@ -1765,4 +1765,4 @@ namespace berles2
         }
 
     }
-    }
+}
