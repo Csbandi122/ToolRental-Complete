@@ -39,7 +39,7 @@ namespace berles2
         private void InitializeDatabase()
         {
             var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
-            optionsBuilder.UseSqlite("Data Source=ToolRental.db");
+            optionsBuilder.UseSqlServer(DatabaseConfig.ConnectionString);
             _context = new ToolRentalDbContext(optionsBuilder.Options);
         }
 

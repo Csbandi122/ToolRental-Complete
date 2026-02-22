@@ -220,7 +220,7 @@ namespace berles2
         private ToolRentalDbContext GetDbContext()
         {
             var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
-            optionsBuilder.UseSqlite("Data Source=ToolRental.db");
+            optionsBuilder.UseSqlServer(DatabaseConfig.ConnectionString);
             return new ToolRentalDbContext(optionsBuilder.Options);
         }
     }

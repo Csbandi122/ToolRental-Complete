@@ -15,13 +15,13 @@ namespace berles2
         {
             // Adatbázis létrehozása üres állapotban
             using (var context = new ToolRentalDbContext(
-                new DbContextOptionsBuilder<ToolRentalDbContext>()
-                    .UseSqlite("Data Source=ToolRental.db")
-                    .Options))
+               new DbContextOptionsBuilder<ToolRentalDbContext>()
+                   .UseSqlServer(DatabaseConfig.ConnectionString)
+                   .Options))
             {
                 context.Database.EnsureCreated();
             }
-
+            
             base.OnStartup(e);
         }
     }

@@ -59,7 +59,7 @@ namespace berles2
         {
             // Adatbázis kapcsolat inicializálása
             var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
-            optionsBuilder.UseSqlite("Data Source=ToolRental.db");
+            optionsBuilder.UseSqlServer(DatabaseConfig.ConnectionString);
             _context = new ToolRentalDbContext(optionsBuilder.Options);
         }
         private void MainWindow_Activated(object sender, EventArgs e)
