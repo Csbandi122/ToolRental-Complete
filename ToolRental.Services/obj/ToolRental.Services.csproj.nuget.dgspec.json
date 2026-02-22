@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Services\\ToolRental.Services.csproj": {}
+    "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Services\\ToolRental.Services.csproj": {}
   },
   "projects": {
-    "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Core\\ToolRental.Core.csproj": {
+    "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Core\\ToolRental.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Core\\ToolRental.Core.csproj",
+        "projectUniqueName": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Core\\ToolRental.Core.csproj",
         "projectName": "ToolRental.Core",
-        "projectPath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Core\\ToolRental.Core.csproj",
+        "projectPath": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Core\\ToolRental.Core.csproj",
         "packagesPath": "C:\\Users\\cseke\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Core\\obj\\",
+        "outputPath": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Core\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -75,14 +75,14 @@
         }
       }
     },
-    "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Data\\ToolRental.Data.csproj": {
+    "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Data\\ToolRental.Data.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Data\\ToolRental.Data.csproj",
+        "projectUniqueName": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Data\\ToolRental.Data.csproj",
         "projectName": "ToolRental.Data",
-        "projectPath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Data\\ToolRental.Data.csproj",
+        "projectPath": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Data\\ToolRental.Data.csproj",
         "packagesPath": "C:\\Users\\cseke\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Data\\obj\\",
+        "outputPath": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Data\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -103,8 +103,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Core\\ToolRental.Core.csproj": {
-                "projectPath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Core\\ToolRental.Core.csproj"
+              "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Core\\ToolRental.Core.csproj": {
+                "projectPath": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Core\\ToolRental.Core.csproj"
               }
             }
           }
@@ -174,14 +174,14 @@
         }
       }
     },
-    "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Services\\ToolRental.Services.csproj": {
+    "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Services\\ToolRental.Services.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Services\\ToolRental.Services.csproj",
+        "projectUniqueName": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Services\\ToolRental.Services.csproj",
         "projectName": "ToolRental.Services",
-        "projectPath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Services\\ToolRental.Services.csproj",
+        "projectPath": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Services\\ToolRental.Services.csproj",
         "packagesPath": "C:\\Users\\cseke\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Services\\obj\\",
+        "outputPath": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Services\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -202,11 +202,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Core\\ToolRental.Core.csproj": {
-                "projectPath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Core\\ToolRental.Core.csproj"
+              "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Core\\ToolRental.Core.csproj": {
+                "projectPath": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Core\\ToolRental.Core.csproj"
               },
-              "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Data\\ToolRental.Data.csproj": {
-                "projectPath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Data\\ToolRental.Data.csproj"
+              "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Data\\ToolRental.Data.csproj": {
+                "projectPath": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Data\\ToolRental.Data.csproj"
               }
             }
           }

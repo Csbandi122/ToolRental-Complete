@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "ZC4Biz7flew=",
+  "dgSpecHash": "Jp1+o0t+8G4=",
   "success": true,
-  "projectFilePath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Services\\ToolRental.Services.csproj",
+  "projectFilePath": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Services\\ToolRental.Services.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\cseke\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\cseke\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "BngrSV5Tuuo=",
+  "dgSpecHash": "IPwp1SgBq1M=",
   "success": true,
-  "projectFilePath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\RentallPro_final\\ToolRental.Core\\ToolRental.Core.csproj",
+  "projectFilePath": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Core\\ToolRental.Core.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\cseke\\.nuget\\packages\\microsoft.office.interop.word\\15.0.4797.1004\\microsoft.office.interop.word.15.0.4797.1004.nupkg.sha512"
   ],

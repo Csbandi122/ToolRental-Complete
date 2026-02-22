@@ -255,7 +255,16 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridCheckBoxColumn Header="Értékelés küldve" Binding="{Binding ReviewEmailSent}" Width="120"/>
+                            <DataGridTemplateColumn Header="Értékelés küldve" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <CheckBox IsChecked="{Binding ReviewEmailSent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                      HorizontalAlignment="Center"
+                      Checked="ReviewEmailSent_Changed"
+                      Unchecked="ReviewEmailSent_Changed"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>

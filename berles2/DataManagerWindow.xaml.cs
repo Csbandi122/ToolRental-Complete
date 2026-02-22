@@ -415,6 +415,26 @@ namespace berles2
         {
             LoadRentals();
         }
+        private void ReviewEmailSent_Changed(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox checkBox && checkBox.DataContext is RentalDisplayModel displayModel)
+            {
+                try
+                {
+                    var rental = _context.Rentals.Find(displayModel.Id);
+                    if (rental != null)
+                    {
+                        rental.ReviewEmailSent = displayModel.ReviewEmailSent;
+                        _context.SaveChanges();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Hiba a mentéskor: {ex.Message}", "Hiba",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+        }
 
         private void FilterRentals()
         {

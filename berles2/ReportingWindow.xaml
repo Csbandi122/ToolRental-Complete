@@ -58,10 +58,22 @@
                                 <RowDefinition Height="40"/>
                             </Grid.RowDefinitions>
 
-                            <!-- GRAFIKON CÍM -->
-                            <TextBlock Grid.Row="0" Text="📊 Havi pénzügyi áttekintés - 2025" 
-                                      FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"/>
-
+                            <!-- GRAFIKON CÍM + ÉV SZŰRŐ -->
+                            <Grid Grid.Row="0">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock x:Name="ChartTitleText" Grid.Column="0"
+              Text="📊 Havi pénzügyi áttekintés"
+              FontSize="16" FontWeight="Bold" HorizontalAlignment="Center"
+              VerticalAlignment="Center"/>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,5,0">
+                                    <TextBlock Text="Év:" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,5,0"/>
+                                    <ComboBox x:Name="FinancialYearComboBox" Width="100" Height="25"
+                 SelectionChanged="FinancialYearComboBox_SelectionChanged"/>
+                                </StackPanel>
+                            </Grid>
                             <!-- GRAFIKON TERÜLET -->
                             <Canvas Grid.Row="1" x:Name="ChartCanvas" Background="#FAFAFA" Margin="40,10,10,10"/>
 
@@ -87,7 +99,17 @@
             <!-- ESZKÖZÖK FÜL -->
             <TabItem Header="🔧 Eszközök">
                 <Grid Margin="10">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <!-- ÉV SZŰRŐ -->
+                    <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center">
+                        <TextBlock Text="Év szűrő:" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                        <ComboBox x:Name="DeviceYearComboBox" Width="100" Height="25"
+                     SelectionChanged="DeviceYearComboBox_SelectionChanged"/>
+                    </StackPanel>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                         <StackPanel>
                             <!-- FEJLÉC -->
                             <Border Background="#FF5722" CornerRadius="5,5,0,0" Padding="15,10,15,10" Margin="0,0,0,0">

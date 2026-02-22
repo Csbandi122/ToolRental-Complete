@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Windows;
+using System.Windows.Controls;
+using ToolRental.Core.Models;
 using ToolRental.Data;
 
 namespace berles2
@@ -7,14 +9,15 @@ namespace berles2
     public partial class ReportingWindow : Window
     {
         private ToolRentalDbContext _context;
-
+        private int? _selectedFinancialYear;
+        private int? _selectedDeviceYear;
         public ReportingWindow()
         {
             InitializeComponent();
             InitializeDatabase();
-            LoadFinancialData();
-            
             ChartCanvas.SizeChanged += ChartCanvas_SizeChanged;
+            LoadYearFilters();
+            LoadFinancialData();
         }
 
         private void InitializeDatabase()
@@ -151,40 +154,119 @@ namespace berles2
             _context?.Dispose();
             base.OnClosed(e);
         }
+        private void LoadYearFilters()
+        {
+            // Pénzügyek évek
+            var financialYears = _context.Financials
+                .Select(f => f.Date.Year)
+                .Distinct()
+                .OrderByDescending(y => y)
+                .ToList();
+
+            FinancialYearComboBox.SelectionChanged -= FinancialYearComboBox_SelectionChanged;
+            FinancialYearComboBox.Items.Clear();
+            FinancialYearComboBox.Items.Add("Összes");
+            foreach (var year in financialYears)
+                FinancialYearComboBox.Items.Add(year.ToString());
+
+            var currentYearStr = DateTime.Now.Year.ToString();
+            var matchF = FinancialYearComboBox.Items.Cast<object>().FirstOrDefault(i => i.ToString() == currentYearStr);
+            FinancialYearComboBox.SelectedItem = matchF ?? FinancialYearComboBox.Items[0];
+            _selectedFinancialYear = matchF != null ? DateTime.Now.Year : (int?)null;
+            FinancialYearComboBox.SelectionChanged += FinancialYearComboBox_SelectionChanged;
+
+            // Eszközök évek (bérlések alapján)
+            var deviceYears = _context.Rentals
+                .Select(r => r.RentStart.Year)
+                .Distinct()
+                .OrderByDescending(y => y)
+                .ToList();
+
+            DeviceYearComboBox.SelectionChanged -= DeviceYearComboBox_SelectionChanged;
+            DeviceYearComboBox.Items.Clear();
+            DeviceYearComboBox.Items.Add("Összes");
+            foreach (var year in deviceYears)
+                DeviceYearComboBox.Items.Add(year.ToString());
+
+            var matchD = DeviceYearComboBox.Items.Cast<object>().FirstOrDefault(i => i.ToString() == currentYearStr);
+            DeviceYearComboBox.SelectedItem = matchD ?? DeviceYearComboBox.Items[0];
+            _selectedDeviceYear = matchD != null ? DateTime.Now.Year : (int?)null;
+            DeviceYearComboBox.SelectionChanged += DeviceYearComboBox_SelectionChanged;
+        }
         private void LoadChart()
         {
             try
             {
                 ChartCanvas.Children.Clear();
+                var chartData = new List<MonthlyData>();
 
-                var currentYear = DateTime.Now.Year;
-                var monthlyData = new List<MonthlyData>();
-
-                // 12 hónap adatainak lekérdezése
-                for (int month = 1; month <= 12; month++)
+                if (_selectedFinancialYear.HasValue)
                 {
-                    var monthStart = new DateTime(currentYear, month, 1);
-                    var monthEnd = monthStart.AddMonths(1);
-
-                    var revenue = _context.Financials
-                        .Where(f => f.Date >= monthStart && f.Date < monthEnd && f.EntryType == "bevétel")
-                        .Sum(f => (decimal?)f.Amount) ?? 0;
-
-                    var expense = _context.Financials
-                        .Where(f => f.Date >= monthStart && f.Date < monthEnd && f.EntryType == "költség")
-                        .Sum(f => (decimal?)f.Amount) ?? 0;
-
-                    monthlyData.Add(new MonthlyData
+                    // Havi nézet – kiválasztott év
+                    for (int month = 1; month <= 12; month++)
                     {
-                        Month = month,
-                        MonthName = GetHungarianMonthName(month),
-                        Revenue = revenue,
-                        Expense = expense,
-                        Profit = revenue - expense
-                    });
+                        var monthStart = new DateTime(_selectedFinancialYear.Value, month, 1);
+                        var monthEnd = monthStart.AddMonths(1);
+
+                        var revenue = _context.Financials
+                            .Where(f => f.Date >= monthStart && f.Date < monthEnd && f.EntryType == "bevétel")
+                            .Sum(f => (decimal?)f.Amount) ?? 0;
+
+                        var expense = _context.Financials
+                            .Where(f => f.Date >= monthStart && f.Date < monthEnd && f.EntryType == "költség")
+                            .Sum(f => (decimal?)f.Amount) ?? 0;
+
+                        chartData.Add(new MonthlyData
+                        {
+                            Month = month,
+                            MonthName = GetHungarianMonthName(month),
+                            Revenue = revenue,
+                            Expense = expense,
+                            Profit = revenue - expense
+                        });
+                    }
+
+                    if (ChartTitleText != null)
+                        ChartTitleText.Text = $"📊 Havi pénzügyi áttekintés - {_selectedFinancialYear.Value}";
+                }
+                else
+                {
+                    // Éves összesített nézet – összes év
+                    var years = _context.Financials
+                        .Select(f => f.Date.Year)
+                        .Distinct()
+                        .OrderBy(y => y)
+                        .ToList();
+
+                    for (int i = 0; i < years.Count; i++)
+                    {
+                        var year = years[i];
+                        var yearStart = new DateTime(year, 1, 1);
+                        var yearEnd = yearStart.AddYears(1);
+
+                        var revenue = _context.Financials
+                            .Where(f => f.Date >= yearStart && f.Date < yearEnd && f.EntryType == "bevétel")
+                            .Sum(f => (decimal?)f.Amount) ?? 0;
+
+                        var expense = _context.Financials
+                            .Where(f => f.Date >= yearStart && f.Date < yearEnd && f.EntryType == "költség")
+                            .Sum(f => (decimal?)f.Amount) ?? 0;
+
+                        chartData.Add(new MonthlyData
+                        {
+                            Month = i + 1,
+                            MonthName = year.ToString(),
+                            Revenue = revenue,
+                            Expense = expense,
+                            Profit = revenue - expense
+                        });
+                    }
+
+                    if (ChartTitleText != null)
+                        ChartTitleText.Text = "📊 Éves pénzügyi áttekintés - Összes";
                 }
 
-                DrawChart(monthlyData);
+                DrawChart(chartData);
             }
             catch (Exception ex)
             {
@@ -201,7 +283,8 @@ namespace berles2
 
             var chartWidth = ChartCanvas.ActualWidth - 60;
             var chartHeight = ChartCanvas.ActualHeight - 40;
-            var barWidth = chartWidth / 12 / 4; // 12 hónap, 4 hely oszloponként
+            var count = Math.Max(data.Count, 1);
+            var barWidth = chartWidth / count / 4;
             var zeroLine = chartHeight / 2; // Középső vonal (0 szint)
 
             // 0-vonal rajzolása
@@ -219,7 +302,7 @@ namespace berles2
             for (int i = 0; i < data.Count; i++)
             {
                 var monthData = data[i];
-                var x = 30 + (i * chartWidth / 12);
+                var x = 30 + (i * chartWidth / count);
 
                 // Hónap címkéje a 0-vonalon
                 var monthLabel = new System.Windows.Controls.TextBlock
@@ -343,6 +426,21 @@ namespace berles2
         {
             LoadChart();
         }
+        private void FinancialYearComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (FinancialYearComboBox.SelectedItem == null) return;
+            var selected = FinancialYearComboBox.SelectedItem.ToString();
+            _selectedFinancialYear = selected == "Összes" ? (int?)null : int.Parse(selected);
+            LoadChart();
+        }
+
+        private void DeviceYearComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (DeviceYearComboBox.SelectedItem == null) return;
+            var selected = DeviceYearComboBox.SelectedItem.ToString();
+            _selectedDeviceYear = selected == "Összes" ? (int?)null : int.Parse(selected);
+            LoadDeviceData();
+        }
         private void LoadDeviceData()
         {
             try
@@ -357,18 +455,26 @@ namespace berles2
                 foreach (var device in devices)
                 {
                     // Bérlések száma
-                    var rentalCount = _context.RentalDevices
-                        .Where(rd => rd.DeviceId == device.Id)
-                        .Count();
+                    var rentalCountQuery = _context.RentalDevices
+    .Where(rd => rd.DeviceId == device.Id);
+
+                    if (_selectedDeviceYear.HasValue)
+                        rentalCountQuery = rentalCountQuery.Where(rd => rd.Rental.RentStart.Year == _selectedDeviceYear.Value);
+
+                    var rentalCount = rentalCountQuery.Count();
 
                     // ÁTMENETI EGYSZERŰ MEGOLDÁS - bérlési bevételek helyes számítása
                     var revenue = 0m;
 
                     // Bérlések száma és bevétel számítása
-                    var deviceRentals = _context.RentalDevices
-                        .Where(rd => rd.DeviceId == device.Id)
-                        .Include(rd => rd.Rental)
-                        .ToList();
+                    IQueryable<RentalDevice> deviceRentalsQuery = _context.RentalDevices
+    .Where(rd => rd.DeviceId == device.Id)
+    .Include(rd => rd.Rental);
+
+                    if (_selectedDeviceYear.HasValue)
+                        deviceRentalsQuery = deviceRentalsQuery.Where(rd => rd.Rental.RentStart.Year == _selectedDeviceYear.Value);
+
+                    var deviceRentals = deviceRentalsQuery.ToList();
 
                     foreach (var rentalDevice in deviceRentals)
                     {
@@ -427,22 +533,20 @@ namespace berles2
 
                     // JAVÍTOTT költségszámítás - elosztja az összeget
                     var expense = _context.FinancialDevices
-                        .Where(fd => fd.DeviceId == device.Id)
-                        .Join(_context.Financials,
-                              fd => fd.FinancialId,
-                              f => f.Id,
-                              (fd, f) => new { fd, f })
-                        .Where(x => x.f.EntryType == "költség")
-                        .ToList() // Memóriába töltés a további számításokhoz
-                        .Sum(x =>
-                        {
-                            // Hány eszközre vonatkozik ez a Financial rekord?
-                            var deviceCount = _context.FinancialDevices
-                                .Count(fd => fd.FinancialId == x.f.Id);
-
-                            // Elosztjuk az összeget az eszközök számával
-                            return deviceCount > 0 ? x.f.Amount / deviceCount : 0;
-                        });
+    .Where(fd => fd.DeviceId == device.Id)
+    .Join(_context.Financials,
+          fd => fd.FinancialId,
+          f => f.Id,
+          (fd, f) => new { fd, f })
+    .Where(x => x.f.EntryType == "költség" &&
+                (!_selectedDeviceYear.HasValue || x.f.Date.Year == _selectedDeviceYear.Value))
+    .ToList()
+    .Sum(x =>
+    {
+        var deviceCount = _context.FinancialDevices
+            .Count(fd => fd.FinancialId == x.f.Id);
+        return deviceCount > 0 ? x.f.Amount / deviceCount : 0;
+    });
 
                     deviceStats.Add(new DeviceStats
                     {
