@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Win32;
 using System;
 using System.IO;
@@ -11,7 +12,7 @@ namespace berles2
 {
     public partial class SettingsDialog : Window
     {
-        private ToolRentalDbContext _context;
+        private ToolRentalDbContext? _context;
         private Setting? _currentSetting;
 
         public SettingsDialog()
@@ -23,17 +24,37 @@ namespace berles2
 
         private void InitializeDatabase()
         {
-            var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
-            optionsBuilder.UseSqlServer(DatabaseConfig.ConnectionString);
-            _context = new ToolRentalDbContext(optionsBuilder.Options);
+            // Csak akkor nyitjuk meg az adatbázist, ha már van beállítva connection string
+            if (DatabaseConfig.IsConfigured)
+            {
+                var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
+                optionsBuilder.UseSqlServer(DatabaseConfig.ConnectionString);
+                _context = new ToolRentalDbContext(optionsBuilder.Options);
+            }
         }
 
         private void LoadSettings()
         {
             try
             {
+                // SQL szerver beállítások betöltése az appsettings.json-ból
+                SqlServerTextBox.Text = DatabaseConfig.Server;
+                SqlPortTextBox.Text = DatabaseConfig.Port.ToString();
+                SqlDatabaseTextBox.Text = DatabaseConfig.Database;
+                SqlUserIdTextBox.Text = DatabaseConfig.UserId;
+                SqlPasswordBox.Password = DatabaseConfig.Password;
+                SqlTrustCertCheckBox.IsChecked = DatabaseConfig.TrustServerCertificate;
+
+                // Ha nincs még SQL kapcsolat konfigurálva, figyelmeztető szín
+                if (!DatabaseConfig.IsConfigured)
+                {
+                    SqlServerGroupBox.BorderBrush = System.Windows.Media.Brushes.OrangeRed;
+                    SqlTestResultText.Text = "⚠️ Az SQL szerver még nincs beállítva!";
+                    SqlTestResultText.Foreground = System.Windows.Media.Brushes.OrangeRed;
+                }
+
                 // Első Setting rekord betöltése (ha van)
-                _currentSetting = _context.Settings.FirstOrDefault();
+                _currentSetting = _context?.Settings.FirstOrDefault();
 
                 if (_currentSetting != null)
                 {
@@ -76,6 +97,60 @@ namespace berles2
                               "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        #region SQL kapcsolat teszt
+
+        private void TestConnectionButton_Click(object sender, RoutedEventArgs e)
+        {
+            string server = SqlServerTextBox.Text.Trim();
+            string portText = SqlPortTextBox.Text.Trim();
+            string database = SqlDatabaseTextBox.Text.Trim();
+            string userId = SqlUserIdTextBox.Text.Trim();
+            string password = SqlPasswordBox.Password;
+            bool trustCert = SqlTrustCertCheckBox.IsChecked == true;
+
+            if (string.IsNullOrWhiteSpace(server) || string.IsNullOrWhiteSpace(database)
+                || string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(password))
+            {
+                SqlTestResultText.Text = "❌ Töltsd ki az összes SQL szerver mezőt!";
+                SqlTestResultText.Foreground = System.Windows.Media.Brushes.Red;
+                return;
+            }
+
+            if (!int.TryParse(portText, out int port) || port <= 0)
+            {
+                SqlTestResultText.Text = "❌ Érvénytelen port szám!";
+                SqlTestResultText.Foreground = System.Windows.Media.Brushes.Red;
+                return;
+            }
+
+            SqlTestResultText.Text = "⏳ Kapcsolódás...";
+            SqlTestResultText.Foreground = System.Windows.Media.Brushes.Gray;
+            TestConnectionButton.IsEnabled = false;
+
+            try
+            {
+                string testConnStr = $"Server={server},{port};Database={database};User Id={userId};Password={password};TrustServerCertificate={trustCert.ToString().ToLower()};Connect Timeout=5;";
+                using var conn = new SqlConnection(testConnStr);
+                conn.Open();
+
+                SqlTestResultText.Text = "✅ Kapcsolat sikeres!";
+                SqlTestResultText.Foreground = System.Windows.Media.Brushes.Green;
+                SqlServerGroupBox.BorderBrush = System.Windows.Media.Brushes.Green;
+            }
+            catch (Exception ex)
+            {
+                SqlTestResultText.Text = $"❌ Kapcsolat sikertelen: {ex.Message}";
+                SqlTestResultText.Foreground = System.Windows.Media.Brushes.Red;
+                SqlServerGroupBox.BorderBrush = System.Windows.Media.Brushes.Red;
+            }
+            finally
+            {
+                TestConnectionButton.IsEnabled = true;
+            }
+        }
+
+        #endregion
 
         #region Fájl tallózó gombok
 
@@ -187,6 +262,47 @@ namespace berles2
 
         private bool ValidateForm()
         {
+            // SQL szerver validáció
+            if (string.IsNullOrWhiteSpace(SqlServerTextBox.Text))
+            {
+                MessageBox.Show("Az SQL szerver neve/IP megadása kötelező!", "Hiba",
+                              MessageBoxButton.OK, MessageBoxImage.Warning);
+                SqlServerTextBox.Focus();
+                return false;
+            }
+
+            if (!int.TryParse(SqlPortTextBox.Text, out int sqlPort) || sqlPort <= 0)
+            {
+                MessageBox.Show("Érvényes SQL szerver port megadása kötelező!", "Hiba",
+                              MessageBoxButton.OK, MessageBoxImage.Warning);
+                SqlPortTextBox.Focus();
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(SqlDatabaseTextBox.Text))
+            {
+                MessageBox.Show("Az adatbázis neve megadása kötelező!", "Hiba",
+                              MessageBoxButton.OK, MessageBoxImage.Warning);
+                SqlDatabaseTextBox.Focus();
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(SqlUserIdTextBox.Text))
+            {
+                MessageBox.Show("Az SQL felhasználónév megadása kötelező!", "Hiba",
+                              MessageBoxButton.OK, MessageBoxImage.Warning);
+                SqlUserIdTextBox.Focus();
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(SqlPasswordBox.Password))
+            {
+                MessageBox.Show("Az SQL jelszó megadása kötelező!", "Hiba",
+                              MessageBoxButton.OK, MessageBoxImage.Warning);
+                SqlPasswordBox.Focus();
+                return false;
+            }
+
             if (string.IsNullOrWhiteSpace(CompanyNameTextBox.Text))
             {
                 MessageBox.Show("A cégnév megadása kötelező!", "Hiba",
@@ -289,6 +405,26 @@ namespace berles2
 
         private void SaveSettings()
         {
+            // SQL szerver beállítások mentése appsettings.json-ba
+            int.TryParse(SqlPortTextBox.Text, out int sqlPort);
+            DatabaseConfig.Save(
+                server: SqlServerTextBox.Text.Trim(),
+                port: sqlPort > 0 ? sqlPort : 1433,
+                database: SqlDatabaseTextBox.Text.Trim(),
+                userId: SqlUserIdTextBox.Text.Trim(),
+                password: SqlPasswordBox.Password,
+                trustServerCertificate: SqlTrustCertCheckBox.IsChecked == true
+            );
+
+            // Ha még nincs DB context (első indítás), most inicializáljuk
+            if (_context == null)
+            {
+                var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
+                optionsBuilder.UseSqlServer(DatabaseConfig.ConnectionString);
+                _context = new ToolRentalDbContext(optionsBuilder.Options);
+                _context.Database.EnsureCreated();
+            }
+
             if (_currentSetting == null)
             {
                 // Új Setting létrehozása

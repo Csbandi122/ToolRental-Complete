@@ -1,8 +1,83 @@
-﻿namespace berles2
+using Microsoft.Extensions.Configuration;
+using System.IO;
+
+namespace berles2
 {
     public static class DatabaseConfig
     {
-        public static string ConnectionString =>
-            @"Server=192.168.68.241,1433;Database=ToolRentalDB_TEST;User Id=toolrentaluser;Password=ToolRental2025!;TrustServerCertificate=True;";
+        private static IConfiguration? _configuration;
+
+        private static IConfiguration Configuration
+        {
+            get
+            {
+                if (_configuration == null)
+                {
+                    _configuration = new ConfigurationBuilder()
+                        .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                        .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+                        .Build();
+                }
+                return _configuration;
+            }
+        }
+
+        public static string Server => Configuration["DatabaseSettings:Server"] ?? "";
+        public static int Port => int.TryParse(Configuration["DatabaseSettings:Port"], out int p) ? p : 1433;
+        public static string Database => Configuration["DatabaseSettings:Database"] ?? "";
+        public static string UserId => Configuration["DatabaseSettings:UserId"] ?? "";
+        public static string Password => Configuration["DatabaseSettings:Password"] ?? "";
+        public static bool TrustServerCertificate => bool.TryParse(Configuration["DatabaseSettings:TrustServerCertificate"], out bool t) ? t : true;
+
+        /// <summary>
+        /// Visszaadja a connection string-et az appsettings.json alapján.
+        /// Ha nincs beállítva, üres string-et ad vissza.
+        /// </summary>
+        public static string ConnectionString
+        {
+            get
+            {
+                if (string.IsNullOrWhiteSpace(Server) || string.IsNullOrWhiteSpace(Database)
+                    || string.IsNullOrWhiteSpace(UserId) || string.IsNullOrWhiteSpace(Password))
+                {
+                    return string.Empty;
+                }
+
+                return $"Server={Server},{Port};Database={Database};User Id={UserId};Password={Password};TrustServerCertificate={TrustServerCertificate};";
+            }
+        }
+
+        /// <summary>
+        /// Ellenőrzi, hogy be vannak-e állítva az SQL szerver adatok.
+        /// </summary>
+        public static bool IsConfigured => !string.IsNullOrEmpty(ConnectionString);
+
+        /// <summary>
+        /// Elmenti az SQL szerver beállításokat az appsettings.json fájlba.
+        /// </summary>
+        public static void Save(string server, int port, string database, string userId, string password, bool trustServerCertificate)
+        {
+            var appSettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json");
+
+            var json = $@"{{
+  ""DatabaseSettings"": {{
+    ""Server"": ""{EscapeJson(server)}"",
+    ""Port"": {port},
+    ""Database"": ""{EscapeJson(database)}"",
+    ""UserId"": ""{EscapeJson(userId)}"",
+    ""Password"": ""{EscapeJson(password)}"",
+    ""TrustServerCertificate"": {trustServerCertificate.ToString().ToLower()}
+  }}
+}}";
+            File.WriteAllText(appSettingsPath, json);
+
+            // Konfiguráció újratöltése
+            _configuration = null;
+        }
+
+        private static string EscapeJson(string value)
+        {
+            return value.Replace("\\", "\\\\").Replace("\"", "\\\"");
+        }
     }
 }
