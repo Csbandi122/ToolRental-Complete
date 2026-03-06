@@ -1,6 +1,4 @@
-﻿using DocumentFormat.OpenXml.Packaging;
-using DocumentFormat.OpenXml.Wordprocessing;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -16,17 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ToolRental.Core.Models;
 using ToolRental.Data;
-using BorderValues = DocumentFormat.OpenXml.Wordprocessing.BorderValues;
-using OpenXmlBold = DocumentFormat.OpenXml.Wordprocessing.Bold;
-using OpenXmlParagraph = DocumentFormat.OpenXml.Wordprocessing.Paragraph;
-using OpenXmlRun = DocumentFormat.OpenXml.Wordprocessing.Run;
-// ALIASOK - mint a régi kódban
-using OpenXmlTable = DocumentFormat.OpenXml.Wordprocessing.Table;
-using OpenXmlTableCell = DocumentFormat.OpenXml.Wordprocessing.TableCell;
-using OpenXmlTableRow = DocumentFormat.OpenXml.Wordprocessing.TableRow;
-using OpenXmlText = DocumentFormat.OpenXml.Wordprocessing.Text;
 using SystemIO = System.IO;
-using Word = Microsoft.Office.Interop.Word;
 using WpfBorder = System.Windows.Controls.Border;
 using System.Linq;
 
@@ -984,44 +972,40 @@ namespace berles2
         {
             try
             {
-                // 1. Beállítások betöltése
                 var setting = _context.Settings.FirstOrDefault();
-                if (setting?.TemplateContract == null || !SystemIO.File.Exists(setting.TemplateContract))
+                if (setting == null)
                 {
-                    MessageBox.Show("A szerződés sablon nincs beállítva vagy nem található!\nKérjük állítsa be a Beállítások menüben.",
+                    MessageBox.Show("Nincsenek beállítások! Kérjük állítsa be a Beállítások menüben.",
                                   "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
-                // 2. Mappák létrehozása
-                string exeDirectory = SystemIO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
-                string contractsFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-word");
-                SystemIO.Directory.CreateDirectory(contractsFolder);
+                int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int d) ? Math.Max(1, d) : 1;
+                int discount   = int.TryParse(DiscountTextBox.Text,   out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
+                decimal total  = _selectedDevices.Sum(dev => dev.RentPrice) * (100 - discount) / 100 * rentalDays;
 
-                // 3. Fájlnév generálása
-                string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
-                _lastContractTimestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
-                string rentalDate = _lastContractTimestamp;
-                string fileName = $"szerződés_{customerName}_{rentalDate}.docx";
-                string outputPath = SystemIO.Path.Combine(contractsFolder, fileName);
-
-                // 4. Template másolása
-                SystemIO.File.Copy(setting.TemplateContract, outputPath, true);
-
-                // 5. Változók helyettesítése
-                ReplaceVariablesInWordDocument(outputPath);
-
-                // 6. Word -> PDF konverzió
-                string pdfPath = ConvertWordToPdfFromPath(outputPath);
-                if (string.IsNullOrEmpty(pdfPath))
-                    return;
-
-                // 7. PDF megnyitása (nem a Word fájl!)
-                Process.Start(new ProcessStartInfo
+                var data = new Services.ContractData
                 {
-                    FileName = pdfPath,
-                    UseShellExecute = true
-                });
+                    CustomerName     = _selectedExistingCustomer?.Name      ?? CustomerNameTextBox.Text,
+                    CustomerZip      = _selectedExistingCustomer?.Zipcode   ?? CustomerZipTextBox.Text,
+                    CustomerCity     = _selectedExistingCustomer?.City      ?? CustomerCityTextBox.Text,
+                    CustomerAddress  = _selectedExistingCustomer?.Address   ?? CustomerAddressTextBox.Text,
+                    CustomerEmail    = _selectedExistingCustomer?.Email     ?? CustomerEmailTextBox.Text,
+                    CustomerIdNumber = _selectedExistingCustomer?.IdNumber  ?? CustomerIdNumberTextBox.Text,
+                    RentalDays       = rentalDays,
+                    DiscountPercent  = discount,
+                    TotalAmount      = total,
+                    Devices          = _selectedDevices.ToList()
+                };
+
+                _lastContractTimestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
+
+                var docService = new Services.DocumentService(setting);
+                string pdfPath = docService.GenerateContract(data);
+
+                if (string.IsNullOrEmpty(pdfPath)) return;
+
+                Process.Start(new ProcessStartInfo { FileName = pdfPath, UseShellExecute = true });
             }
             catch (Exception ex)
             {
@@ -1029,141 +1013,6 @@ namespace berles2
                 MessageBox.Show($"Hiba a szerződés generálásakor: {ex.Message}",
                               "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-        }
-
-        private void ReplaceVariablesInWordDocument(string filePath)
-        {
-            using (WordprocessingDocument document = WordprocessingDocument.Open(filePath, true))
-            {
-                var body = document.MainDocumentPart?.Document.Body;
-                if (body != null)
-                {
-                    // Szöveg elemek változói
-                    foreach (var text in body.Descendants<OpenXmlText>())
-                    {
-                        if (text.Text.Contains("{{"))
-                        {
-                            string originalText = text.Text;
-
-                            // Ügyfél adatok
-                            originalText = originalText.Replace("{{CUSTOMER_NAME}}", _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
-                            originalText = originalText.Replace("{{CUSTOMER_ZIP}}", _selectedExistingCustomer?.Zipcode ?? CustomerZipTextBox.Text);
-                            originalText = originalText.Replace("{{CUSTOMER_CITY}}", _selectedExistingCustomer?.City ?? CustomerCityTextBox.Text);
-                            originalText = originalText.Replace("{{CUSTOMER_ADDRESS}}", _selectedExistingCustomer?.Address ?? CustomerAddressTextBox.Text);
-                            originalText = originalText.Replace("{{CUSTOMER_EMAIL}}", _selectedExistingCustomer?.Email ?? CustomerEmailTextBox.Text);
-                            originalText = originalText.Replace("{{CUSTOMER_ID_NUMBER}}", _selectedExistingCustomer?.IdNumber ?? CustomerIdNumberTextBox.Text);
-
-                            // Bérlés adatok
-                            originalText = originalText.Replace("{{RENTAL_DATE}}", DateTime.Now.ToString("yyyy. MM. dd."));
-                            originalText = originalText.Replace("{{RENTAL_DAYS}}", RentalDaysTextBox.Text);
-                            originalText = originalText.Replace("{{DEVICE_COUNT}}", _selectedDevices.Count.ToString());
-
-                            // Végösszeg kedvezménnyel
-                            int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int days) ? days : 1;
-                            int discount = 0;
-                            if (int.TryParse(DiscountTextBox.Text, out int disc))
-                            {
-                                discount = Math.Max(0, Math.Min(100, disc));
-                            }
-                            decimal dailyTotal = _selectedDevices.Sum(d => d.RentPrice);
-                            decimal discountedDailyTotal = dailyTotal * (100 - discount) / 100;
-                            decimal totalAmount = discountedDailyTotal * rentalDays;
-                            originalText = originalText.Replace("{{TOTAL_AMOUNT}}", $"{totalAmount:N0}");
-
-                            text.Text = originalText;
-                        }
-                    }
-
-                    // TÁBLÁZAT GENERÁLÁS
-                    ReplaceDeviceTable(body);
-                }
-
-                document.Save();
-            }
-        }
-
-        private void ReplaceDeviceTable(Body body)
-        {
-            foreach (var text in body.Descendants<OpenXmlText>())
-            {
-                if (text.Text.Contains("{{DEVICE_TABLE}}"))
-                {
-                    // Táblázat létrehozása - PONT MINT A RÉGI KÓDBAN
-                    OpenXmlTable table = new OpenXmlTable();
-
-                    // Táblázat tulajdonságok - RÉGI KÓD ALAPJÁN
-                    TableProperties tblProp = new TableProperties(
-                        new TableBorders(
-                            new TopBorder() { Val = BorderValues.Single, Size = 12 },
-                            new BottomBorder() { Val = BorderValues.Single, Size = 12 },
-                            new LeftBorder() { Val = BorderValues.Single, Size = 12 },
-                            new RightBorder() { Val = BorderValues.Single, Size = 12 },
-                            new InsideHorizontalBorder() { Val = BorderValues.Single, Size = 12 },
-                            new InsideVerticalBorder() { Val = BorderValues.Single, Size = 12 }
-                        )
-                    );
-                    table.AppendChild(tblProp);
-
-                    // Fejléc sor - RÉGI KÓD ALAPJÁN
-                    OpenXmlTableRow headerRow = new OpenXmlTableRow();
-                    headerRow.AppendChild(CreateTableCell("Eszköztípus", true));
-                    headerRow.AppendChild(CreateTableCell("Eszköz neve", true));
-                    headerRow.AppendChild(CreateTableCell("Sorozatszám", true));
-                    headerRow.AppendChild(CreateTableCell("Eszköz értéke", true));
-                    headerRow.AppendChild(CreateTableCell("Bérleti díj", true));
-                    table.AppendChild(headerRow);
-
-                    // Eszköz sorok - RÉGI KÓD ALAPJÁN
-                    foreach (var device in _selectedDevices)
-                    {
-                        OpenXmlTableRow dataRow = new OpenXmlTableRow();
-                        dataRow.AppendChild(CreateTableCell(device.DeviceTypeNavigation?.TypeName ?? "N/A", false));
-                        dataRow.AppendChild(CreateTableCell(device.DeviceName, false));
-                        dataRow.AppendChild(CreateTableCell(device.Serial, false));
-                        dataRow.AppendChild(CreateTableCell($"{device.Price:N0} Ft", false));
-
-                        // Kedvezményes ár számítása
-                        int discount = 0;
-                        if (int.TryParse(DiscountTextBox.Text, out int disc))
-                        {
-                            discount = Math.Max(0, Math.Min(100, disc));
-                        }
-                        decimal discountedPrice = device.RentPrice * (100 - discount) / 100;
-                        dataRow.AppendChild(CreateTableCell($"{discountedPrice:N0} Ft", false));
-
-                        table.AppendChild(dataRow);
-                    }
-
-                    // Szöveg cseréje táblázatra - RÉGI KÓD ALAPJÁN
-                    var paragraph = text.Ancestors<OpenXmlParagraph>().First();
-                    text.Text = text.Text.Replace("{{DEVICE_TABLE}}", "");
-                    paragraph.Parent.InsertAfter(table, paragraph);
-                    break;
-                }
-            }
-        }
-
-        private OpenXmlTableCell CreateTableCell(string text, bool isBold)
-        {
-            OpenXmlTableCell cell = new OpenXmlTableCell();
-
-            OpenXmlParagraph paragraph = new OpenXmlParagraph();
-            OpenXmlRun run = new OpenXmlRun();
-
-            if (isBold)
-            {
-                RunProperties runProps = new RunProperties();
-                DocumentFormat.OpenXml.Wordprocessing.Bold bold = new DocumentFormat.OpenXml.Wordprocessing.Bold();
-                runProps.AppendChild(bold);
-                run.AppendChild(runProps);
-            }
-
-            OpenXmlText cellText = new OpenXmlText(text);
-            run.AppendChild(cellText);
-            paragraph.AppendChild(run);
-            cell.AppendChild(paragraph);
-
-            return cell;
         }
 
         private async Task GenerateInvoiceXml()
@@ -1186,7 +1035,7 @@ namespace berles2
             SystemIO.Directory.CreateDirectory(invoiceFolder);
 
             // 3. Fájlnév generálása
-            string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
+            string customerName = Services.DocumentService.GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
             string rentalDate = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
             string fileName = $"szamla_{customerName}_{rentalDate}.xml";
             string outputPath = SystemIO.Path.Combine(invoiceFolder, fileName);
@@ -1370,110 +1219,26 @@ namespace berles2
                 return string.Empty;
             }
         }
-        private string GetCleanFileName(string input)
-        {
-            if (string.IsNullOrEmpty(input))
-                return "ismeretlen";
-
-            char[] invalidChars = SystemIO.Path.GetInvalidFileNameChars();
-            string clean = input;
-            foreach (char c in invalidChars)
-            {
-                clean = clean.Replace(c.ToString(), "");
-            }
-
-            clean = clean.Replace(" ", "_");
-            return clean;
-        }
         // ===========================================
         // PDF GENERÁLÁS ÉS EMAIL KÜLDÉS
         // ===========================================
 
         /// <summary>
-        /// Word fájl konvertálása PDF-be a Word fájl elérési útja alapján.
-        /// Ezt hívja a szerződés gomb közvetlenül.
-        /// </summary>
-        private string ConvertWordToPdfFromPath(string wordPath)
-        {
-            try
-            {
-                if (!SystemIO.File.Exists(wordPath))
-                {
-                    MessageBox.Show("A Word szerződés fájl nem található!",
-                                  "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return "";
-                }
-
-                // PDF mappa létrehozása
-                string exeDirectory = SystemIO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
-                string contractsPdfFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-pdf");
-                SystemIO.Directory.CreateDirectory(contractsPdfFolder);
-
-                // PDF fájlnév: ugyanolyan mint a Word, csak .pdf kiterjesztéssel
-                string pdfFileName = SystemIO.Path.GetFileNameWithoutExtension(wordPath) + ".pdf";
-                string pdfPath = SystemIO.Path.Combine(contractsPdfFolder, pdfFileName);
-
-                // Word -> PDF konverzió
-                Word.Application wordApp = new Word.Application();
-                Word.Document doc = null;
-                try
-                {
-                    wordApp.Visible = false;
-                    doc = wordApp.Documents.Open(wordPath);
-                    doc.SaveAs2(pdfPath, Word.WdSaveFormat.wdFormatPDF);
-                }
-                finally
-                {
-                    doc?.Close();
-                    wordApp?.Quit();
-                }
-
-                // PDF elérési útját elmenti az adatbázisba
-                SaveContractPath(pdfPath);
-
-                return pdfPath;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Hiba a PDF generálásakor: {ex.Message}",
-                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                return "";
-            }
-        }
-
-        /// <summary>
-        /// Word fájl megkeresése a contracts-word mappában és konvertálása PDF-be.
-        /// Ezt hívja az email gomb, ha a PDF még nem létezik.
+        /// Az email gomb hívja — megkeresi vagy legenerálja a szerződés PDF-et.
         /// </summary>
         private string ConvertWordToPdf()
         {
             try
             {
-                string exeDirectory = SystemIO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
-                string contractsWordFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-word");
+                var setting = _context.Settings.FirstOrDefault();
+                if (setting == null) return "";
 
-                string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
-                string rentalDate = _lastContractTimestamp ?? DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
-                string wordFileName = $"szerződés_{customerName}_{rentalDate}.docx";
-                string wordPath = SystemIO.Path.Combine(contractsWordFolder, wordFileName);
+                string customerName = Services.DocumentService.GetCleanFileName(
+                    _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
+                string timestamp = _lastContractTimestamp ?? DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
 
-                // PDF már létezik? (szerződés gombból már legenerálódott)
-                string contractsPdfFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-pdf");
-                string pdfFileName = $"szerződés_{customerName}_{rentalDate}.pdf";
-                string pdfPath = SystemIO.Path.Combine(contractsPdfFolder, pdfFileName);
-
-                if (SystemIO.File.Exists(pdfPath))
-                    return pdfPath;
-
-                // Ha még nincs PDF, generáljuk le most
-                if (!SystemIO.File.Exists(wordPath))
-                {
-                    MessageBox.Show("A Word szerződés fájl nem található! Először generálja le a szerződést.",
-                                  "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return "";
-                }
-
-                return ConvertWordToPdfFromPath(wordPath);
+                var docService = new Services.DocumentService(setting);
+                return docService.GetOrCreateContractPdf(customerName, timestamp);
             }
             catch (Exception ex)
             {
@@ -1524,34 +1289,6 @@ namespace berles2
 
                 MessageBox.Show($"Hiba a számla generálásakor: {ex.Message}",
                               "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-        }
-        private string GetContractWordPath()
-        {
-            try
-            {
-                string exeDirectory = SystemIO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
-                string contractsWordFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-word");
-
-                string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
-                string rentalDate = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
-                string wordFileName = $"szerződés_{customerName}_{rentalDate}.docx";
-                string wordPath = SystemIO.Path.Combine(contractsWordFolder, wordFileName);
-
-                if (!SystemIO.File.Exists(wordPath))
-                {
-                    MessageBox.Show("A Word szerződés fájl nem található! Először generálja le a szerződést.",
-                                  "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return "";
-                }
-
-                return wordPath;
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Hiba a szerződés fájl keresésekor: {ex.Message}",
-                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                return "";
             }
         }
         private void ReportingButton_Click(object sender, RoutedEventArgs e)
