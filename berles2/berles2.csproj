@@ -43,7 +43,6 @@
   <ItemGroup>
     <ProjectReference Include="..\ToolRental.Core\ToolRental.Core.csproj" />
     <ProjectReference Include="..\ToolRental.Data\ToolRental.Data.csproj" />
-    <ProjectReference Include="..\ToolRental.Services\ToolRental.Services.csproj" />
   </ItemGroup>
 
 </Project>

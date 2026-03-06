@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(dotnet add package:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet remove package:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nBiztonság: hardcoded jelszavak kiváltása Windows DPAPI titkosítással\n\n- DesignTimeDbContextFactory: SA jelszó fallback eltávolítva, env változó \\(TOOLRENTAL_CONNECTION_STRING\\) vagy CLI arg kell migrációhoz\n- CredentialProtection: új segédosztály Windows DPAPI alapú jelszótitkosításhoz \\(CurrentUser scope\\)\n- DatabaseConfig: SQL jelszó titkosítva kerül appsettings.json-ba, olvasáskor visszafejtés\n- SettingsDialog + MainWindow: email jelszó titkosítva az adatbázisban\n- appsettings.json hozzáadva .gitignore-hoz, appsettings.template.json létrehozva\n- ToolRental.Data: Microsoft.Extensions.Configuration.Json csomag hozzáadva\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git stash:*)",
+      "Bash(git merge:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nNaplózás: Serilog strukturált naplózás bekötése\n\n- AppLogger: új statikus segédosztály, naplófájl: %LocalAppData%\\\\ToolRental\\\\logs\\\\berles2-.log \\(30 napos rotáció\\)\n- App.xaml.cs: Serilog inicializálás indításkor, globális exception handler \\(DispatcherUnhandledException, UnhandledException\\)\n- MainWindow: Console.WriteLine cserék, catch blokkok naplózással kiegészítve \\(bérlés, szerződés, email, CURL\\)\n- SettingsDialog: betöltési és mentési hibák naplózva\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit:*)"
+    ]
+  }
+}
