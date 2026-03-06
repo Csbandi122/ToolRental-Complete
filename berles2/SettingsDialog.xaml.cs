@@ -305,77 +305,23 @@ namespace berles2
                 return false;
             }
 
+            // Cégnév: alapértelmezett ha üres
             if (string.IsNullOrWhiteSpace(CompanyNameTextBox.Text))
-            {
-                MessageBox.Show("A cégnév megadása kötelező!", "Hiba",
-                              MessageBoxButton.OK, MessageBoxImage.Warning);
-                CompanyNameTextBox.Focus();
-                return false;
-            }
+                CompanyNameTextBox.Text = "Kerékpár Bérlő Kft.";
 
-            if (string.IsNullOrWhiteSpace(EmailSmtpTextBox.Text))
-            {
-                MessageBox.Show("Az SMTP szerver megadása kötelező!", "Hiba",
-                              MessageBoxButton.OK, MessageBoxImage.Warning);
-                EmailSmtpTextBox.Focus();
-                return false;
-            }
-
+            // SMTP port: alapértelmezett ha érvénytelen
             if (!int.TryParse(SmtpPortTextBox.Text, out int smtpPort) || smtpPort <= 0)
-            {
-                MessageBox.Show("Érvényes SMTP port megadása kötelező!", "Hiba",
-                              MessageBoxButton.OK, MessageBoxImage.Warning);
-                SmtpPortTextBox.Focus();
-                return false;
-            }
+                SmtpPortTextBox.Text = "587";
 
-            if (string.IsNullOrWhiteSpace(SenderEmailTextBox.Text))
-            {
-                MessageBox.Show("A küldő email cím megadása kötelező!", "Hiba",
-                              MessageBoxButton.OK, MessageBoxImage.Warning);
-                SenderEmailTextBox.Focus();
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(EmailPasswordBox.Password))
-            {
-                MessageBox.Show("Az email jelszó megadása kötelező!", "Hiba",
-                              MessageBoxButton.OK, MessageBoxImage.Warning);
-                EmailPasswordBox.Focus();
-                return false;
-            }
-
-            if (string.IsNullOrWhiteSpace(SenderNameTextBox.Text))
-            {
-                MessageBox.Show("A küldő név megadása kötelező!", "Hiba",
-                              MessageBoxButton.OK, MessageBoxImage.Warning);
-                SenderNameTextBox.Focus();
-                return false;
-            }
-
+            // Email tárgyak: alapértelmezett ha üres
             if (string.IsNullOrWhiteSpace(EmailSubjectTextBox.Text))
-            {
-                MessageBox.Show("A szerződés email tárgy megadása kötelező!", "Hiba",
-                              MessageBoxButton.OK, MessageBoxImage.Warning);
-                EmailSubjectTextBox.Focus();
-                return false;
-            }
-
+                EmailSubjectTextBox.Text = "Bérlési szerződés";
             if (string.IsNullOrWhiteSpace(ReviewEmailSubjectTextBox.Text))
-            {
-                MessageBox.Show("Az értékelés email tárgy megadása kötelező!", "Hiba",
-                              MessageBoxButton.OK, MessageBoxImage.Warning);
-                ReviewEmailSubjectTextBox.Focus();
-                return false;
-            }
+                ReviewEmailSubjectTextBox.Text = "Értékelje szolgáltatásunkat!";
 
+            // Alapértelmezett bérlési napok: alapértelmezett ha érvénytelen
             if (!int.TryParse(DefaultRentalDaysTextBox.Text, out int rentalDays) || rentalDays <= 0)
-            {
-                MessageBox.Show("Érvényes alapértelmezett bérlési idő megadása kötelező!", "Hiba",
-                              MessageBoxButton.OK, MessageBoxImage.Warning);
-                DefaultRentalDaysTextBox.Focus();
-                return false;
-            }
+                DefaultRentalDaysTextBox.Text = "1";
 
             // Fájlok létezésének ellenőrzése (ha meg vannak adva)
             if (!ValidateFilePath(CompanyLogoTextBox.Text, "Cég logo"))
@@ -440,7 +386,7 @@ namespace berles2
                                          null : CompanyLogoTextBox.Text.Trim();
 
             _currentSetting.EmailSmtp = EmailSmtpTextBox.Text.Trim();
-            _currentSetting.SmtpPort = int.Parse(SmtpPortTextBox.Text);
+            _currentSetting.SmtpPort = int.TryParse(SmtpPortTextBox.Text, out int parsedSmtpPort) && parsedSmtpPort > 0 ? parsedSmtpPort : 587;
             _currentSetting.SenderEmail = SenderEmailTextBox.Text.Trim();
             _currentSetting.EmailPassword = CredentialProtection.Protect(EmailPasswordBox.Password);
             _currentSetting.SenderName = SenderNameTextBox.Text.Trim();
@@ -452,10 +398,12 @@ namespace berles2
             _currentSetting.AszfFile = string.IsNullOrWhiteSpace(AszfFileTextBox.Text) ?
                                       null : AszfFileTextBox.Text.Trim();
 
-            _currentSetting.EmailSubject = EmailSubjectTextBox.Text.Trim();
+            _currentSetting.EmailSubject = string.IsNullOrWhiteSpace(EmailSubjectTextBox.Text) ?
+                                          "Bérlési szerződés" : EmailSubjectTextBox.Text.Trim();
             _currentSetting.ContractEmailTemplate = string.IsNullOrWhiteSpace(ContractEmailTemplateTextBox.Text) ?
                                                     null : ContractEmailTemplateTextBox.Text.Trim();
-            _currentSetting.ReviewEmailSubject = ReviewEmailSubjectTextBox.Text.Trim();
+            _currentSetting.ReviewEmailSubject = string.IsNullOrWhiteSpace(ReviewEmailSubjectTextBox.Text) ?
+                                                "Értékelje szolgáltatásunkat!" : ReviewEmailSubjectTextBox.Text.Trim();
             _currentSetting.ReviewEmailTemplate = string.IsNullOrWhiteSpace(ReviewEmailTemplateTextBox.Text) ?
                                                   null : ReviewEmailTemplateTextBox.Text.Trim();
 
@@ -463,7 +411,7 @@ namespace berles2
                                           null : GoogleReviewTextBox.Text.Trim();
             _currentSetting.InvoiceXml = string.IsNullOrWhiteSpace(InvoiceXmlTextBox.Text) ?
                                         null : InvoiceXmlTextBox.Text.Trim();
-            _currentSetting.DefaultRentalDays = int.Parse(DefaultRentalDaysTextBox.Text);
+            _currentSetting.DefaultRentalDays = int.TryParse(DefaultRentalDaysTextBox.Text, out int parsedRentalDays) && parsedRentalDays > 0 ? parsedRentalDays : 1;
 
             _context.SaveChanges();
         }
