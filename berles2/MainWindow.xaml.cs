@@ -379,7 +379,7 @@ namespace berles2
                     MailKit.Security.SecureSocketOptions.StartTls;
 
                 client.Connect(setting.EmailSmtp, setting.SmtpPort, socketOptions);
-                client.Authenticate(setting.SenderEmail, setting.EmailPassword);
+                client.Authenticate(setting.SenderEmail, CredentialProtection.Unprotect(setting.EmailPassword));
                 client.Send(message);
                 client.Disconnect(true);
             }
@@ -1597,7 +1597,7 @@ namespace berles2
 
                     // opcionális: ha nem OAUTH2-t használsz, leveheted client.AuthenticationMechanisms.Remove("XOAUTH2");
 
-                    Console.WriteLine($"Autentikáció: {setting.SenderEmail}"); client.Authenticate(setting.SenderEmail, setting.EmailPassword);
+                    Console.WriteLine($"Autentikáció: {setting.SenderEmail}"); client.Authenticate(setting.SenderEmail, CredentialProtection.Unprotect(setting.EmailPassword));
 
                     Console.WriteLine("Email küldés...");
                     client.Send(message);
