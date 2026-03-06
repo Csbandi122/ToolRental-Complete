@@ -1058,14 +1058,17 @@ namespace berles2
                 // 5. Változók helyettesítése
                 ReplaceVariablesInWordDocument(outputPath);
 
-                // 6. Automatikus megnyitás
+                // 6. Word -> PDF konverzió
+                string pdfPath = ConvertWordToPdfFromPath(outputPath);
+                if (string.IsNullOrEmpty(pdfPath))
+                    return;
+
+                // 7. PDF megnyitása (nem a Word fájl!)
                 Process.Start(new ProcessStartInfo
                 {
-                    FileName = outputPath,
+                    FileName = pdfPath,
                     UseShellExecute = true
                 });
-
-
             }
             catch (Exception ex)
             {
@@ -1432,38 +1435,33 @@ namespace berles2
         // PDF GENERÁLÁS ÉS EMAIL KÜLDÉS
         // ===========================================
 
-        private string ConvertWordToPdf()
+        /// <summary>
+        /// Word fájl konvertálása PDF-be a Word fájl elérési útja alapján.
+        /// Ezt hívja a szerződés gomb közvetlenül.
+        /// </summary>
+        private string ConvertWordToPdfFromPath(string wordPath)
         {
             try
             {
-                // 1. Word fájl elérési útjának megkeresése
-                string exeDirectory = SystemIO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
-                string contractsWordFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-word");
-
-                string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
-                string rentalDate = _lastContractTimestamp ?? DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
-                string wordFileName = $"szerződés_{customerName}_{rentalDate}.docx";
-                string wordPath = SystemIO.Path.Combine(contractsWordFolder, wordFileName);
-
                 if (!SystemIO.File.Exists(wordPath))
                 {
-                    MessageBox.Show("A Word szerződés fájl nem található! Először generálja le a szerződést.",
+                    MessageBox.Show("A Word szerződés fájl nem található!",
                                   "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return "";
                 }
 
-                // 2. PDF mappa létrehozása
+                // PDF mappa létrehozása
+                string exeDirectory = SystemIO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
                 string contractsPdfFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-pdf");
                 SystemIO.Directory.CreateDirectory(contractsPdfFolder);
 
-                // 3. PDF fájl neve
-                string pdfFileName = $"szerződés_{customerName}_{rentalDate}.pdf";
+                // PDF fájlnév: ugyanolyan mint a Word, csak .pdf kiterjesztéssel
+                string pdfFileName = SystemIO.Path.GetFileNameWithoutExtension(wordPath) + ".pdf";
                 string pdfPath = SystemIO.Path.Combine(contractsPdfFolder, pdfFileName);
 
-                // 4. Word -> PDF konverzió (MŰKÖDŐ VERZIÓ!)
+                // Word -> PDF konverzió
                 Word.Application wordApp = new Word.Application();
                 Word.Document doc = null;
-
                 try
                 {
                     wordApp.Visible = false;
@@ -1476,7 +1474,52 @@ namespace berles2
                     wordApp?.Quit();
                 }
 
+                // PDF elérési útját elmenti az adatbázisba
+                SaveContractPath(pdfPath);
+
                 return pdfPath;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba a PDF generálásakor: {ex.Message}",
+                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                return "";
+            }
+        }
+
+        /// <summary>
+        /// Word fájl megkeresése a contracts-word mappában és konvertálása PDF-be.
+        /// Ezt hívja az email gomb, ha a PDF még nem létezik.
+        /// </summary>
+        private string ConvertWordToPdf()
+        {
+            try
+            {
+                string exeDirectory = SystemIO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
+                string contractsWordFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-word");
+
+                string customerName = GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
+                string rentalDate = _lastContractTimestamp ?? DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
+                string wordFileName = $"szerződés_{customerName}_{rentalDate}.docx";
+                string wordPath = SystemIO.Path.Combine(contractsWordFolder, wordFileName);
+
+                // PDF már létezik? (szerződés gombból már legenerálódott)
+                string contractsPdfFolder = SystemIO.Path.Combine(exeDirectory, "files", "contracts-pdf");
+                string pdfFileName = $"szerződés_{customerName}_{rentalDate}.pdf";
+                string pdfPath = SystemIO.Path.Combine(contractsPdfFolder, pdfFileName);
+
+                if (SystemIO.File.Exists(pdfPath))
+                    return pdfPath;
+
+                // Ha még nincs PDF, generáljuk le most
+                if (!SystemIO.File.Exists(wordPath))
+                {
+                    MessageBox.Show("A Word szerződés fájl nem található! Először generálja le a szerződést.",
+                                  "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return "";
+                }
+
+                return ConvertWordToPdfFromPath(wordPath);
             }
             catch (Exception ex)
             {
