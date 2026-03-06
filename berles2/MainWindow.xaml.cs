@@ -1017,206 +1017,34 @@ namespace berles2
 
         private async Task GenerateInvoiceXml()
         {
-            // 1. Beállítások betöltése
             var setting = _context.Settings.FirstOrDefault();
-            if (setting == null || string.IsNullOrWhiteSpace(setting.InvoiceXml))
-            {
-                throw new Exception("Nincs beállítva számla XML template! Kérlek állítsd be a beállításokban.");
-            }
+            if (setting == null)
+                throw new InvalidOperationException("Nincsenek beállítások! Kérlek állítsd be a beállításokban.");
 
-            if (!SystemIO.File.Exists(setting.InvoiceXml))
-            {
-                throw new Exception($"A számla XML template nem található: {setting.InvoiceXml}");
-            }
-
-            // 2. Kimeneti mappa létrehozása
-            string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-            string invoiceFolder = SystemIO.Path.Combine(exeDirectory, "files", "Invoice_xml");
-            SystemIO.Directory.CreateDirectory(invoiceFolder);
-
-            // 3. Fájlnév generálása
-            string customerName = Services.DocumentService.GetCleanFileName(_selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
-            string rentalDate = DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss");
-            string fileName = $"szamla_{customerName}_{rentalDate}.xml";
-            string outputPath = SystemIO.Path.Combine(invoiceFolder, fileName);
-
-            // 4. Template beolvasása
-            string xmlContent = SystemIO.File.ReadAllText(setting.InvoiceXml);
-
-            // 5. Változók kiszámítása
-            string paymentDueDate = DateTime.Now.ToString("yyyy-MM-dd"); // Azonnali fizetés (0 nap)
-            string paymentMode = (PaymentModeComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Készpénz";
-
-            // ALANYI ADÓMENTES - nettó = bruttó, kedvezménnyel!
             int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int days) ? days : 1;
-            int discount = 0;
-            if (int.TryParse(DiscountTextBox.Text, out int disc))
+            int discount   = int.TryParse(DiscountTextBox.Text,   out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
+            decimal netPrice = _selectedDevices.Sum(d => d.RentPrice) * (100 - discount) / 100 * rentalDays;
+
+            var data = new Services.InvoiceData
             {
-                discount = Math.Max(0, Math.Min(100, disc));
-            }
-            decimal dailyTotal = _selectedDevices.Sum(d => d.RentPrice);
-            decimal discountedDailyTotal = dailyTotal * (100 - discount) / 100;
-            decimal totalAmount = discountedDailyTotal * rentalDays;
-            decimal netPrice = totalAmount; // Alanyi adómentes - nincs ÁFA
+                CustomerName    = _selectedExistingCustomer?.Name      ?? CustomerNameTextBox.Text,
+                CustomerZip     = _selectedExistingCustomer?.Zipcode   ?? CustomerZipTextBox.Text,
+                CustomerCity    = _selectedExistingCustomer?.City      ?? CustomerCityTextBox.Text,
+                CustomerAddress = _selectedExistingCustomer?.Address   ?? CustomerAddressTextBox.Text,
+                CustomerEmail   = _selectedExistingCustomer?.Email     ?? CustomerEmailTextBox.Text,
+                PaymentMode     = (PaymentModeComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Készpénz",
+                NetPrice        = netPrice,
+                DevicesList     = string.Join(", ", _selectedDevices.Select(d => d.DeviceName))
+            };
 
-            // Kiválasztott eszközök listája
-            string devicesList = string.Join(", ", _selectedDevices.Select(d => d.DeviceName));
-
-            // 6. Változók helyettesítése
-            xmlContent = ReplaceInvoiceVariables(xmlContent, netPrice, paymentMode, paymentDueDate, devicesList);
-
-            // 7. XML fájl mentése
-            SystemIO.File.WriteAllText(outputPath, xmlContent, System.Text.Encoding.UTF8);
-
-            // 8. CURL parancs futtatása - számla küldés
-            string pdfPath = await SendInvoiceViaCurl(outputPath, customerName, rentalDate);
+            var invoiceService = new Services.InvoiceService(setting);
+            string pdfPath = await invoiceService.GenerateAndSendAsync(data);
 
             if (!string.IsNullOrEmpty(pdfPath))
             {
-                // ÚJ: Számla elérési út mentése az adatbázisba
+                MessageBox.Show($"Számla sikeresen elküldve és mentve!\nHelye: {pdfPath}",
+                              "Számla siker", MessageBoxButton.OK, MessageBoxImage.Information);
                 SaveInvoicePath(pdfPath);
-
-                // MessageBox.Show("Számla sikeresen generálva és mentve!",
-                //             "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-        }
-
-        private string ReplaceInvoiceVariables(string xmlContent, decimal netPrice, string paymentMode, string paymentDueDate, string devicesList)
-        {
-
-            // Ügyfél adatok
-            xmlContent = xmlContent.Replace("{{CUSTOMER_NAME}}", _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
-            xmlContent = xmlContent.Replace("{{CUSTOMER_ZIP}}", _selectedExistingCustomer?.Zipcode ?? CustomerZipTextBox.Text);
-            xmlContent = xmlContent.Replace("{{CUSTOMER_CITY}}", _selectedExistingCustomer?.City ?? CustomerCityTextBox.Text);
-            xmlContent = xmlContent.Replace("{{CUSTOMER_ADDRESS}}", _selectedExistingCustomer?.Address ?? CustomerAddressTextBox.Text);
-            xmlContent = xmlContent.Replace("{{CUSTOMER_EMAIL}}", _selectedExistingCustomer?.Email ?? CustomerEmailTextBox.Text);
-
-            // Bérlés és fizetés adatok - JAVÍTOTT dátum formátumok
-            xmlContent = xmlContent.Replace("{{RENTAL_DATE}}", DateTime.Now.ToString("yyyy-MM-dd"));
-            xmlContent = xmlContent.Replace("{{PAYMENT_DUE_DATE}}", paymentDueDate);
-            xmlContent = xmlContent.Replace("{{PAYMENT_MODE}}", paymentMode);
-
-            // Pénzügyi adatok
-            xmlContent = xmlContent.Replace("{{NET_PRICE}}", netPrice.ToString("0"));
-
-            // Eszközök listája
-            xmlContent = xmlContent.Replace("{{SELECTED_DEVICES_LIST}}", devicesList);
-
-            return xmlContent;
-        }
-
-        private async Task<string> SendInvoiceViaCurl(string xmlPath, string customerName, string rentalDate)
-        {
-            try
-            {
-                // 1. PDF kimeneti mappa (az exe mellett, files\invoices)
-                string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-                string invoicesFolder = SystemIO.Path.Combine(exeDirectory, "files", "invoices");
-                string curlAnswerFolder = SystemIO.Path.Combine(exeDirectory, "files", "curl_answer");
-                SystemIO.Directory.CreateDirectory(invoicesFolder);
-                SystemIO.Directory.CreateDirectory(curlAnswerFolder);
-
-                string pdfFileName = $"szamla_{customerName}_{rentalDate}.pdf";
-                string pdfPath = SystemIO.Path.Combine(invoicesFolder, pdfFileName);
-
-                // CURL válasz fájl
-                string curlAnswerFileName = $"curl_valasz_{customerName}_{rentalDate}.txt";
-                string curlAnswerPath = SystemIO.Path.Combine(curlAnswerFolder, curlAnswerFileName);
-
-                // 2. Cookies fájl (exe mappa mellett)
-                string cookiesPath = SystemIO.Path.Combine(exeDirectory, "curl_cookies.txt");
-
-                // 3. CURL argumentumok - JAVÍTOTT, mint a működő CMD parancs
-                string curlArguments = $"-v " +
-                                     $"-F \"action-xmlagentxmlfile=@{xmlPath}\" " +
-                                     $"-c \"{cookiesPath}\" " +
-                                     $"-o \"{pdfPath}\" " +
-                                     $"\"https://www.szamlazz.hu/szamla/\"";
-
-                // 4. CURL futtatása
-                ProcessStartInfo curlInfo = new ProcessStartInfo
-                {
-                    FileName = "curl",
-                    Arguments = curlArguments,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    WorkingDirectory = exeDirectory
-                };
-
-                using (Process curlProcess = Process.Start(curlInfo))
-                {
-                    if (curlProcess != null)
-                    {
-                        string output = await curlProcess.StandardOutput.ReadToEndAsync();
-                        string error = await curlProcess.StandardError.ReadToEndAsync();
-
-                        await curlProcess.WaitForExitAsync();
-
-                        // CURL válasz mentése fájlba
-                        try
-                        {
-                            string curlResponse = $"=== CURL VÁLASZ RÉSZLETES LOG ===\n" +
-                                                $"Dátum: {DateTime.Now}\n" +
-                                                $"Ügyfél: {customerName}\n" +
-                                                $"XML fájl: {xmlPath}\n" +
-                                                $"PDF cél: {pdfPath}\n" +
-                                                $"Exit kód: {curlProcess.ExitCode}\n\n" +
-                                                $"=== CURL PARANCS ===\n" +
-                                                $"curl {curlArguments}\n\n" +
-                                                $"=== STANDARD OUTPUT ===\n" +
-                                                $"{output}\n\n" +
-                                                $"=== STANDARD ERROR ===\n" +
-                                                $"{error}\n\n" +
-                                                $"=== VÉGEREDMÉNY ===\n" +
-                                                $"PDF létrejött: {SystemIO.File.Exists(pdfPath)}\n" +
-                                                $"PDF mérete: {(SystemIO.File.Exists(pdfPath) ? new SystemIO.FileInfo(pdfPath).Length : 0)} byte\n";
-
-                            SystemIO.File.WriteAllText(curlAnswerPath, curlResponse, System.Text.Encoding.UTF8);
-                        }
-                        catch (Exception logEx)
-                        {
-                            // Ha a log mentés nem sikerül, ne akadályozza meg a számlázást
-                            AppLogger.Logger.Warning(logEx, "CURL log mentési hiba");
-                        }
-
-                        // 5. Eredmény ellenőrzése
-                        if (curlProcess.ExitCode == 0 && SystemIO.File.Exists(pdfPath) && new SystemIO.FileInfo(pdfPath).Length > 0)
-                        {
-                            // Fájl tartalmának ellenőrzése - PDF vagy hibaüzenet?
-                            string fileContent = SystemIO.File.ReadAllText(pdfPath, System.Text.Encoding.UTF8);
-
-                            if (fileContent.Contains("[ERR]") || fileContent.Contains("Számla mentés sikertelen"))
-                            {
-                                // Hibaüzenet van a fájlban - töröljük és dobjunk exception-t
-                                try { SystemIO.File.Delete(pdfPath); } catch { }
-                                throw new Exception($"Számla kibocsátási hiba:\n{fileContent.Substring(0, Math.Min(300, fileContent.Length))}");
-                            }
-
-                            // Cookies törlése
-                            try { SystemIO.File.Delete(cookiesPath); } catch { }
-
-                            MessageBox.Show($"Számla sikeresen elküldve és mentve!\nHelye: {pdfPath}",
-                                          "Számla siker", MessageBoxButton.OK, MessageBoxImage.Information);
-                            return pdfPath;
-                        }
-                        else
-                        {
-                            throw new Exception($"CURL hiba:\nKimeneti kód: {curlProcess.ExitCode}\nPDF létrejött: {SystemIO.File.Exists(pdfPath)}\nHiba: {error}");
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception("Nem sikerült elindítani a CURL parancsot.");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Hiba a számla küldésekor:\n{ex.Message}",
-                              "Számla hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                return string.Empty;
             }
         }
         // ===========================================
