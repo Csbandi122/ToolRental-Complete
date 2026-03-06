@@ -1,23 +1,17 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ToolRental.Core.Models;
 using ToolRental.Data;
 using SystemIO = System.IO;
 using WpfBorder = System.Windows.Controls.Border;
 using System.Linq;
-
 
 namespace berles2
 {
@@ -26,8 +20,9 @@ namespace berles2
         private ToolRentalDbContext _context;
         private List<Device> _selectedDevices = new List<Device>();
         private List<Device> _allDevices = new List<Device>();
+        private List<Device> _filteredDevices = new List<Device>();
         private Customer? _selectedExistingCustomer = null;
-        private string? _lastContractTimestamp = null; // Utolsó szerződés időbélyege
+        private string? _lastContractTimestamp = null;
         private System.Windows.Threading.DispatcherTimer _searchTimer;
 
         public MainWindow()
@@ -42,44 +37,36 @@ namespace berles2
             _searchTimer.Tick += SearchTimer_Tick;
         }
 
+        // ===========================================
+        // INICIALIZÁLÁS
+        // ===========================================
+
         private void InitializeDatabase()
         {
-            // Adatbázis kapcsolat inicializálása
             var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
             optionsBuilder.UseSqlServer(DatabaseConfig.ConnectionString);
             _context = new ToolRentalDbContext(optionsBuilder.Options);
         }
-        private void MainWindow_Activated(object sender, EventArgs e)
-        {
-            // Eszközök frissítése amikor az ablak fókuszba kerül
-            LoadDevices();
-        }
 
         private void InitializeForm()
         {
-            // Mai dátum beállítása
             RentStartTextBox.Text = DateTime.Now.ToString("yyyy.MM.dd HH:mm");
-
-            // Következő ticket szám generálása
             GenerateNextTicketNumber();
-
-            // Company név és logo betöltése
             LoadCompanySettings();
-
-            // Végösszeg nullázása - direkt érték beállítás
             TotalAmountTextBox.Text = "0 Ft";
-
-            // Végösszeg frissítése biztonságosan
             UpdateTotalAmount();
-            // Kedvezmény mező eseménykezelő
             DiscountTextBox.TextChanged += DiscountTextBox_TextChanged;
+        }
+
+        private void MainWindow_Activated(object sender, EventArgs e)
+        {
+            LoadDevices();
         }
 
         private void GenerateNextTicketNumber()
         {
             try
             {
-                // JAVÍTOTT: TicketNr alapján keresés, nem Id alapján!
                 var allTicketNumbers = _context.Rentals
                     .Where(r => r.TicketNr.StartsWith("RNT"))
                     .Select(r => r.TicketNr)
@@ -88,20 +75,15 @@ namespace berles2
                 int maxNumber = 0;
                 foreach (var ticketNr in allTicketNumbers)
                 {
-                    var numberPart = ticketNr.Replace("RNT", "");
-                    if (int.TryParse(numberPart, out int number))
-                    {
+                    if (int.TryParse(ticketNr.Replace("RNT", ""), out int number))
                         maxNumber = Math.Max(maxNumber, number);
-                    }
                 }
 
-                int nextNumber = maxNumber + 1;
-                TicketNumberTextBox.Text = $"RNT{nextNumber:D4}";
+                TicketNumberTextBox.Text = $"RNT{maxNumber + 1:D4}";
             }
             catch (Exception ex)
             {
                 AppLogger.Logger.Warning(ex, "Hiba a ticket szám generálásakor");
-                MessageBox.Show($"Hiba a ticket szám generálásakor: {ex.Message}");
                 TicketNumberTextBox.Text = "RNT0001";
             }
         }
@@ -114,37 +96,31 @@ namespace berles2
                 if (settings != null)
                 {
                     CompanyNameText.Text = settings.CompanyName;
-
-                    // Logo betöltése ha van
                     if (!string.IsNullOrEmpty(settings.CompanyLogo) && SystemIO.File.Exists(settings.CompanyLogo))
-                    {
                         CompanyLogo.Source = new BitmapImage(new Uri(settings.CompanyLogo));
-                    }
                 }
             }
             catch (Exception ex)
             {
                 AppLogger.Logger.Error(ex, "Hiba a cég beállítások betöltésekor");
-                MessageBox.Show($"Hiba a cég beállítások betöltésekor: {ex.Message}");
             }
         }
+
+        // ===========================================
+        // ESZKÖZ KEZELÉS
+        // ===========================================
 
         public void LoadDevices()
         {
             try
             {
-                // Entity Framework cache törlése
                 _context.ChangeTracker.Clear();
-
-                // Csak elérhető eszközök betöltése
                 _allDevices = _context.Devices
                     .Include(d => d.DeviceTypeNavigation)
                     .Where(d => d.Available)
                     .ToList();
 
                 DisplayDevices();
-
-                // Végösszeg frissítése a kiválasztott eszközök alapján
                 UpdateTotalAmount();
             }
             catch (Exception ex)
@@ -153,176 +129,49 @@ namespace berles2
                 MessageBox.Show($"Hiba az eszközök betöltésekor: {ex.Message}");
             }
         }
-        // Szűrt eszközlista tárolására
-        private List<Device> _filteredDevices = new List<Device>();
 
-        // A keresőmező változásakor fut le
         private void DeviceSearchTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             _searchTimer.Stop();
             _searchTimer.Start();
         }
+
         private void SearchTimer_Tick(object sender, EventArgs e)
         {
             _searchTimer.Stop();
             FilterDevices();
         }
-        // Eszközök szűrése
+
         private void FilterDevices()
         {
             if (_allDevices == null) return;
 
             string searchText = DeviceSearchTextBox.Text?.ToLower() ?? "";
 
-            if (string.IsNullOrWhiteSpace(searchText))
-            {
-                _filteredDevices = _allDevices.ToList();
-            }
-            else
-            {
-                _filteredDevices = _allDevices.Where(d =>
+            _filteredDevices = string.IsNullOrWhiteSpace(searchText)
+                ? _allDevices.ToList()
+                : _allDevices.Where(d =>
                     d.DeviceName.ToLower().Contains(searchText) ||
                     d.Serial.ToLower().Contains(searchText) ||
                     d.DeviceTypeNavigation?.TypeName.ToLower().Contains(searchText) == true
-                ).ToList();
-            }
+                  ).ToList();
 
             DisplayFilteredDevices();
         }
 
-        // Szűrt eszközök megjelenítése
-        private void DisplayFilteredDevices()
-        {
-            DevicesWrapPanel.Children.Clear();
-
-            foreach (var device in _filteredDevices)
-            {
-                var deviceWidget = CreateDeviceWidget(device);
-                DevicesWrapPanel.Children.Add(deviceWidget);
-            }
-        }
         private void DisplayDevices()
         {
             _filteredDevices = _allDevices.ToList();
             DisplayFilteredDevices();
-
         }
-        private void ReviewButton_Click(object sender, RoutedEventArgs e)
+
+        private void DisplayFilteredDevices()
         {
-            try
-            {
-                SendReviewEmails();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Hiba az értékelő emailek küldésekor: {ex.Message}",
-                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            DevicesWrapPanel.Children.Clear();
+            foreach (var device in _filteredDevices)
+                DevicesWrapPanel.Children.Add(CreateDeviceWidget(device));
         }
-        private void SendReviewEmails()
-        {
-            // 1. Beállítások ellenőrzése
-            var setting = _context.Settings.FirstOrDefault();
-            if (setting == null || string.IsNullOrWhiteSpace(setting.ReviewEmailTemplate) ||
-                string.IsNullOrWhiteSpace(setting.ReviewEmailSubject))
-            {
-                MessageBox.Show("Értékelő email beállítások hiányoznak! Kérjük állítsa be a Beállításokban.",
-                              "Hiányzó beállítások", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
 
-            // 2. Megfelelő bérlések keresése
-            var reviewCandidates = _context.Rentals
-                .Include(r => r.Customer)
-                .Where(r => !r.ReviewEmailSent &&
-                            r.RentStart.AddDays(r.RentalDays).AddDays(3) <= DateTime.Now) // 3 nap után küldünk értékelést
-                .ToList();
-
-            if (reviewCandidates.Count == 0)
-            {
-                MessageBox.Show("Nincs olyan bérlés, amelyhez értékelő emailt kellene küldeni.",
-                              "Nincs feladat", MessageBoxButton.OK, MessageBoxImage.Information);
-                return;
-            }
-
-            // 3. Megerősítő ablak megjelenítése
-            var confirmationWindow = new ReviewConfirmationWindow(reviewCandidates);
-            if (confirmationWindow.ShowDialog() == true)
-            {
-                // 4. Email küldés és flag frissítés
-                SendReviewEmailsToCustomers(reviewCandidates, setting);
-            }
-        }
-        private void SendReviewEmailsToCustomers(List<Rental> rentals, Setting setting)
-        {
-            int successCount = 0;
-            int errorCount = 0;
-            string errorMessages = "";
-
-            foreach (var rental in rentals)
-            {
-                try
-                {
-                    // Email küldés
-                    SendSingleReviewEmail(rental, setting);
-
-                    // Flag frissítése sikeres küldés után
-                    rental.ReviewEmailSent = true;
-                    _context.Update(rental);  // ← ÚJ SOR!
-                    successCount++;
-                }
-                catch (Exception ex)
-                {
-                    AppLogger.Logger.Error(ex, "Értékelő email küldési hiba - bérlés: {TicketNr}, ügyfél: {Customer}",
-                        rental.TicketNr, rental.Customer.Name);
-                    errorCount++;
-                    errorMessages += $"- {rental.Customer.Name} ({rental.TicketNr}): {ex.Message}\n";
-                }
-            }
-
-            // Adatbázis mentése
-            try
-            {
-                _context.SaveChanges();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Hiba az adatbázis frissítésekor: {ex.Message}",
-                              "Adatbázis hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-
-            // Eredmény megjelenítése
-            string resultMessage = $"Email küldés befejezve!\n\n" +
-                                  $"Sikeresen elküldve: {successCount} db\n" +
-                                  $"Hibák: {errorCount} db";
-
-            if (errorCount > 0)
-            {
-                resultMessage += $"\n\nHiba részletek:\n{errorMessages}";
-                MessageBox.Show(resultMessage, "Email küldés eredménye",
-                              MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-            else
-            {
-                MessageBox.Show(resultMessage, "Email küldés eredménye",
-                              MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            // DataManagerWindow frissítése ha nyitva van
-            foreach (Window window in Application.Current.Windows)
-            {
-                if (window is DataManagerWindow dataManagerWindow)
-                {
-                    dataManagerWindow.LoadRentals();
-                    break;
-                }
-            }
-        }
-        private void SendSingleReviewEmail(Rental rental, Setting setting)
-        {
-            var emailService = new Services.EmailService(setting);
-            emailService.SendReviewEmail(rental);
-        }
         private WpfBorder CreateDeviceWidget(Device device)
         {
             var border = new WpfBorder
@@ -338,7 +187,6 @@ namespace berles2
 
             var stackPanel = new StackPanel();
 
-            // Eszköz képe - EGYSZERŰ VERZIÓ
             var imageContainer = new WpfBorder
             {
                 Width = 120,
@@ -349,98 +197,79 @@ namespace berles2
                 BorderThickness = new Thickness(1)
             };
 
-            // Ha van kép, próbáljuk betölteni
             try
             {
                 if (!string.IsNullOrEmpty(device.Picture) && SystemIO.File.Exists(device.Picture))
                 {
-                    var image = new Image
+                    imageContainer.Child = new Image
                     {
                         Source = new BitmapImage(new Uri(device.Picture)),
                         Stretch = Stretch.Uniform
                     };
-                    imageContainer.Child = image;
                 }
                 else
                 {
-                    // Ha nincs kép, egy emoji ikon
-                    var iconText = new TextBlock
-                    {
-                        Text = "🚲",  // Kerékpár emoji
-                        FontSize = 48,
-                        HorizontalAlignment = HorizontalAlignment.Center,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Foreground = Brushes.DarkGray
-                    };
-                    imageContainer.Child = iconText;
+                    imageContainer.Child = MakeEmojiIcon();
                 }
             }
             catch
             {
-                // Ha hiba van, emoji ikon
-                var iconText = new TextBlock
-                {
-                    Text = "🚲",
-                    FontSize = 48,
-                    HorizontalAlignment = HorizontalAlignment.Center,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Foreground = Brushes.DarkGray
-                };
-                imageContainer.Child = iconText;
+                imageContainer.Child = MakeEmojiIcon();
             }
 
-            // Eszköz neve
-            var nameText = new TextBlock
+            stackPanel.Children.Add(imageContainer);
+            stackPanel.Children.Add(new TextBlock
             {
                 Text = device.DeviceName,
                 FontWeight = FontWeights.Bold,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 TextWrapping = TextWrapping.Wrap,
                 Margin = new Thickness(5, 0, 5, 5)
-            };
-
-            // Bérlési ár
-            var priceText = new TextBlock
+            });
+            stackPanel.Children.Add(new TextBlock
             {
                 Text = $"{device.RentPrice:N0} Ft/nap",
                 Foreground = Brushes.Green,
                 FontWeight = FontWeights.Bold,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 Margin = new Thickness(5, 0, 5, 10)
-            };
+            });
 
-            stackPanel.Children.Add(imageContainer);
-            stackPanel.Children.Add(nameText);
-            stackPanel.Children.Add(priceText);
             border.Child = stackPanel;
-
-            // Kattintás esemény
             border.MouseLeftButtonDown += (sender, e) => ToggleDeviceSelection(device, border);
             border.Tag = device;
-            // ELLENŐRZÉS: ha már ki van választva, állítsd be a vizuális állapotot
+
             if (_selectedDevices.Any(d => d.Id == device.Id))
             {
                 border.Background = Brushes.LightBlue;
                 border.BorderBrush = Brushes.Blue;
                 border.BorderThickness = new Thickness(3);
             }
+
             return border;
         }
 
+        private static TextBlock MakeEmojiIcon() => new TextBlock
+        {
+            Text = "🚲",
+            FontSize = 48,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+            Foreground = Brushes.DarkGray
+        };
+
         private void ToggleDeviceSelection(Device device, WpfBorder border)
         {
-            var existingDevice = _selectedDevices.FirstOrDefault(d => d.Id == device.Id);
-            if (existingDevice != null)
+            var existing = _selectedDevices.FirstOrDefault(d => d.Id == device.Id);
+            if (existing != null)
             {
-                // Kijelölés megszüntetése
-                _selectedDevices.Remove(existingDevice);
+                _selectedDevices.Remove(existing);
                 border.Background = Brushes.White;
                 border.BorderBrush = Brushes.Gray;
                 border.BorderThickness = new Thickness(1);
             }
             else
             {
-                // Kijelölés
                 _selectedDevices.Add(device);
                 border.Background = Brushes.LightBlue;
                 border.BorderBrush = Brushes.Blue;
@@ -450,33 +279,18 @@ namespace berles2
             UpdateTotalAmount();
         }
 
+        // ===========================================
+        // VÉGÖSSZEG SZÁMÍTÁS
+        // ===========================================
+
         private void UpdateTotalAmount()
         {
-            // Null ellenőrzés - ha még nem lettek inicializálva a vezérlők
             if (RentalDaysTextBox == null || TotalAmountTextBox == null || DiscountTextBox == null)
                 return;
 
-            int rentalDays = 1;
-            if (int.TryParse(RentalDaysTextBox.Text, out int days))
-            {
-                rentalDays = Math.Max(1, days);
-            }
-
-            // Kedvezmény kiolvasása
-            int discount = 0;
-            if (int.TryParse(DiscountTextBox.Text, out int disc))
-            {
-                discount = Math.Max(0, Math.Min(100, disc)); // 0-100 között
-            }
-
-            // Eredeti napi összeg
-            decimal dailyTotal = _selectedDevices.Sum(d => d.RentPrice);
-
-            // Kedvezmény alkalmazása
-            decimal discountedDailyTotal = dailyTotal * (100 - discount) / 100;
-
-            // Végösszeg napokkal szorozva
-            decimal total = discountedDailyTotal * rentalDays;
+            int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int d) ? Math.Max(1, d) : 1;
+            int discount   = int.TryParse(DiscountTextBox.Text,   out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
+            decimal total  = _selectedDevices.Sum(x => x.RentPrice) * (100 - discount) / 100 * rentalDays;
 
             TotalAmountTextBox.Text = $"{total:N0} Ft";
         }
@@ -485,224 +299,37 @@ namespace berles2
         {
             UpdateTotalAmount();
         }
+
         private void DiscountTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
-            // Csak számokat engedünk 0-100 között
-            if (sender is TextBox textBox)
+            if (sender is not TextBox textBox) return;
+
+            string text = string.IsNullOrEmpty(textBox.Text) ? "0" : textBox.Text;
+
+            if (int.TryParse(text, out int value))
             {
-                string text = textBox.Text;
-
-                // Ha üres, akkor 0
-                if (string.IsNullOrEmpty(text))
-                {
-                    text = "0";
-                }
-
-                // Csak számokat engedünk
-                if (int.TryParse(text, out int value))
-                {
-                    // 0-100 közé korlátozás
-                    if (value < 0)
-                    {
-                        textBox.Text = "0";
-                        textBox.SelectionStart = textBox.Text.Length;
-                    }
-                    else if (value > 100)
-                    {
-                        textBox.Text = "100";
-                        textBox.SelectionStart = textBox.Text.Length;
-                    }
-                }
-                else
-                {
-                    // Ha nem szám, visszaállítjuk 0-ra
-                    textBox.Text = "0";
-                    textBox.SelectionStart = textBox.Text.Length;
-                }
-            }
-
-            UpdateTotalAmount();
-        }
-
-        private void ContractButton_Click(object sender, RoutedEventArgs e)
-        {
-            // GOMB AZONNALI LETILTÁSA dupla kattintás ellen
-            ContractButton.IsEnabled = false;
-
-            if (ValidateForm())
-            {
-                try
-                {
-                    // === ÚJ RÉSZ: Megerősítő ablak megjelenítése ===
-
-                    // Lakcím összeállítása
-                    string fullAddress = $"{CustomerZipTextBox.Text} {CustomerCityTextBox.Text}, {CustomerAddressTextBox.Text}";
-
-                    // Végösszeg kiszámítása
-                    int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int days) ? Math.Max(1, days) : 1;
-                    int discount = int.TryParse(DiscountTextBox.Text, out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
-                    decimal dailyTotal = _selectedDevices.Sum(d => d.RentPrice);
-                    decimal discountedDailyTotal = dailyTotal * (100 - discount) / 100;
-                    decimal totalAmount = discountedDailyTotal * rentalDays;
-
-                    // Megerősítő dialog megnyitása
-                    var confirmDialog = new ConfirmationDialog(
-                        _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text,
-                        fullAddress,
-                        _selectedExistingCustomer?.Email ?? CustomerEmailTextBox.Text,
-                        _selectedDevices,
-                        totalAmount
-                    );
-
-                    // Ablak megjelenítése és válasz kezelése
-                    bool? result = confirmDialog.ShowDialog();
-
-                    if (result == true && confirmDialog.Confirmed)
-                    {
-                        // === OK GOMB - FOLYTATÁS ===
-                        SaveRental();
-                        GenerateWordContract();
-
-                        // Sikeres mentés után gombok állapotának frissítése
-                        ContractButton.Background = System.Windows.Media.Brushes.Gray;
-                        EmailButton.IsEnabled = true;
-                        EmailButton.Background = System.Windows.Media.Brushes.Blue;
-
-                        // MINDEN MEZŐ LETILTÁSA - a szerződés már végleges!
-                        LockAllInputFields();
-                    }
-                    else
-                    {
-                        // === MÉGSEM GOMB - VISSZALÉPÉS ===
-                        // Gomb visszaengedélyezése, hogy újra lehessen próbálkozni
-                        ContractButton.IsEnabled = true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // HIBA ESETÉN VISSZAENGEDÉLYEZNI A GOMBOT!
-                    ContractButton.IsEnabled = true;
-                    ContractButton.Background = System.Windows.Media.Brushes.Green;
-
-                    MessageBox.Show($"Hiba történt a bérlés létrehozásakor: {ex.Message}",
-                                  "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
+                if (value < 0) { textBox.Text = "0"; textBox.SelectionStart = textBox.Text.Length; }
+                else if (value > 100) { textBox.Text = "100"; textBox.SelectionStart = textBox.Text.Length; }
             }
             else
             {
-                // VALIDÁCIÓ SIKERTELEN - GOMB VISSZAENGEDÉLYEZÉSE
-                ContractButton.IsEnabled = true;
-            }
-        }
-        private bool ValidateForm()
-        {
-            if (string.IsNullOrWhiteSpace(CustomerNameTextBox.Text))
-            {
-                MessageBox.Show("A név megadása kötelező!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return false;
+                textBox.Text = "0";
+                textBox.SelectionStart = textBox.Text.Length;
             }
 
-            if (string.IsNullOrWhiteSpace(CustomerEmailTextBox.Text))
-            {
-                MessageBox.Show("Az e-mail cím megadása kötelező!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return false;
-            }
-
-            // Email formátum ellenőrzése
-            string email = CustomerEmailTextBox.Text.Trim();
-            if (!email.Contains("@") || !email.Contains(".") || email.IndexOf("@") > email.LastIndexOf("."))
-            {
-                MessageBox.Show("Kérem adjon meg egy érvényes e-mail címet! (például: pelda@email.hu)", "Hibás e-mail formátum", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return false;
-            }
-
-            if (_selectedDevices.Count == 0)
-            {
-                MessageBox.Show("Legalább egy eszközt ki kell választani!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return false;
-            }
-
-            return true;
-        }
-
-        private void SaveRental()
-        {
-            int rentalDays  = int.TryParse(RentalDaysTextBox.Text, out int days) ? Math.Max(1, days) : 1;
-            int discount    = int.TryParse(DiscountTextBox.Text,   out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
-            decimal total   = _selectedDevices.Sum(d => d.RentPrice) * (100 - discount) / 100 * rentalDays;
-
-            var data = new Services.RentalData
-            {
-                TicketNr          = TicketNumberTextBox.Text,
-                RentalDays        = rentalDays,
-                PaymentMode       = ((ComboBoxItem)PaymentModeComboBox.SelectedItem).Content.ToString() ?? "Készpénz",
-                Comment           = RentalCommentTextBox.Text.Trim(),
-                TotalAmount       = total,
-                Devices           = _selectedDevices.ToList(),
-                ExistingCustomer  = _selectedExistingCustomer,
-                NewCustomerName     = CustomerNameTextBox.Text.Trim(),
-                NewCustomerZip      = CustomerZipTextBox.Text.Trim(),
-                NewCustomerCity     = CustomerCityTextBox.Text.Trim(),
-                NewCustomerAddress  = CustomerAddressTextBox.Text.Trim(),
-                NewCustomerEmail    = CustomerEmailTextBox.Text.Trim(),
-                NewCustomerIdNumber = CustomerIdNumberTextBox.Text.Trim(),
-                NewCustomerComment  = CustomerCommentTextBox.Text.Trim()
-            };
-
-            var rentalService = new Services.RentalService(_context);
-            rentalService.SaveRental(data);
-        }
-
-        private void ClearForm()
-        {
-            // Ügyfél adatok törlése
-            CustomerNameTextBox.Clear();
-            CustomerZipTextBox.Clear();
-            CustomerCityTextBox.Clear();
-            CustomerAddressTextBox.Clear();
-            CustomerEmailTextBox.Clear();
-            CustomerIdNumberTextBox.Clear();
-            CustomerCommentTextBox.Clear();
-
-            // Bérlés adatok visszaállítása
-            RentalDaysTextBox.Text = "1";
-            PaymentModeComboBox.SelectedIndex = 0;
-            RentalCommentTextBox.Clear();
-
-            // Eszköz kijelölések törlése
-            _selectedDevices.Clear();
-            foreach (WpfBorder border in DevicesWrapPanel.Children)
-            {
-                border.Background = Brushes.White;
-                border.BorderBrush = Brushes.Gray;
-                border.BorderThickness = new Thickness(1);
-            }
-
-            // Új ticket szám generálása
-            GenerateNextTicketNumber();
             UpdateTotalAmount();
-
-            // Kiválasztott ügyfél törlése
-            _selectedExistingCustomer = null;
-            SelectedCustomerBorder.Visibility = Visibility.Collapsed;
-            SetCustomerFieldsEnabled(true);
         }
 
+        // ===========================================
+        // ÜGYFÉL KEZELÉS
+        // ===========================================
 
-
-
-
-        private void DataManagerButton_Click(object sender, RoutedEventArgs e)
-        {
-            var dataManagerWindow = new DataManagerWindow();
-            dataManagerWindow.ShowDialog();
-        }
         private void SelectExistingCustomerButton_Click(object sender, RoutedEventArgs e)
         {
-            var customerSelectDialog = new CustomerSelectDialog();
-            if (customerSelectDialog.ShowDialog() == true && customerSelectDialog.SelectedCustomer != null)
+            var dialog = new CustomerSelectDialog();
+            if (dialog.ShowDialog() == true && dialog.SelectedCustomer != null)
             {
-                _selectedExistingCustomer = customerSelectDialog.SelectedCustomer;
+                _selectedExistingCustomer = dialog.SelectedCustomer;
                 LoadSelectedCustomerData();
                 ShowSelectedCustomerIndicator();
             }
@@ -710,49 +337,41 @@ namespace berles2
 
         private void LoadSelectedCustomerData()
         {
-            if (_selectedExistingCustomer != null)
-            {
-                CustomerNameTextBox.Text = _selectedExistingCustomer.Name;
-                CustomerZipTextBox.Text = _selectedExistingCustomer.Zipcode;
-                CustomerCityTextBox.Text = _selectedExistingCustomer.City;
-                CustomerAddressTextBox.Text = _selectedExistingCustomer.Address;
-                CustomerEmailTextBox.Text = _selectedExistingCustomer.Email;
-                CustomerIdNumberTextBox.Text = _selectedExistingCustomer.IdNumber;
-                CustomerCommentTextBox.Text = _selectedExistingCustomer.Comment ?? "";
-            }
+            if (_selectedExistingCustomer == null) return;
+            CustomerNameTextBox.Text    = _selectedExistingCustomer.Name;
+            CustomerZipTextBox.Text     = _selectedExistingCustomer.Zipcode;
+            CustomerCityTextBox.Text    = _selectedExistingCustomer.City;
+            CustomerAddressTextBox.Text = _selectedExistingCustomer.Address;
+            CustomerEmailTextBox.Text   = _selectedExistingCustomer.Email;
+            CustomerIdNumberTextBox.Text = _selectedExistingCustomer.IdNumber;
+            CustomerCommentTextBox.Text  = _selectedExistingCustomer.Comment ?? "";
         }
 
         private void ShowSelectedCustomerIndicator()
         {
-            if (_selectedExistingCustomer != null)
-            {
-                SelectedCustomerBorder.Visibility = Visibility.Visible;
-                SelectedCustomerText.Text = $"✅ Kiválasztott ügyfél: {_selectedExistingCustomer.Name}";
-
-                // Mezők letiltása hogy ne lehessen módosítani
-                SetCustomerFieldsEnabled(false);
-            }
+            if (_selectedExistingCustomer == null) return;
+            SelectedCustomerBorder.Visibility = Visibility.Visible;
+            SelectedCustomerText.Text = $"✅ Kiválasztott ügyfél: {_selectedExistingCustomer.Name}";
+            SetCustomerFieldsEnabled(false);
         }
 
         private void ClearSelectedCustomerButton_Click(object sender, RoutedEventArgs e)
         {
             _selectedExistingCustomer = null;
             SelectedCustomerBorder.Visibility = Visibility.Collapsed;
-
-            // Mezők engedélyezése és törlése
             SetCustomerFieldsEnabled(true);
             ClearCustomerFields();
         }
 
         private void SetCustomerFieldsEnabled(bool enabled)
         {
-            CustomerNameTextBox.IsEnabled = enabled;
-            CustomerZipTextBox.IsEnabled = enabled;
-            CustomerCityTextBox.IsEnabled = enabled;
-            CustomerAddressTextBox.IsEnabled = enabled;
-            CustomerEmailTextBox.IsEnabled = enabled;
+            CustomerNameTextBox.IsEnabled     = enabled;
+            CustomerZipTextBox.IsEnabled      = enabled;
+            CustomerCityTextBox.IsEnabled     = enabled;
+            CustomerAddressTextBox.IsEnabled  = enabled;
+            CustomerEmailTextBox.IsEnabled    = enabled;
             CustomerIdNumberTextBox.IsEnabled = enabled;
-            CustomerCommentTextBox.IsEnabled = enabled;
+            CustomerCommentTextBox.IsEnabled  = enabled;
         }
 
         private void ClearCustomerFields()
@@ -765,123 +384,116 @@ namespace berles2
             CustomerIdNumberTextBox.Clear();
             CustomerCommentTextBox.Clear();
         }
-        protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
-        {
-            _context?.Dispose();
-            base.OnClosing(e);
-        }
+
         // ===========================================
-        // BÉRLÉSI FOLYAMAT GOMBOK
+        // BÉRLÉSI FOLYAMAT
         // ===========================================
 
-        private void EmailButton_Click(object sender, RoutedEventArgs e)
+        private bool ValidateForm()
         {
+            if (string.IsNullOrWhiteSpace(CustomerNameTextBox.Text))
+            {
+                MessageBox.Show("A név megadása kötelező!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            string email = CustomerEmailTextBox.Text.Trim();
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                MessageBox.Show("Az e-mail cím megadása kötelező!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+            if (!email.Contains("@") || !email.Contains(".") || email.IndexOf("@") > email.LastIndexOf("."))
+            {
+                MessageBox.Show("Kérem adjon meg egy érvényes e-mail címet! (például: pelda@email.hu)",
+                    "Hibás e-mail formátum", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            if (_selectedDevices.Count == 0)
+            {
+                MessageBox.Show("Legalább egy eszközt ki kell választani!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            return true;
+        }
+
+        private void ContractButton_Click(object sender, RoutedEventArgs e)
+        {
+            ContractButton.IsEnabled = false;
+
+            if (!ValidateForm())
+            {
+                ContractButton.IsEnabled = true;
+                return;
+            }
+
             try
             {
-                // 1. PDF generálás a Word dokumentumból
-                string pdfPath = ConvertWordToPdf();
-                if (string.IsNullOrEmpty(pdfPath))
-                    return;
+                int rentalDays  = int.TryParse(RentalDaysTextBox.Text, out int days) ? Math.Max(1, days) : 1;
+                int discount    = int.TryParse(DiscountTextBox.Text,   out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
+                decimal total   = _selectedDevices.Sum(d => d.RentPrice) * (100 - discount) / 100 * rentalDays;
+                string address  = $"{CustomerZipTextBox.Text} {CustomerCityTextBox.Text}, {CustomerAddressTextBox.Text}";
 
-                // 2. Email küldés
-                SendContractEmail(pdfPath);
+                var confirmDialog = new ConfirmationDialog(
+                    _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text,
+                    address,
+                    _selectedExistingCustomer?.Email ?? CustomerEmailTextBox.Text,
+                    _selectedDevices,
+                    total
+                );
 
-                // 3. Gombok állapotának frissítése
-                EmailButton.IsEnabled = false;
-                EmailButton.Background = System.Windows.Media.Brushes.Gray;
+                if (confirmDialog.ShowDialog() == true && confirmDialog.Confirmed)
+                {
+                    SaveRental();
+                    GenerateWordContract();
 
-                InvoiceButton.IsEnabled = true;
-                InvoiceButton.Background = System.Windows.Media.Brushes.Orange;
-
-                MessageBox.Show("Email sikeresen elküldve!",
-                              "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                    ContractButton.Background = System.Windows.Media.Brushes.Gray;
+                    EmailButton.IsEnabled = true;
+                    EmailButton.Background = System.Windows.Media.Brushes.Blue;
+                    LockAllInputFields();
+                }
+                else
+                {
+                    ContractButton.IsEnabled = true;
+                }
             }
             catch (Exception ex)
             {
-                AppLogger.Logger.Error(ex, "Email küldési hiba");
-                MessageBox.Show($"Hiba az email küldésekor: {ex.Message}",
-                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                ContractButton.IsEnabled = true;
+                ContractButton.Background = System.Windows.Media.Brushes.Green;
+                MessageBox.Show($"Hiba történt a bérlés létrehozásakor: {ex.Message}",
+                    "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private void FinishButton_Click(object sender, RoutedEventArgs e)
+        private void SaveRental()
         {
-            // Ablak inicializálása
-            var result = MessageBox.Show("Biztosan befejezed és törölni szeretnéd az összes adatot?",
-                                        "Bérlés befejezése", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            int rentalDays  = int.TryParse(RentalDaysTextBox.Text, out int days) ? Math.Max(1, days) : 1;
+            int discount    = int.TryParse(DiscountTextBox.Text,   out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
+            decimal total   = _selectedDevices.Sum(d => d.RentPrice) * (100 - discount) / 100 * rentalDays;
 
-            if (result == MessageBoxResult.Yes)
+            var data = new Services.RentalData
             {
-                ClearAllForms();
-                //MessageBox.Show("Az ablak inicializálva! Új bérlést kezdhetsz.",
-                //            "Kész", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
+                TicketNr            = TicketNumberTextBox.Text,
+                RentalDays          = rentalDays,
+                PaymentMode         = ((ComboBoxItem)PaymentModeComboBox.SelectedItem).Content.ToString() ?? "Készpénz",
+                Comment             = RentalCommentTextBox.Text.Trim(),
+                TotalAmount         = total,
+                Devices             = _selectedDevices.ToList(),
+                ExistingCustomer    = _selectedExistingCustomer,
+                NewCustomerName     = CustomerNameTextBox.Text.Trim(),
+                NewCustomerZip      = CustomerZipTextBox.Text.Trim(),
+                NewCustomerCity     = CustomerCityTextBox.Text.Trim(),
+                NewCustomerAddress  = CustomerAddressTextBox.Text.Trim(),
+                NewCustomerEmail    = CustomerEmailTextBox.Text.Trim(),
+                NewCustomerIdNumber = CustomerIdNumberTextBox.Text.Trim(),
+                NewCustomerComment  = CustomerCommentTextBox.Text.Trim()
+            };
+
+            new Services.RentalService(_context).SaveRental(data);
         }
-
-        private void ClearAllForms()
-        {
-            // Bérlő adatok törlése
-            CustomerNameTextBox.Text = "";
-            CustomerZipTextBox.Text = "";  // ← JAVÍTVA!
-            CustomerCityTextBox.Text = "";
-            CustomerAddressTextBox.Text = "";
-            CustomerEmailTextBox.Text = "";
-            CustomerIdNumberTextBox.Text = "";
-            CustomerCommentTextBox.Text = "";
-
-            // Bérlés részletek törlése
-            RentalDaysTextBox.Text = "1";  // ← Alapértelmezett érték
-            PaymentModeComboBox.SelectedIndex = 0;
-            RentalCommentTextBox.Text = "";
-            TotalAmountTextBox.Text = "0 Ft";
-
-            // Kiválasztott eszközök törlése
-            _selectedDevices.Clear();
-
-            // Eszközök megjelenítésének újratöltése
-            DisplayDevices();
-
-            // Ticket szám újragenerálása
-            GenerateNextTicketNumber();  // ← JAVÍTVA!
-            UnlockAllInputFields();
-
-            // Kiválasztott ügyfél törlése
-            _selectedExistingCustomer = null;
-            if (SelectedCustomerBorder != null)
-                SelectedCustomerBorder.Visibility = Visibility.Collapsed;
-            SetCustomerFieldsEnabled(true);
-
-            // Végösszeg frissítése
-            UpdateTotalAmount();
-
-            // Gombok visszaállítása
-            ContractButton.IsEnabled = true;
-            ContractButton.Background = System.Windows.Media.Brushes.Green;
-
-            EmailButton.IsEnabled = false;
-            EmailButton.Background = System.Windows.Media.Brushes.Gray;
-
-            InvoiceButton.IsEnabled = false;
-            InvoiceButton.Background = System.Windows.Media.Brushes.Gray;
-        }
-        // ===========================================
-        // BÉRLÉSI FOLYAMAT GOMBOK
-        // ===========================================
-
-        private void SettingsButton_Click(object sender, RoutedEventArgs e)
-        {
-            var settingsDialog = new SettingsDialog();
-            if (settingsDialog.ShowDialog() == true)
-            {
-                // Beállítások frissítése után reload company settings
-                LoadCompanySettings();
-                MessageBox.Show("Beállítások alkalmazva!",
-                              "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-        }
-        // ===========================================
-        // WORD TÁBLÁZAT GENERÁLÁS - RÉGI KÓD ALAPJÁN
-        // ===========================================
 
         private void GenerateWordContract()
         {
@@ -891,13 +503,12 @@ namespace berles2
                 if (setting == null)
                 {
                     MessageBox.Show("Nincsenek beállítások! Kérjük állítsa be a Beállítások menüben.",
-                                  "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
                     return;
                 }
 
                 int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int d) ? Math.Max(1, d) : 1;
                 int discount   = int.TryParse(DiscountTextBox.Text,   out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
-                decimal total  = _selectedDevices.Sum(dev => dev.RentPrice) * (100 - discount) / 100 * rentalDays;
 
                 var data = new Services.ContractData
                 {
@@ -909,66 +520,52 @@ namespace berles2
                     CustomerIdNumber = _selectedExistingCustomer?.IdNumber  ?? CustomerIdNumberTextBox.Text,
                     RentalDays       = rentalDays,
                     DiscountPercent  = discount,
-                    TotalAmount      = total,
+                    TotalAmount      = _selectedDevices.Sum(dev => dev.RentPrice) * (100 - discount) / 100 * rentalDays,
                     Devices          = _selectedDevices.ToList()
                 };
 
                 _lastContractTimestamp = DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
 
-                var docService = new Services.DocumentService(setting);
-                string pdfPath = docService.GenerateContract(data);
-
-                if (string.IsNullOrEmpty(pdfPath)) return;
-
-                Process.Start(new ProcessStartInfo { FileName = pdfPath, UseShellExecute = true });
+                string pdfPath = new Services.DocumentService(setting).GenerateContract(data);
+                if (!string.IsNullOrEmpty(pdfPath))
+                    Process.Start(new ProcessStartInfo { FileName = pdfPath, UseShellExecute = true });
             }
             catch (Exception ex)
             {
                 AppLogger.Logger.Error(ex, "Hiba a szerződés generálásakor");
                 MessageBox.Show($"Hiba a szerződés generálásakor: {ex.Message}",
-                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        private async Task GenerateInvoiceXml()
+        // ===========================================
+        // EMAIL ÉS SZÁMLA
+        // ===========================================
+
+        private void EmailButton_Click(object sender, RoutedEventArgs e)
         {
-            var setting = _context.Settings.FirstOrDefault();
-            if (setting == null)
-                throw new InvalidOperationException("Nincsenek beállítások! Kérlek állítsd be a beállításokban.");
-
-            int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int days) ? days : 1;
-            int discount   = int.TryParse(DiscountTextBox.Text,   out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
-            decimal netPrice = _selectedDevices.Sum(d => d.RentPrice) * (100 - discount) / 100 * rentalDays;
-
-            var data = new Services.InvoiceData
+            try
             {
-                CustomerName    = _selectedExistingCustomer?.Name      ?? CustomerNameTextBox.Text,
-                CustomerZip     = _selectedExistingCustomer?.Zipcode   ?? CustomerZipTextBox.Text,
-                CustomerCity    = _selectedExistingCustomer?.City      ?? CustomerCityTextBox.Text,
-                CustomerAddress = _selectedExistingCustomer?.Address   ?? CustomerAddressTextBox.Text,
-                CustomerEmail   = _selectedExistingCustomer?.Email     ?? CustomerEmailTextBox.Text,
-                PaymentMode     = (PaymentModeComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Készpénz",
-                NetPrice        = netPrice,
-                DevicesList     = string.Join(", ", _selectedDevices.Select(d => d.DeviceName))
-            };
+                string pdfPath = ConvertWordToPdf();
+                if (string.IsNullOrEmpty(pdfPath)) return;
 
-            var invoiceService = new Services.InvoiceService(setting);
-            string pdfPath = await invoiceService.GenerateAndSendAsync(data);
+                SendContractEmail(pdfPath);
 
-            if (!string.IsNullOrEmpty(pdfPath))
+                EmailButton.IsEnabled = false;
+                EmailButton.Background = System.Windows.Media.Brushes.Gray;
+                InvoiceButton.IsEnabled = true;
+                InvoiceButton.Background = System.Windows.Media.Brushes.Orange;
+
+                MessageBox.Show("Email sikeresen elküldve!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+            catch (Exception ex)
             {
-                MessageBox.Show($"Számla sikeresen elküldve és mentve!\nHelye: {pdfPath}",
-                              "Számla siker", MessageBoxButton.OK, MessageBoxImage.Information);
-                SaveInvoicePath(pdfPath);
+                AppLogger.Logger.Error(ex, "Email küldési hiba");
+                MessageBox.Show($"Hiba az email küldésekor: {ex.Message}",
+                    "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        // ===========================================
-        // PDF GENERÁLÁS ÉS EMAIL KÜLDÉS
-        // ===========================================
 
-        /// <summary>
-        /// Az email gomb hívja — megkeresi vagy legenerálja a szerződés PDF-et.
-        /// </summary>
         private string ConvertWordToPdf()
         {
             try
@@ -980,89 +577,232 @@ namespace berles2
                     _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
                 string timestamp = _lastContractTimestamp ?? DateTime.Now.ToString("yyyy-MM-dd_HH-mm");
 
-                var docService = new Services.DocumentService(setting);
-                return docService.GetOrCreateContractPdf(customerName, timestamp);
+                return new Services.DocumentService(setting).GetOrCreateContractPdf(customerName, timestamp);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Hiba a PDF generálásakor: {ex.Message}",
-                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                 return "";
             }
         }
-
-
 
         private void SendContractEmail(string pdfPath)
         {
             var setting = _context.Settings.FirstOrDefault();
             if (setting == null)
             {
-                MessageBox.Show("Email beállítások nincsenek megadva!",
-                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Email beállítások nincsenek megadva!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             SaveContractPath(pdfPath);
-
-            string recipientEmail = _selectedExistingCustomer?.Email ?? CustomerEmailTextBox.Text;
-            string recipientName  = _selectedExistingCustomer?.Name  ?? CustomerNameTextBox.Text;
-
-            var emailService = new Services.EmailService(setting);
-            emailService.SendContractEmail(recipientEmail, recipientName, pdfPath);
+            new Services.EmailService(setting).SendContractEmail(
+                _selectedExistingCustomer?.Email ?? CustomerEmailTextBox.Text,
+                _selectedExistingCustomer?.Name  ?? CustomerNameTextBox.Text,
+                pdfPath);
         }
+
         private async void InvoiceButton_Click(object sender, RoutedEventArgs e)
         {
-            // GOMB AZONNALI LETILTÁSA dupla kattintás ellen
             InvoiceButton.IsEnabled = false;
-
             try
             {
-                // XML generálása és számla küldés
                 await GenerateInvoiceXml();
-
-                // Sikeres küldés után gomb állapotának frissítése
                 InvoiceButton.Background = System.Windows.Media.Brushes.Gray;
             }
             catch (Exception ex)
             {
-                // HIBA ESETÉN VISSZAENGEDÉLYEZNI A GOMBOT!
                 InvoiceButton.IsEnabled = true;
                 InvoiceButton.Background = System.Windows.Media.Brushes.Blue;
-
                 MessageBox.Show($"Hiba a számla generálásakor: {ex.Message}",
-                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                    "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-        private void ReportingButton_Click(object sender, RoutedEventArgs e)
+
+        private async Task GenerateInvoiceXml()
         {
-            var reportingWindow = new ReportingWindow();
-            reportingWindow.ShowDialog();
+            var setting = _context.Settings.FirstOrDefault()
+                ?? throw new InvalidOperationException("Nincsenek beállítások! Kérlek állítsd be a beállításokban.");
+
+            int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int days) ? days : 1;
+            int discount   = int.TryParse(DiscountTextBox.Text,   out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
+
+            var data = new Services.InvoiceData
+            {
+                CustomerName    = _selectedExistingCustomer?.Name      ?? CustomerNameTextBox.Text,
+                CustomerZip     = _selectedExistingCustomer?.Zipcode   ?? CustomerZipTextBox.Text,
+                CustomerCity    = _selectedExistingCustomer?.City      ?? CustomerCityTextBox.Text,
+                CustomerAddress = _selectedExistingCustomer?.Address   ?? CustomerAddressTextBox.Text,
+                CustomerEmail   = _selectedExistingCustomer?.Email     ?? CustomerEmailTextBox.Text,
+                PaymentMode     = (PaymentModeComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Készpénz",
+                NetPrice        = _selectedDevices.Sum(d => d.RentPrice) * (100 - discount) / 100 * rentalDays,
+                DevicesList     = string.Join(", ", _selectedDevices.Select(d => d.DeviceName))
+            };
+
+            string pdfPath = await new Services.InvoiceService(setting).GenerateAndSendAsync(data);
+
+            if (!string.IsNullOrEmpty(pdfPath))
+            {
+                MessageBox.Show($"Számla sikeresen elküldve és mentve!\nHelye: {pdfPath}",
+                    "Számla siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                SaveInvoicePath(pdfPath);
+            }
         }
 
-        private void SaveContractPath(string pdfPath)
+        // ===========================================
+        // ÉRTÉKELŐ EMAIL
+        // ===========================================
+
+        private void ReviewButton_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                // Legutolsó rental keresése a ticket szám alapján
-                string currentTicketNr = TicketNumberTextBox.Text;
-                var rental = _context.Rentals.FirstOrDefault(r => r.TicketNr == currentTicketNr);
-
-                if (rental != null)
-                {
-                    rental.Contract = pdfPath;
-                    _context.SaveChanges();
-                }
+                SendReviewEmails();
             }
             catch (Exception ex)
             {
-                // Csak logolás, ne akadályozza meg az email küldést
-                System.Diagnostics.Debug.WriteLine($"Hiba a PDF útvonal mentésekor: {ex.Message}");
+                MessageBox.Show($"Hiba az értékelő emailek küldésekor: {ex.Message}",
+                    "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
+        private void SendReviewEmails()
+        {
+            var setting = _context.Settings.FirstOrDefault();
+            if (setting == null || string.IsNullOrWhiteSpace(setting.ReviewEmailTemplate) ||
+                string.IsNullOrWhiteSpace(setting.ReviewEmailSubject))
+            {
+                MessageBox.Show("Értékelő email beállítások hiányoznak! Kérjük állítsa be a Beállításokban.",
+                    "Hiányzó beállítások", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            var candidates = _context.Rentals
+                .Include(r => r.Customer)
+                .Where(r => !r.ReviewEmailSent &&
+                            r.RentStart.AddDays(r.RentalDays).AddDays(3) <= DateTime.Now)
+                .ToList();
+
+            if (candidates.Count == 0)
+            {
+                MessageBox.Show("Nincs olyan bérlés, amelyhez értékelő emailt kellene küldeni.",
+                    "Nincs feladat", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            var confirmationWindow = new ReviewConfirmationWindow(candidates);
+            if (confirmationWindow.ShowDialog() == true)
+                SendReviewEmailsToCustomers(candidates, setting);
+        }
+
+        private void SendReviewEmailsToCustomers(List<Rental> rentals, Setting setting)
+        {
+            int successCount = 0;
+            int errorCount   = 0;
+            string errors    = "";
+            var emailService = new Services.EmailService(setting);
+
+            foreach (var rental in rentals)
+            {
+                try
+                {
+                    emailService.SendReviewEmail(rental);
+                    rental.ReviewEmailSent = true;
+                    _context.Update(rental);
+                    successCount++;
+                }
+                catch (Exception ex)
+                {
+                    AppLogger.Logger.Error(ex, "Értékelő email küldési hiba - bérlés: {TicketNr}, ügyfél: {Customer}",
+                        rental.TicketNr, rental.Customer.Name);
+                    errorCount++;
+                    errors += $"- {rental.Customer.Name} ({rental.TicketNr}): {ex.Message}\n";
+                }
+            }
+
+            try { _context.SaveChanges(); }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Hiba az adatbázis frissítésekor: {ex.Message}",
+                    "Adatbázis hiba", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            string result = $"Email küldés befejezve!\n\nSikeresen elküldve: {successCount} db\nHibák: {errorCount} db";
+            if (errorCount > 0) result += $"\n\nHiba részletek:\n{errors}";
+
+            MessageBox.Show(result, "Email küldés eredménye", MessageBoxButton.OK,
+                errorCount > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
+
+            foreach (Window window in Application.Current.Windows)
+            {
+                if (window is DataManagerWindow dmw) { dmw.LoadRentals(); break; }
+            }
+        }
+
+        // ===========================================
+        // GOMBOK ÉS NAVIGÁCIÓ
+        // ===========================================
+
+        private void FinishButton_Click(object sender, RoutedEventArgs e)
+        {
+            var result = MessageBox.Show("Biztosan befejezed és törölni szeretnéd az összes adatot?",
+                "Bérlés befejezése", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+                ClearAllForms();
+        }
+
+        private void ClearAllForms()
+        {
+            ClearCustomerFields();
+            RentalDaysTextBox.Text = "1";
+            PaymentModeComboBox.SelectedIndex = 0;
+            RentalCommentTextBox.Text = "";
+            TotalAmountTextBox.Text = "0 Ft";
+            _selectedDevices.Clear();
+            DisplayDevices();
+            GenerateNextTicketNumber();
+            UnlockAllInputFields();
+            _selectedExistingCustomer = null;
+            if (SelectedCustomerBorder != null)
+                SelectedCustomerBorder.Visibility = Visibility.Collapsed;
+            SetCustomerFieldsEnabled(true);
+            UpdateTotalAmount();
+            ContractButton.IsEnabled = true;
+            ContractButton.Background = System.Windows.Media.Brushes.Green;
+            EmailButton.IsEnabled = false;
+            EmailButton.Background = System.Windows.Media.Brushes.Gray;
+            InvoiceButton.IsEnabled = false;
+            InvoiceButton.Background = System.Windows.Media.Brushes.Gray;
+        }
+
+        private void SettingsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var settingsDialog = new SettingsDialog();
+            if (settingsDialog.ShowDialog() == true)
+            {
+                LoadCompanySettings();
+                MessageBox.Show("Beállítások alkalmazva!", "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
+        }
+
+        private void DataManagerButton_Click(object sender, RoutedEventArgs e)
+        {
+            new DataManagerWindow().ShowDialog();
+        }
+
+        private void ReportingButton_Click(object sender, RoutedEventArgs e)
+        {
+            new ReportingWindow().ShowDialog();
+        }
+
+        // ===========================================
+        // MEZŐ ZÁROLÁS / FELOLDÁS
+        // ===========================================
+
         private void LockAllInputFields()
         {
-            // Ügyfél adatok letiltása
             CustomerNameTextBox.IsEnabled = false;
             CustomerZipTextBox.IsEnabled = false;
             CustomerCityTextBox.IsEnabled = false;
@@ -1072,20 +812,16 @@ namespace berles2
             CustomerCommentTextBox.IsEnabled = false;
             SelectExistingCustomerButton.IsEnabled = false;
             ClearSelectedCustomerButton.IsEnabled = false;
-
-            // Bérlési adatok letiltása
             RentalDaysTextBox.IsEnabled = false;
             DiscountTextBox.IsEnabled = false;
             PaymentModeComboBox.IsEnabled = false;
             RentalCommentTextBox.IsEnabled = false;
-
-            // Eszköz keresés és kiválasztás letiltása
             DeviceSearchTextBox.IsEnabled = false;
             DevicesWrapPanel.IsEnabled = false;
         }
+
         private void UnlockAllInputFields()
         {
-            // Ügyfél adatok engedélyezése
             CustomerNameTextBox.IsEnabled = true;
             CustomerZipTextBox.IsEnabled = true;
             CustomerCityTextBox.IsEnabled = true;
@@ -1095,25 +831,40 @@ namespace berles2
             CustomerCommentTextBox.IsEnabled = true;
             SelectExistingCustomerButton.IsEnabled = true;
             ClearSelectedCustomerButton.IsEnabled = true;
-
-            // Bérlési adatok engedélyezése
             RentalDaysTextBox.IsEnabled = true;
             DiscountTextBox.IsEnabled = true;
             PaymentModeComboBox.IsEnabled = true;
             RentalCommentTextBox.IsEnabled = true;
-
-            // Eszköz keresés és kiválasztás engedélyezése
             DeviceSearchTextBox.IsEnabled = true;
             DevicesWrapPanel.IsEnabled = true;
         }
+
+        // ===========================================
+        // ADATBÁZIS SEGÉD METÓDUSOK
+        // ===========================================
+
+        private void SaveContractPath(string pdfPath)
+        {
+            try
+            {
+                var rental = _context.Rentals.FirstOrDefault(r => r.TicketNr == TicketNumberTextBox.Text);
+                if (rental != null)
+                {
+                    rental.Contract = pdfPath;
+                    _context.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Logger.Warning(ex, "Hiba a szerződés útvonal mentésekor");
+            }
+        }
+
         private void SaveInvoicePath(string invoicePath)
         {
             try
             {
-                // Legutolsó rental keresése a ticket szám alapján
-                string currentTicketNr = TicketNumberTextBox.Text;
-                var rental = _context.Rentals.FirstOrDefault(r => r.TicketNr == currentTicketNr);
-
+                var rental = _context.Rentals.FirstOrDefault(r => r.TicketNr == TicketNumberTextBox.Text);
                 if (rental != null)
                 {
                     rental.Invoice = invoicePath;
@@ -1122,10 +873,14 @@ namespace berles2
             }
             catch (Exception ex)
             {
-                // Csak logolás, ne akadályozza meg a számlázást
-                System.Diagnostics.Debug.WriteLine($"Hiba a számla útvonal mentésekor: {ex.Message}");
+                AppLogger.Logger.Warning(ex, "Hiba a számla útvonal mentésekor");
             }
         }
 
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            _context?.Dispose();
+            base.OnClosing(e);
+        }
     }
 }
