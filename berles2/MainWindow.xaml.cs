@@ -1,8 +1,6 @@
 ﻿using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
-using MailKit.Net.Smtp;
 using Microsoft.EntityFrameworkCore;
-using MimeKit;
 using Serilog;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -334,61 +332,8 @@ namespace berles2
         }
         private void SendSingleReviewEmail(Rental rental, Setting setting)
         {
-            // 1. Email template betöltése
-            string emailBody;
-            if (!string.IsNullOrWhiteSpace(setting.ReviewEmailTemplate) &&
-                SystemIO.File.Exists(setting.ReviewEmailTemplate))
-            {
-                emailBody = SystemIO.File.ReadAllText(setting.ReviewEmailTemplate);
-
-                // Változók helyettesítése
-                emailBody = emailBody.Replace("{{CUSTOMER_NAME}}", rental.Customer.Name);
-                emailBody = emailBody.Replace("{{COMPANY_NAME}}", setting.CompanyName);
-                emailBody = emailBody.Replace("{{RENTAL_DATE}}", rental.RentStart.ToString("yyyy. MM. dd."));
-                emailBody = emailBody.Replace("{{GOOGLE_REVIEW_LINK}}", setting.GoogleReview ?? "");
-            }
-            else
-            {
-                // Alapértelmezett template ha nincs fájl
-                emailBody = $@"
-        <html>
-        <body>
-            <h2>Kedves {rental.Customer.Name}!</h2>
-            <p>Köszönjük, hogy választotta a {setting.CompanyName} szolgáltatásait!</p>
-            <p>Kérjük, segítsen nekünk a szolgáltatásunk fejlesztésében egy rövid értékeléssel!</p>
-            {(!string.IsNullOrWhiteSpace(setting.GoogleReview) ? $"<p><a href='{setting.GoogleReview}'>Értékelés írása itt</a></p>" : "")}
-            <p>Köszönjük!</p>
-            <br>
-            <p>Üdvözlettel,<br>{setting.CompanyName}</p>
-        </body>
-        </html>";
-            }
-
-            // 2. Email üzenet készítése
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(setting.SenderName, setting.SenderEmail));
-            message.To.Add(new MailboxAddress("", rental.Customer.Email));
-
-            if (!string.IsNullOrWhiteSpace(setting.CcAddress))
-            {
-                message.Cc.Add(new MailboxAddress("", setting.CcAddress));
-            }
-
-            message.Subject = setting.ReviewEmailSubject;
-            message.Body = new TextPart("html") { Text = emailBody };
-
-            // 3. Email küldés
-            using (var client = new SmtpClient())
-            {
-                var socketOptions = setting.SmtpPort == 465 ?
-                    MailKit.Security.SecureSocketOptions.SslOnConnect :
-                    MailKit.Security.SecureSocketOptions.StartTls;
-
-                client.Connect(setting.EmailSmtp, setting.SmtpPort, socketOptions);
-                client.Authenticate(setting.SenderEmail, CredentialProtection.Unprotect(setting.EmailPassword));
-                client.Send(message);
-                client.Disconnect(true);
-            }
+            var emailService = new Services.EmailService(setting);
+            emailService.SendReviewEmail(rental);
         }
         private WpfBorder CreateDeviceWidget(Device device)
         {
@@ -1542,7 +1487,6 @@ namespace berles2
 
         private void SendContractEmail(string pdfPath)
         {
-            // 1. Beállítások betöltése
             var setting = _context.Settings.FirstOrDefault();
             if (setting == null)
             {
@@ -1550,130 +1494,14 @@ namespace berles2
                               "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
+
             SaveContractPath(pdfPath);
 
-            // 2. Email címzett meghatározása
             string recipientEmail = _selectedExistingCustomer?.Email ?? CustomerEmailTextBox.Text;
-            if (string.IsNullOrWhiteSpace(recipientEmail))
-            {
-                MessageBox.Show("Az ügyfél email címe nincs megadva!",
-                              "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+            string recipientName  = _selectedExistingCustomer?.Name  ?? CustomerNameTextBox.Text;
 
-            // 3. Email üzenet készítése
-            var message = new MimeMessage();
-            message.From.Add(new MailboxAddress(setting.SenderName, setting.SenderEmail));
-            message.To.Add(new MailboxAddress("", recipientEmail));
-
-            // CC hozzáadása ha van
-            if (!string.IsNullOrWhiteSpace(setting.CcAddress))
-            {
-                message.Cc.Add(new MailboxAddress("", setting.CcAddress));
-            }
-
-            message.Subject = setting.EmailSubject;
-
-            // 4. Email tartalom betöltése
-            string emailBody = GetEmailBody(setting);
-
-            // 5. Mellékletek hozzáadása
-            var bodyBuilder = new BodyBuilder { HtmlBody = emailBody };
-
-            // PDF szerződés csatolása
-            if (SystemIO.File.Exists(pdfPath))
-            {
-                bodyBuilder.Attachments.Add(pdfPath);
-            }
-
-            // ÁSZF csatolása ha van
-            if (!string.IsNullOrWhiteSpace(setting.AszfFile) && SystemIO.File.Exists(setting.AszfFile))
-            {
-                bodyBuilder.Attachments.Add(setting.AszfFile);
-            }
-
-            message.Body = bodyBuilder.ToMessageBody();
-
-            // 6. Email küldés 
-            using (var client = new SmtpClient())
-            {
-                try
-                {
-                    AppLogger.Logger.Debug("SMTP kapcsolódás: {Server}:{Port}", setting.EmailSmtp, setting.SmtpPort);
-                    var socketOptions = setting.SmtpPort == 465 ? MailKit.Security.SecureSocketOptions.SslOnConnect : MailKit.Security.SecureSocketOptions.StartTls;
-
-                    client.Connect(setting.EmailSmtp, setting.SmtpPort, socketOptions);
-
-                    // opcionális: ha nem OAUTH2-t használsz, leveheted client.AuthenticationMechanisms.Remove("XOAUTH2");
-
-                    AppLogger.Logger.Debug("SMTP autentikáció: {Email}", setting.SenderEmail);
-                    client.Authenticate(setting.SenderEmail, CredentialProtection.Unprotect(setting.EmailPassword));
-
-                    AppLogger.Logger.Debug("Email küldése...");
-                    client.Send(message);
-                    client.Disconnect(true);
-
-                    AppLogger.Logger.Information("Email sikeresen elküldve: {Recipient}", message.To.ToString());
-                }
-                catch (Exception smtpEx)
-                {
-                    AppLogger.Logger.Error(smtpEx, "SMTP küldési hiba - szerver: {Server}:{Port}, feladó: {Email}",
-                        setting.EmailSmtp, setting.SmtpPort, setting.SenderEmail);
-                    throw new Exception($"SMTP hiba részletesen:\n" +
-                                      $"Szerver: {setting.EmailSmtp}:{setting.SmtpPort}\n" +
-                                      $"Email: {setting.SenderEmail}\n" +
-                                      $"SSL: StartTls\n" +
-                                      $"Hiba: {smtpEx.Message}\n" +
-                                      $"Típus: {smtpEx.GetType().Name}");
-                }
-            }
-        }
-
-        private string GetEmailBody(Setting setting)
-        {
-            try
-            {
-                // Email template betöltése ha van
-                if (!string.IsNullOrWhiteSpace(setting.ContractEmailTemplate) && SystemIO.File.Exists(setting.ContractEmailTemplate))
-                {
-                    string template = SystemIO.File.ReadAllText(setting.ContractEmailTemplate);
-
-                    // Változók helyettesítése a template-ben
-                    template = template.Replace("{{CUSTOMER_NAME}}", _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text);
-                    template = template.Replace("{{COMPANY_NAME}}", setting.CompanyName);
-                    template = template.Replace("{{RENTAL_DATE}}", DateTime.Now.ToString("yyyy. MM. dd."));
-                    template = template.Replace("{{GOOGLE_REVIEW_LINK}}", setting.GoogleReview ?? "");
-
-                    return template;
-                }
-                else
-                {
-                    // Alapértelmezett email tartalom ha nincs template
-                    string customerName = _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text;
-                    return $@"
-            <html>
-            <body>
-                <h2>Kedves {customerName}!</h2>
-                <p>Köszönjük, hogy választotta a {setting.CompanyName} szolgáltatásait!</p>
-                <p>Mellékletben megtalálja:</p>
-                <ul>
-                    <li>A bérlési szerződést PDF formátumban</li>
-                    <li>Az Általános Szerződési Feltételeket</li>
-                </ul>
-                <p>Kérjük, olvassa át figyelmesen a dokumentumokat.</p>
-                <p>Köszönjük a bizalmát!</p>
-                <br>
-                <p>Üdvözlettel,<br>{setting.CompanyName}</p>
-            </body>
-            </html>";
-                }
-            }
-            catch (Exception)
-            {
-                // Ha bármi probléma van, egyszerű szöveges üzenet
-                string customerName = _selectedExistingCustomer?.Name ?? CustomerNameTextBox.Text;
-                return $"Kedves {customerName}!\n\nMellékletben megtalálja a bérlési szerződést és az ÁSZF-et.\n\nKöszönjük!\n{setting.CompanyName}";
-            }
+            var emailService = new Services.EmailService(setting);
+            emailService.SendContractEmail(recipientEmail, recipientName, pdfPath);
         }
         private async void InvoiceButton_Click(object sender, RoutedEventArgs e)
         {
