@@ -93,6 +93,7 @@ namespace berles2
             }
             catch (Exception ex)
             {
+                AppLogger.Logger.Error(ex, "Hiba a beállítások betöltésekor");
                 MessageBox.Show($"Hiba a beállítások betöltésekor: {ex.Message}",
                               "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -254,6 +255,7 @@ namespace berles2
                 }
                 catch (Exception ex)
                 {
+                    AppLogger.Logger.Error(ex, "Hiba a beállítások mentésekor");
                     MessageBox.Show($"Hiba a beállítások mentésekor: {ex.Message}",
                                   "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
