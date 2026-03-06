@@ -627,115 +627,30 @@ namespace berles2
 
         private void SaveRental()
         {
-            using var transaction = _context.Database.BeginTransaction();
+            int rentalDays  = int.TryParse(RentalDaysTextBox.Text, out int days) ? Math.Max(1, days) : 1;
+            int discount    = int.TryParse(DiscountTextBox.Text,   out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
+            decimal total   = _selectedDevices.Sum(d => d.RentPrice) * (100 - discount) / 100 * rentalDays;
 
-            try
+            var data = new Services.RentalData
             {
-                // 1. Customer kezelése - meglévő vagy új
-                Customer customer;
-                if (_selectedExistingCustomer != null)
-                {
-                    // Meglévő ügyfél használata
-                    customer = _selectedExistingCustomer;
-                }
-                else
-                {
-                    // Új ügyfél létrehozása
-                    customer = new Customer
-                    {
-                        Name = CustomerNameTextBox.Text.Trim(),
-                        Zipcode = CustomerZipTextBox.Text.Trim(),
-                        City = CustomerCityTextBox.Text.Trim(),
-                        Address = CustomerAddressTextBox.Text.Trim(),
-                        Email = CustomerEmailTextBox.Text.Trim(),
-                        IdNumber = CustomerIdNumberTextBox.Text.Trim(),
-                        Comment = CustomerCommentTextBox.Text.Trim()
-                    };
+                TicketNr          = TicketNumberTextBox.Text,
+                RentalDays        = rentalDays,
+                PaymentMode       = ((ComboBoxItem)PaymentModeComboBox.SelectedItem).Content.ToString() ?? "Készpénz",
+                Comment           = RentalCommentTextBox.Text.Trim(),
+                TotalAmount       = total,
+                Devices           = _selectedDevices.ToList(),
+                ExistingCustomer  = _selectedExistingCustomer,
+                NewCustomerName     = CustomerNameTextBox.Text.Trim(),
+                NewCustomerZip      = CustomerZipTextBox.Text.Trim(),
+                NewCustomerCity     = CustomerCityTextBox.Text.Trim(),
+                NewCustomerAddress  = CustomerAddressTextBox.Text.Trim(),
+                NewCustomerEmail    = CustomerEmailTextBox.Text.Trim(),
+                NewCustomerIdNumber = CustomerIdNumberTextBox.Text.Trim(),
+                NewCustomerComment  = CustomerCommentTextBox.Text.Trim()
+            };
 
-                    _context.Customers.Add(customer);
-                    _context.SaveChanges();
-                }
-
-
-                // 2. Rental létrehozása
-                int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int days) ? Math.Max(1, days) : 1;
-
-                // Kedvezmény figyelembevétele
-                int discount = 0;
-                if (int.TryParse(DiscountTextBox.Text, out int disc))
-                {
-                    discount = Math.Max(0, Math.Min(100, disc));
-                }
-
-                decimal dailyTotal = _selectedDevices.Sum(d => d.RentPrice);
-                decimal discountedDailyTotal = dailyTotal * (100 - discount) / 100;
-                decimal totalAmount = discountedDailyTotal * rentalDays;
-
-                string ticketNr = TicketNumberTextBox.Text;
-
-                var rental = new Rental
-                {
-                    TicketNr = ticketNr,
-                    CustomerId = customer.Id,
-                    RentStart = DateTime.Now,
-                    RentalDays = rentalDays,
-                    PaymentMode = ((ComboBoxItem)PaymentModeComboBox.SelectedItem).Content.ToString(),
-                    Comment = RentalCommentTextBox.Text.Trim(),
-                    TotalAmount = totalAmount
-                };
-
-                _context.Rentals.Add(rental);
-                _context.SaveChanges();
-
-                // 3. RentalDevice rekordok létrehozása
-                foreach (var device in _selectedDevices)
-                {
-                    var rentalDevice = new RentalDevice
-                    {
-                        RentalId = rental.Id,
-                        DeviceId = device.Id
-                    };
-                    _context.RentalDevices.Add(rentalDevice);
-
-                    // Eszköz rent count növelése
-                    device.RentCount++;
-                }
-
-                // 4. Financial rekord létrehozása
-                var financial = new Financial
-                {
-                    TicketNr = ticketNr,
-                    EntryType = "bevétel",
-                    SourceType = "bérlés",
-                    SourceId = rental.Id,
-                    Date = DateTime.Now,
-                    Comment = $"Bérlési díj - {ticketNr}",
-                    Amount = totalAmount
-                };
-
-                _context.Financials.Add(financial);
-                _context.SaveChanges();
-
-                // 5. FinancialDevice rekordok létrehozása
-                foreach (var device in _selectedDevices)
-                {
-                    var financialDevice = new FinancialDevice
-                    {
-                        FinancialId = financial.Id,
-                        DeviceId = device.Id
-                    };
-                    _context.FinancialDevices.Add(financialDevice);
-                }
-
-                _context.SaveChanges();
-                transaction.Commit();
-            }
-            catch (Exception ex)
-            {
-                AppLogger.Logger.Error(ex, "Bérlés mentése sikertelen, tranzakció visszagörgetve");
-                transaction.Rollback();
-                throw;
-            }
+            var rentalService = new Services.RentalService(_context);
+            rentalService.SaveRental(data);
         }
 
         private void ClearForm()
