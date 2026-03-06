@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:berles2"
         mc:Ignorable="d"
-        Title="Beállítások - Kerékpár Bérlő Rendszer" Height="750" Width="600"
+        Title="Beállítások - Kerékpár Bérlő Rendszer" Height="900" Width="600"
         WindowStartupLocation="CenterOwner" ResizeMode="CanResize">
 
     <Grid Margin="20">
@@ -28,6 +28,49 @@
         <!-- FŐTARTALOM SCROLLVIEWER -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <StackPanel>
+
+                <!-- 0. SQL SZERVER KAPCSOLAT SZEKCIÓ -->
+                <GroupBox x:Name="SqlServerGroupBox" Header="🗄️ SQL szerver kapcsolat" FontWeight="Bold" Margin="0,0,0,15">
+                    <StackPanel Margin="10">
+                        <Label Content="Szerver neve / IP cím *:" FontWeight="Bold"/>
+                        <TextBox x:Name="SqlServerTextBox" Height="30" Margin="0,0,0,10"
+                                 ToolTip="Pl.: 192.168.1.100 vagy SZERVERNEV"/>
+
+                        <Label Content="Port:" FontWeight="Bold"/>
+                        <TextBox x:Name="SqlPortTextBox" Height="30" Margin="0,0,0,10" Text="1433"
+                                 ToolTip="Alapértelmezett SQL Server port: 1433"/>
+
+                        <Label Content="Adatbázis neve *:" FontWeight="Bold"/>
+                        <TextBox x:Name="SqlDatabaseTextBox" Height="30" Margin="0,0,0,10"
+                                 ToolTip="Pl.: ToolRentalDB"/>
+
+                        <Label Content="Felhasználónév *:" FontWeight="Bold"/>
+                        <TextBox x:Name="SqlUserIdTextBox" Height="30" Margin="0,0,0,10"
+                                 ToolTip="SQL Server felhasználónév"/>
+
+                        <Label Content="Jelszó *:" FontWeight="Bold"/>
+                        <PasswordBox x:Name="SqlPasswordBox" Height="30" Margin="0,0,0,10"
+                                     ToolTip="SQL Server jelszó"/>
+
+                        <CheckBox x:Name="SqlTrustCertCheckBox" Content="Tanúsítvány megbízhatónak jelölése (TrustServerCertificate)"
+                                  IsChecked="True" Margin="0,0,0,10"/>
+
+                        <Grid Margin="0,5,0,0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock x:Name="SqlTestResultText" Grid.Column="0"
+                                       VerticalAlignment="Center" FontStyle="Italic" Foreground="#757575"
+                                       Text="Kattints a 'Kapcsolat tesztelése' gombra a kapcsolat ellenőrzéséhez."/>
+                            <Button x:Name="TestConnectionButton" Grid.Column="1"
+                                    Content="🔌 Kapcsolat tesztelése"
+                                    Height="32" Padding="10,0"
+                                    Background="#1565C0" Foreground="White" FontWeight="Bold"
+                                    Click="TestConnectionButton_Click"/>
+                        </Grid>
+                    </StackPanel>
+                </GroupBox>
 
                 <!-- 1. CÉG ADATOK SZEKCIÓ -->
                 <GroupBox Header="🏢 Cég adatok" FontWeight="Bold" Margin="0,0,0,15">
