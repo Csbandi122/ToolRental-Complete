@@ -12,3 +12,6 @@ packages/
 *.db
 *.db-shm
 *.db-wal
+
+## Sensitive config - ne kerüljön repóba éles kapcsolati adatokkal
+berles2/appsettings.json

@@ -26,7 +26,11 @@ namespace berles2
         public static int Port => int.TryParse(Configuration["DatabaseSettings:Port"], out int p) ? p : 1433;
         public static string Database => Configuration["DatabaseSettings:Database"] ?? "";
         public static string UserId => Configuration["DatabaseSettings:UserId"] ?? "";
-        public static string Password => Configuration["DatabaseSettings:Password"] ?? "";
+
+        /// <summary>
+        /// A jelszót visszafejti, ha titkosítva van tárolva az appsettings.json-ban.
+        /// </summary>
+        public static string Password => CredentialProtection.Unprotect(Configuration["DatabaseSettings:Password"] ?? "");
         public static bool TrustServerCertificate => bool.TryParse(Configuration["DatabaseSettings:TrustServerCertificate"], out bool t) ? t : true;
 
         /// <summary>
@@ -59,13 +63,16 @@ namespace berles2
         {
             var appSettingsPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "appsettings.json");
 
+            // A jelszót titkosítva tároljuk – csak ezen a gépen fejthető vissza (Windows DPAPI)
+            var protectedPassword = CredentialProtection.Protect(password);
+
             var json = $@"{{
   ""DatabaseSettings"": {{
     ""Server"": ""{EscapeJson(server)}"",
     ""Port"": {port},
     ""Database"": ""{EscapeJson(database)}"",
     ""UserId"": ""{EscapeJson(userId)}"",
-    ""Password"": ""{EscapeJson(password)}"",
+    ""Password"": ""{EscapeJson(protectedPassword)}"",
     ""TrustServerCertificate"": {trustServerCertificate.ToString().ToLower()}
   }}
 }}";

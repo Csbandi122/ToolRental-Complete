@@ -65,7 +65,7 @@ namespace berles2
                     EmailSmtpTextBox.Text = _currentSetting.EmailSmtp;
                     SmtpPortTextBox.Text = _currentSetting.SmtpPort.ToString();
                     SenderEmailTextBox.Text = _currentSetting.SenderEmail;
-                    EmailPasswordBox.Password = _currentSetting.EmailPassword;
+                    EmailPasswordBox.Password = CredentialProtection.Unprotect(_currentSetting.EmailPassword);
                     SenderNameTextBox.Text = _currentSetting.SenderName;
                     CcAddressTextBox.Text = _currentSetting.CcAddress ?? "";
 
@@ -440,7 +440,7 @@ namespace berles2
             _currentSetting.EmailSmtp = EmailSmtpTextBox.Text.Trim();
             _currentSetting.SmtpPort = int.Parse(SmtpPortTextBox.Text);
             _currentSetting.SenderEmail = SenderEmailTextBox.Text.Trim();
-            _currentSetting.EmailPassword = EmailPasswordBox.Password;
+            _currentSetting.EmailPassword = CredentialProtection.Protect(EmailPasswordBox.Password);
             _currentSetting.SenderName = SenderNameTextBox.Text.Trim();
             _currentSetting.CcAddress = string.IsNullOrWhiteSpace(CcAddressTextBox.Text) ?
                                        null : CcAddressTextBox.Text.Trim();

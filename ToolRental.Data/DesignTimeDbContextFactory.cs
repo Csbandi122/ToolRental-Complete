@@ -67,14 +67,22 @@ namespace ToolRental.Data
 
         private static string GetFallbackConnectionString(string[] args)
         {
-            // Migrációhoz használható fallback – csak fejlesztési környezetben!
-            // Migráció futtatáskor megadható argumentumként:
-            // dotnet ef migrations add MigrationName -- "Server=...;Database=...;"
+            // 1. Migráció CLI argumentumból: dotnet ef migrations add Name -- "Server=...;"
             if (args != null && args.Length > 0 && args[0].StartsWith("Server="))
                 return args[0];
 
-            // Utolsó fallback: localhost alapértelmezett kapcsolat
-            return "Server=localhost,1433;Database=ToolRentalDB;User Id=sa;Password=YourPassword;TrustServerCertificate=True;";
+            // 2. Environment változóból (CI/CD pipeline vagy lokális fejlesztés)
+            // Beállítás: setx TOOLRENTAL_CONNECTION_STRING "Server=...;Database=...;..."
+            var envConnStr = Environment.GetEnvironmentVariable("TOOLRENTAL_CONNECTION_STRING");
+            if (!string.IsNullOrWhiteSpace(envConnStr))
+                return envConnStr;
+
+            throw new InvalidOperationException(
+                "EF Core migráció futtatásához nincs connection string megadva.\n" +
+                "Lehetőségek:\n" +
+                "  1. CLI arg:    dotnet ef migrations add Nev -- \"Server=...;Database=...;\"\n" +
+                "  2. Env változó: TOOLRENTAL_CONNECTION_STRING=\"Server=...;Database=...;\"\n" +
+                "  3. appsettings.json a berles2 mappában kitöltve");
         }
     }
 }
