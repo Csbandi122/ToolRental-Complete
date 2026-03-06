@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using MailKit.Net.Smtp;
 using Microsoft.EntityFrameworkCore;
 using MimeKit;
+using Serilog;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Text;
@@ -113,6 +114,7 @@ namespace berles2
             }
             catch (Exception ex)
             {
+                AppLogger.Logger.Warning(ex, "Hiba a ticket szám generálásakor");
                 MessageBox.Show($"Hiba a ticket szám generálásakor: {ex.Message}");
                 TicketNumberTextBox.Text = "RNT0001";
             }
@@ -136,6 +138,7 @@ namespace berles2
             }
             catch (Exception ex)
             {
+                AppLogger.Logger.Error(ex, "Hiba a cég beállítások betöltésekor");
                 MessageBox.Show($"Hiba a cég beállítások betöltésekor: {ex.Message}");
             }
         }
@@ -160,6 +163,7 @@ namespace berles2
             }
             catch (Exception ex)
             {
+                AppLogger.Logger.Error(ex, "Hiba az eszközök betöltésekor");
                 MessageBox.Show($"Hiba az eszközök betöltésekor: {ex.Message}");
             }
         }
@@ -283,6 +287,8 @@ namespace berles2
                 }
                 catch (Exception ex)
                 {
+                    AppLogger.Logger.Error(ex, "Értékelő email küldési hiba - bérlés: {TicketNr}, ügyfél: {Customer}",
+                        rental.TicketNr, rental.Customer.Name);
                     errorCount++;
                     errorMessages += $"- {rental.Customer.Name} ({rental.TicketNr}): {ex.Message}\n";
                 }
@@ -791,8 +797,9 @@ namespace berles2
                 _context.SaveChanges();
                 transaction.Commit();
             }
-            catch
+            catch (Exception ex)
             {
+                AppLogger.Logger.Error(ex, "Bérlés mentése sikertelen, tranzakció visszagörgetve");
                 transaction.Rollback();
                 throw;
             }
@@ -943,6 +950,7 @@ namespace berles2
             }
             catch (Exception ex)
             {
+                AppLogger.Logger.Error(ex, "Email küldési hiba");
                 MessageBox.Show($"Hiba az email küldésekor: {ex.Message}",
                               "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -1072,6 +1080,7 @@ namespace berles2
             }
             catch (Exception ex)
             {
+                AppLogger.Logger.Error(ex, "Hiba a szerződés generálásakor");
                 MessageBox.Show($"Hiba a szerződés generálásakor: {ex.Message}",
                               "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -1375,7 +1384,7 @@ namespace berles2
                         catch (Exception logEx)
                         {
                             // Ha a log mentés nem sikerül, ne akadályozza meg a számlázást
-                            Console.WriteLine($"CURL log mentési hiba: {logEx.Message}");
+                            AppLogger.Logger.Warning(logEx, "CURL log mentési hiba");
                         }
 
                         // 5. Eredmény ellenőrzése
@@ -1590,23 +1599,26 @@ namespace berles2
             {
                 try
                 {
-                    Console.WriteLine($"Kapcsolódás: {setting.EmailSmtp}:{setting.SmtpPort}");
+                    AppLogger.Logger.Debug("SMTP kapcsolódás: {Server}:{Port}", setting.EmailSmtp, setting.SmtpPort);
                     var socketOptions = setting.SmtpPort == 465 ? MailKit.Security.SecureSocketOptions.SslOnConnect : MailKit.Security.SecureSocketOptions.StartTls;
 
                     client.Connect(setting.EmailSmtp, setting.SmtpPort, socketOptions);
 
                     // opcionális: ha nem OAUTH2-t használsz, leveheted client.AuthenticationMechanisms.Remove("XOAUTH2");
 
-                    Console.WriteLine($"Autentikáció: {setting.SenderEmail}"); client.Authenticate(setting.SenderEmail, CredentialProtection.Unprotect(setting.EmailPassword));
+                    AppLogger.Logger.Debug("SMTP autentikáció: {Email}", setting.SenderEmail);
+                    client.Authenticate(setting.SenderEmail, CredentialProtection.Unprotect(setting.EmailPassword));
 
-                    Console.WriteLine("Email küldés...");
+                    AppLogger.Logger.Debug("Email küldése...");
                     client.Send(message);
                     client.Disconnect(true);
 
-                    Console.WriteLine("Email sikeresen elküldve!");
+                    AppLogger.Logger.Information("Email sikeresen elküldve: {Recipient}", message.To.ToString());
                 }
                 catch (Exception smtpEx)
                 {
+                    AppLogger.Logger.Error(smtpEx, "SMTP küldési hiba - szerver: {Server}:{Port}, feladó: {Email}",
+                        setting.EmailSmtp, setting.SmtpPort, setting.SenderEmail);
                     throw new Exception($"SMTP hiba részletesen:\n" +
                                       $"Szerver: {setting.EmailSmtp}:{setting.SmtpPort}\n" +
                                       $"Email: {setting.SenderEmail}\n" +
