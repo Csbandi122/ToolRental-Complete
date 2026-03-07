@@ -303,11 +303,14 @@ namespace berles2
         private void CustomerZipTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             string zip = CustomerZipTextBox.Text.Trim();
-            if (zip.Length == 4 && string.IsNullOrWhiteSpace(CustomerCityTextBox.Text))
+            if (zip.Length == 4)
             {
                 string? city = Services.ZipCodeService.GetCity(zip);
-                if (city != null)
-                    CustomerCityTextBox.Text = city;
+                CustomerCityTextBox.Text = city ?? "";
+            }
+            else if (zip.Length < 4)
+            {
+                CustomerCityTextBox.Text = "";
             }
         }
 

@@ -52,11 +52,14 @@ namespace berles2
         private void ZipcodeTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             string zip = ZipcodeTextBox.Text.Trim();
-            if (zip.Length == 4 && string.IsNullOrWhiteSpace(CityTextBox.Text))
+            if (zip.Length == 4)
             {
                 string? city = Services.ZipCodeService.GetCity(zip);
-                if (city != null)
-                    CityTextBox.Text = city;
+                CityTextBox.Text = city ?? "";
+            }
+            else if (zip.Length < 4)
+            {
+                CityTextBox.Text = "";
             }
         }
 
