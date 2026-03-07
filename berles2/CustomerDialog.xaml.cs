@@ -49,6 +49,17 @@ namespace berles2
             CommentTextBox.Text = Customer.Comment;
         }
 
+        private void ZipcodeTextBox_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            string zip = ZipcodeTextBox.Text.Trim();
+            if (zip.Length == 4 && string.IsNullOrWhiteSpace(CityTextBox.Text))
+            {
+                string? city = Services.ZipCodeService.GetCity(zip);
+                if (city != null)
+                    CityTextBox.Text = city;
+            }
+        }
+
         private void SaveButton_Click(object sender, RoutedEventArgs e)
         {
             if (ValidateForm())

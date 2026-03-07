@@ -30,7 +30,8 @@
                 <TextBox x:Name="NameTextBox" Height="30" Margin="0,0,0,10"/>
 
                 <Label Content="Irányítószám:" FontWeight="Bold"/>
-                <TextBox x:Name="ZipcodeTextBox" Height="30" Margin="0,0,0,10"/>
+                <TextBox x:Name="ZipcodeTextBox" Height="30" Margin="0,0,0,10"
+                         TextChanged="ZipcodeTextBox_TextChanged"/>
 
                 <Label Content="Város:" FontWeight="Bold"/>
                 <TextBox x:Name="CityTextBox" Height="30" Margin="0,0,0,10"/>

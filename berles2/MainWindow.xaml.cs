@@ -300,6 +300,17 @@ namespace berles2
             UpdateTotalAmount();
         }
 
+        private void CustomerZipTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            string zip = CustomerZipTextBox.Text.Trim();
+            if (zip.Length == 4 && string.IsNullOrWhiteSpace(CustomerCityTextBox.Text))
+            {
+                string? city = Services.ZipCodeService.GetCity(zip);
+                if (city != null)
+                    CustomerCityTextBox.Text = city;
+            }
+        }
+
         private void DiscountTextBox_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (sender is not TextBox textBox) return;
