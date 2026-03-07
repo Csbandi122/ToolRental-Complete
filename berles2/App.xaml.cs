@@ -40,6 +40,7 @@ namespace berles2
                         "Hiányzó beállítás",
                         MessageBoxButton.OK,
                         MessageBoxImage.Warning);
+                    DispatcherUnhandledException -= OnDispatcherUnhandledException;
                     Shutdown();
                     return;
                 }
