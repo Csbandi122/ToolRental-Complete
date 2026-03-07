@@ -80,6 +80,7 @@ namespace berles2
                     GoogleReviewTextBox.Text = _currentSetting.GoogleReview ?? "";
                     InvoiceXmlTextBox.Text = _currentSetting.InvoiceXml ?? "";
                     DefaultRentalDaysTextBox.Text = _currentSetting.DefaultRentalDays.ToString();
+                    ReviewEmailDelayDaysTextBox.Text = _currentSetting.ReviewEmailDelayDays.ToString();
                 }
                 else
                 {
@@ -87,6 +88,7 @@ namespace berles2
                     CompanyNameTextBox.Text = "Kerékpár Bérlő Kft.";
                     SmtpPortTextBox.Text = "587";
                     DefaultRentalDaysTextBox.Text = "1";
+                    ReviewEmailDelayDaysTextBox.Text = "3";
                     EmailSubjectTextBox.Text = "Bérlési szerződés";
                     ReviewEmailSubjectTextBox.Text = "Értékelje szolgáltatásunkat!";
                 }
@@ -323,6 +325,10 @@ namespace berles2
             if (!int.TryParse(DefaultRentalDaysTextBox.Text, out int rentalDays) || rentalDays <= 0)
                 DefaultRentalDaysTextBox.Text = "1";
 
+            // Értékelő email késleltetés: alapértelmezett ha érvénytelen
+            if (!int.TryParse(ReviewEmailDelayDaysTextBox.Text, out int delayDays) || delayDays < 0)
+                ReviewEmailDelayDaysTextBox.Text = "3";
+
             // Fájlok létezésének ellenőrzése (ha meg vannak adva)
             if (!ValidateFilePath(CompanyLogoTextBox.Text, "Cég logo"))
                 return false;
@@ -412,6 +418,7 @@ namespace berles2
             _currentSetting.InvoiceXml = string.IsNullOrWhiteSpace(InvoiceXmlTextBox.Text) ?
                                         null : InvoiceXmlTextBox.Text.Trim();
             _currentSetting.DefaultRentalDays = int.TryParse(DefaultRentalDaysTextBox.Text, out int parsedRentalDays) && parsedRentalDays > 0 ? parsedRentalDays : 1;
+            _currentSetting.ReviewEmailDelayDays = int.TryParse(ReviewEmailDelayDaysTextBox.Text, out int parsedDelayDays) && parsedDelayDays >= 0 ? parsedDelayDays : 3;
 
             _context.SaveChanges();
         }

@@ -681,7 +681,7 @@ namespace berles2
             var candidates = _context.Rentals
                 .Include(r => r.Customer)
                 .Where(r => !r.ReviewEmailSent &&
-                            r.RentStart.AddDays(r.RentalDays).AddDays(3) <= DateTime.Now)
+                            r.RentStart.AddDays(r.RentalDays).AddDays(setting.ReviewEmailDelayDays) <= DateTime.Now)
                 .ToList();
 
             if (candidates.Count == 0)

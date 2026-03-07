@@ -34,5 +34,6 @@
 
         // ALAPÉRTELMEZÉSEK
         public int DefaultRentalDays { get; set; } = 1;
+        public int ReviewEmailDelayDays { get; set; } = 3;
     }
 }

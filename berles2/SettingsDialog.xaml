@@ -210,7 +210,11 @@
                         <Label Content="Alapértelmezett bérlési idő (nap) *:" FontWeight="Bold"/>
                         <TextBox x:Name="DefaultRentalDaysTextBox" Height="30" Margin="0,0,0,10" Text="1"/>
 
-                        <TextBlock Text="* Kötelező mezők" FontSize="12" 
+                        <Label Content="Értékelő email küldés ennyi nap után *:" FontWeight="Bold"/>
+                        <TextBox x:Name="ReviewEmailDelayDaysTextBox" Height="30" Margin="0,0,0,10" Text="3"
+                                 ToolTip="Hány nappal a bérlés lejárta után küldjön értékelő emailt"/>
+
+                        <TextBlock Text="* Kötelező mezők" FontSize="12"
                                   Foreground="Red" FontStyle="Italic" Margin="0,10,0,0"/>
                     </StackPanel>
                 </GroupBox>
