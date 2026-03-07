@@ -114,7 +114,17 @@ namespace berles2.Services
 
             string output = await curlProcess.StandardOutput.ReadToEndAsync();
             string error  = await curlProcess.StandardError.ReadToEndAsync();
-            await curlProcess.WaitForExitAsync();
+
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            try
+            {
+                await curlProcess.WaitForExitAsync(cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                curlProcess.Kill();
+                throw new InvalidOperationException("A számlázz.hu szerver nem válaszolt 30 másodpercen belül. Kérlek ellenőrizd az internetkapcsolatot és próbáld újra.");
+            }
 
             // CURL válasz naplózása fájlba
             WriteCurlLog(curlAnswerPath, xmlPath, pdfPath, curlArguments,

@@ -208,8 +208,16 @@ namespace berles2.Services
             }
             finally
             {
-                doc?.Close();
-                wordApp?.Quit();
+                if (doc != null)
+                {
+                    doc.Close();
+                    System.Runtime.InteropServices.Marshal.ReleaseComObject(doc);
+                }
+                if (wordApp != null)
+                {
+                    wordApp.Quit();
+                    System.Runtime.InteropServices.Marshal.ReleaseComObject(wordApp);
+                }
             }
 
             return pdfPath;
