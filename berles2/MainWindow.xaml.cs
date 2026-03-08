@@ -52,6 +52,7 @@ namespace berles2
         private void InitializeDatabase()
         {
             _context = new ToolRentalDbContext(DatabaseConfig.GetOptions());
+            UpdateModeIndicator();
         }
 
         private void InitializeForm()
@@ -894,6 +895,67 @@ namespace berles2
             catch (Exception ex)
             {
                 AppLogger.Logger.Warning(ex, "Hiba a számla útvonal mentésekor");
+            }
+        }
+
+        // ===========================================
+        // TEST / PROD MÓD VÁLTÁS
+        // ===========================================
+
+        private void TestModeButton_Click(object sender, RoutedEventArgs e)
+        {
+            string targetDb = DatabaseConfig.IsTestMode ? "ToolRentalDB" : "ToolRentalDB_TEST";
+            string targetLabel = DatabaseConfig.IsTestMode ? "PROD" : "TEST";
+
+            var result = MessageBox.Show(
+                $"Biztosan átváltasz {targetLabel} módra?\n\nAdatbázis: {targetDb}",
+                "Mód váltás",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
+
+            if (result != MessageBoxResult.Yes)
+                return;
+
+            try
+            {
+                _context?.Dispose();
+                DatabaseConfig.SwitchDatabase(targetDb);
+                _context = new ToolRentalDbContext(DatabaseConfig.GetOptions());
+                _context.Database.EnsureCreated();
+
+                _selectedDevices.Clear();
+                LoadDevices();
+                LoadCompanySettings();
+                GenerateNextTicketNumber();
+                UpdateModeIndicator();
+
+                AppLogger.Logger.Information("Adatbázis átváltva: {Database}", targetDb);
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Logger.Error(ex, "Hiba a mód váltáskor: {Database}", targetDb);
+                MessageBox.Show($"Hiba az adatbázis váltáskor:\n{ex.Message}", "Hiba",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void UpdateModeIndicator()
+        {
+            if (DatabaseConfig.IsTestMode)
+            {
+                HeaderBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E65100"));
+                TestModeButton.Content = "PROD módra váltás";
+                TestModeButton.Background = new SolidColorBrush(Colors.White);
+                TestModeButton.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#E65100"));
+                Title = "Kerékpár Bérlő Rendszer [TEST]";
+            }
+            else
+            {
+                HeaderBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2E7D32"));
+                TestModeButton.Content = "TEST módra váltás";
+                TestModeButton.Background = Brushes.Transparent;
+                TestModeButton.Foreground = Brushes.White;
+                Title = "Kerékpár Bérlő Rendszer";
             }
         }
 

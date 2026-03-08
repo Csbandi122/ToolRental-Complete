@@ -19,7 +19,7 @@
         </Grid.RowDefinitions>
 
         <!-- FEJLÉC SZEKCIÓ -->
-        <Border Grid.Row="0" Background="#2E7D32" Padding="10">
+        <Border Grid.Row="0" x:Name="HeaderBorder" Background="#2E7D32" Padding="10">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -51,6 +51,14 @@
                         <TextBlock Text="SQL" FontSize="9" Foreground="White"
                                    HorizontalAlignment="Center" Margin="0,2,0,0"/>
                     </StackPanel>
+
+                    <!-- TEST/PROD VÁLTÓ GOMB -->
+                    <Button x:Name="TestModeButton"
+                            Height="36" Margin="0,0,10,0" Padding="10,4"
+                            FontSize="12" FontWeight="Bold"
+                            VerticalAlignment="Center"
+                            Click="TestModeButton_Click"
+                            Content="TEST módra váltás"/>
 
                     <!-- ADATKEZELŐ GOMB -->
                     <Button x:Name="DataManagerButton" 

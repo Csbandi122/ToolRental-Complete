@@ -59,6 +59,20 @@ namespace berles2
         public static bool IsConfigured => !string.IsNullOrEmpty(ConnectionString);
 
         /// <summary>
+        /// Igaz, ha a TEST adatbázisra csatlakozunk (ToolRentalDB_TEST).
+        /// </summary>
+        public static bool IsTestMode => Database == "ToolRentalDB_TEST";
+
+        /// <summary>
+        /// Átváltja az adatbázist PROD ↔ TEST között.
+        /// Minden más beállítás (szerver, port, user, jelszó) változatlan marad.
+        /// </summary>
+        public static void SwitchDatabase(string newDatabaseName)
+        {
+            Save(Server, Port, newDatabaseName, UserId, Password, TrustServerCertificate);
+        }
+
+        /// <summary>
         /// DbContext opciókat ad vissza automatikus újrapróbálkozással (max 3x, 5 mp késleltetéssel).
         /// Átmeneti hálózati hibák esetén az alkalmazás nem fagy be, hanem újrapróbál.
         /// </summary>
