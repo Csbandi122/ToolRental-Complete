@@ -685,39 +685,42 @@ namespace berles2
 
                 if (result == MessageBoxResult.Yes)
                 {
-                    using var transaction = _context.Database.BeginTransaction();
                     try
                     {
-                        var service = _context.Services.Find(selectedService.Id);
-                        if (service != null)
+                        var strategy = _context.Database.CreateExecutionStrategy();
+                        strategy.Execute(() =>
                         {
-                            // 1. Kapcsolódó pénzügyi tétel keresése és törlése
-                            var relatedFinancial = _context.Financials
-                                .FirstOrDefault(f => f.SourceType == "szervíz" && f.SourceId == service.Id);
-
-                            if (relatedFinancial != null)
+                            using var transaction = _context.Database.BeginTransaction();
+                            var service = _context.Services.Find(selectedService.Id);
+                            if (service != null)
                             {
-                                _context.Financials.Remove(relatedFinancial);
+                                // 1. Kapcsolódó pénzügyi tétel keresése és törlése
+                                var relatedFinancial = _context.Financials
+                                    .FirstOrDefault(f => f.SourceType == "szervíz" && f.SourceId == service.Id);
+
+                                if (relatedFinancial != null)
+                                {
+                                    _context.Financials.Remove(relatedFinancial);
+                                }
+
+                                // 2. Szervíz jegy törlése
+                                _context.Services.Remove(service);
+
+                                // 3. Változások mentése
+                                _context.SaveChanges();
+                                transaction.Commit();
                             }
+                        });
 
-                            // 2. Szervíz jegy törlése
-                            _context.Services.Remove(service);
+                        // 4. Listák frissítése
+                        LoadServices();
+                        LoadFinancials();
 
-                            // 3. Változások mentése
-                            _context.SaveChanges();
-                            transaction.Commit();
-
-                            // 4. Listák frissítése
-                            LoadServices();
-                            LoadFinancials(); // Pénzügyek lista is frissüljön
-
-                            MessageBox.Show("Szervíz jegy és a kapcsolódó pénzügyi tétel sikeresen törölve!",
-                                          "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
-                        }
+                        MessageBox.Show("Szervíz jegy és a kapcsolódó pénzügyi tétel sikeresen törölve!",
+                                      "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
                     catch (Exception ex)
                     {
-                        transaction.Rollback();
                         MessageBox.Show($"Hiba a törlés során: {ex.Message}",
                                       "Hiba", MessageBoxButton.OK, MessageBoxImage.Error);
                     }

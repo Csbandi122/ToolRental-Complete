@@ -29,79 +29,83 @@ namespace berles2.Services
         /// <returns>A létrehozott Rental rekord.</returns>
         public Rental SaveRental(RentalData data)
         {
-            using var transaction = _context.Database.BeginTransaction();
-
-            try
+            // EnableRetryOnFailure esetén CreateExecutionStrategy() szükséges a tranzakcióhoz
+            var strategy = _context.Database.CreateExecutionStrategy();
+            return strategy.Execute(() =>
             {
-                // 1. Customer kezelése
-                Customer customer = ResolveCustomer(data);
-
-                // 2. Rental létrehozása
-                var rental = new Rental
+                using var transaction = _context.Database.BeginTransaction();
+                try
                 {
-                    TicketNr    = data.TicketNr,
-                    CustomerId  = customer.Id,
-                    RentStart   = DateTime.Now,
-                    RentalDays  = data.RentalDays,
-                    PaymentMode = data.PaymentMode,
-                    Comment     = data.Comment,
-                    TotalAmount = data.TotalAmount
-                };
+                    // 1. Customer kezelése
+                    Customer customer = ResolveCustomer(data);
 
-                _context.Rentals.Add(rental);
-                _context.SaveChanges();
-
-                // 3. RentalDevice kapcsolatok + RentCount növelés
-                foreach (var device in data.Devices)
-                {
-                    _context.RentalDevices.Add(new RentalDevice
+                    // 2. Rental létrehozása
+                    var rental = new Rental
                     {
-                        RentalId = rental.Id,
-                        DeviceId = device.Id
-                    });
-                    device.RentCount++;
-                }
+                        TicketNr    = data.TicketNr,
+                        CustomerId  = customer.Id,
+                        RentStart   = DateTime.Now,
+                        RentalDays  = data.RentalDays,
+                        PaymentMode = data.PaymentMode,
+                        Comment     = data.Comment,
+                        TotalAmount = data.TotalAmount
+                    };
 
-                // 4. Financial rekord (bevétel)
-                var financial = new Financial
-                {
-                    TicketNr   = data.TicketNr,
-                    EntryType  = "bevétel",
-                    SourceType = "bérlés",
-                    SourceId   = rental.Id,
-                    Date       = DateTime.Now,
-                    Comment    = $"Bérlési díj - {data.TicketNr}",
-                    Amount     = data.TotalAmount
-                };
+                    _context.Rentals.Add(rental);
+                    _context.SaveChanges();
 
-                _context.Financials.Add(financial);
-                _context.SaveChanges();
-
-                // 5. FinancialDevice kapcsolatok
-                foreach (var device in data.Devices)
-                {
-                    _context.FinancialDevices.Add(new FinancialDevice
+                    // 3. RentalDevice kapcsolatok + RentCount növelés
+                    foreach (var device in data.Devices)
                     {
-                        FinancialId = financial.Id,
-                        DeviceId    = device.Id
-                    });
+                        _context.RentalDevices.Add(new RentalDevice
+                        {
+                            RentalId = rental.Id,
+                            DeviceId = device.Id
+                        });
+                        device.RentCount++;
+                    }
+
+                    // 4. Financial rekord (bevétel)
+                    var financial = new Financial
+                    {
+                        TicketNr   = data.TicketNr,
+                        EntryType  = "bevétel",
+                        SourceType = "bérlés",
+                        SourceId   = rental.Id,
+                        Date       = DateTime.Now,
+                        Comment    = $"Bérlési díj - {data.TicketNr}",
+                        Amount     = data.TotalAmount
+                    };
+
+                    _context.Financials.Add(financial);
+                    _context.SaveChanges();
+
+                    // 5. FinancialDevice kapcsolatok
+                    foreach (var device in data.Devices)
+                    {
+                        _context.FinancialDevices.Add(new FinancialDevice
+                        {
+                            FinancialId = financial.Id,
+                            DeviceId    = device.Id
+                        });
+                    }
+
+                    _context.SaveChanges();
+                    transaction.Commit();
+
+                    AppLogger.Logger.Information(
+                        "Bérlés sikeresen mentve: {TicketNr}, ügyfél: {Customer}, összeg: {Amount}",
+                        rental.TicketNr, customer.Name, rental.TotalAmount);
+
+                    return rental;
                 }
-
-                _context.SaveChanges();
-                transaction.Commit();
-
-                AppLogger.Logger.Information(
-                    "Bérlés sikeresen mentve: {TicketNr}, ügyfél: {Customer}, összeg: {Amount}",
-                    rental.TicketNr, customer.Name, rental.TotalAmount);
-
-                return rental;
-            }
-            catch (Exception ex)
-            {
-                AppLogger.Logger.Error(ex, "Bérlés mentése sikertelen, tranzakció visszagörgetve");
-                transaction.Rollback();
-                throw;
-            }
+                catch (Exception ex)
+                {
+                    AppLogger.Logger.Error(ex, "Bérlés mentése sikertelen, tranzakció visszagörgetve");
+                    transaction.Rollback();
+                    throw;
+                }
+            });
         }
 
         // ===========================================
