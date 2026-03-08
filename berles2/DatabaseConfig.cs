@@ -1,5 +1,7 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System.IO;
+using ToolRental.Data;
 
 namespace berles2
 {
@@ -55,6 +57,21 @@ namespace berles2
         /// Ellenőrzi, hogy be vannak-e állítva az SQL szerver adatok.
         /// </summary>
         public static bool IsConfigured => !string.IsNullOrEmpty(ConnectionString);
+
+        /// <summary>
+        /// DbContext opciókat ad vissza automatikus újrapróbálkozással (max 3x, 5 mp késleltetéssel).
+        /// Átmeneti hálózati hibák esetén az alkalmazás nem fagy be, hanem újrapróbál.
+        /// </summary>
+        public static DbContextOptions<ToolRentalDbContext> GetOptions()
+        {
+            return new DbContextOptionsBuilder<ToolRentalDbContext>()
+                .UseSqlServer(ConnectionString, sqlOptions =>
+                    sqlOptions.EnableRetryOnFailure(
+                        maxRetryCount: 3,
+                        maxRetryDelay: TimeSpan.FromSeconds(5),
+                        errorNumbersToAdd: null))
+                .Options;
+        }
 
         /// <summary>
         /// Elmenti az SQL szerver beállításokat az appsettings.json fájlba.

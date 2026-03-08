@@ -27,9 +27,7 @@ namespace berles2
             // Csak akkor nyitjuk meg az adatbázist, ha már van beállítva connection string
             if (DatabaseConfig.IsConfigured)
             {
-                var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
-                optionsBuilder.UseSqlServer(DatabaseConfig.ConnectionString);
-                _context = new ToolRentalDbContext(optionsBuilder.Options);
+                _context = new ToolRentalDbContext(DatabaseConfig.GetOptions());
             }
         }
 
@@ -373,9 +371,7 @@ namespace berles2
             // Ha még nincs DB context (első indítás), most inicializáljuk
             if (_context == null)
             {
-                var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
-                optionsBuilder.UseSqlServer(DatabaseConfig.ConnectionString);
-                _context = new ToolRentalDbContext(optionsBuilder.Options);
+                _context = new ToolRentalDbContext(DatabaseConfig.GetOptions());
                 _context.Database.EnsureCreated();
             }
 

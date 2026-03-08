@@ -43,6 +43,15 @@
 
                 <!-- JOBB OLDALI GOMBOK -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+
+                    <!-- SQL STÁTUSZ JELZŐ -->
+                    <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="0,0,15,0">
+                        <Ellipse x:Name="SqlStatusEllipse" Width="14" Height="14" Fill="Gray"
+                                 HorizontalAlignment="Center"/>
+                        <TextBlock Text="SQL" FontSize="9" Foreground="White"
+                                   HorizontalAlignment="Center" Margin="0,2,0,0"/>
+                    </StackPanel>
+
                     <!-- ADATKEZELŐ GOMB -->
                     <Button x:Name="DataManagerButton" 
                             Width="50" Height="50" Margin="0,0,10,0"

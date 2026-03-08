@@ -50,10 +50,7 @@ namespace berles2
             try
             {
                 AppLogger.Logger.Information("Adatbázis kapcsolat ellenőrzése: {Server}", DatabaseConfig.Server);
-                using var context = new ToolRentalDbContext(
-                    new DbContextOptionsBuilder<ToolRentalDbContext>()
-                        .UseSqlServer(DatabaseConfig.ConnectionString)
-                        .Options);
+                using var context = new ToolRentalDbContext(DatabaseConfig.GetOptions());
                 context.Database.EnsureCreated();
                 AppLogger.Logger.Information("Adatbázis kapcsolat sikeres");
             }

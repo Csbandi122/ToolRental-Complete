@@ -219,9 +219,7 @@ namespace berles2
         
         private ToolRentalDbContext GetDbContext()
         {
-            var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
-            optionsBuilder.UseSqlServer(DatabaseConfig.ConnectionString);
-            return new ToolRentalDbContext(optionsBuilder.Options);
+            return new ToolRentalDbContext(DatabaseConfig.GetOptions());
         }
     }
 }

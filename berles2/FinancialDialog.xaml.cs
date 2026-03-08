@@ -38,9 +38,7 @@ namespace berles2
 
         private void InitializeDatabase()
         {
-            var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
-            optionsBuilder.UseSqlServer(DatabaseConfig.ConnectionString);
-            _context = new ToolRentalDbContext(optionsBuilder.Options);
+            _context = new ToolRentalDbContext(DatabaseConfig.GetOptions());
         }
 
         private void InitializeNewFinancial()

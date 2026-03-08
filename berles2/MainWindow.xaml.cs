@@ -24,6 +24,7 @@ namespace berles2
         private Customer? _selectedExistingCustomer = null;
         private string? _lastContractTimestamp = null;
         private System.Windows.Threading.DispatcherTimer _searchTimer;
+        private System.Windows.Threading.DispatcherTimer _sqlStatusTimer;
 
         public MainWindow()
         {
@@ -32,9 +33,16 @@ namespace berles2
             InitializeForm();
             LoadDevices();
             this.Activated += MainWindow_Activated;
+
             _searchTimer = new System.Windows.Threading.DispatcherTimer();
             _searchTimer.Interval = TimeSpan.FromMilliseconds(300);
             _searchTimer.Tick += SearchTimer_Tick;
+
+            _sqlStatusTimer = new System.Windows.Threading.DispatcherTimer();
+            _sqlStatusTimer.Interval = TimeSpan.FromSeconds(15);
+            _sqlStatusTimer.Tick += SqlStatusTimer_Tick;
+            _sqlStatusTimer.Start();
+            _ = CheckSqlStatusAsync(); // azonnali első ellenőrzés indításkor
         }
 
         // ===========================================
@@ -43,9 +51,7 @@ namespace berles2
 
         private void InitializeDatabase()
         {
-            var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
-            optionsBuilder.UseSqlServer(DatabaseConfig.ConnectionString);
-            _context = new ToolRentalDbContext(optionsBuilder.Options);
+            _context = new ToolRentalDbContext(DatabaseConfig.GetOptions());
         }
 
         private void InitializeForm()
@@ -891,8 +897,33 @@ namespace berles2
             }
         }
 
+        // ===========================================
+        // SQL STÁTUSZ ELLENŐRZÉS
+        // ===========================================
+
+        private async void SqlStatusTimer_Tick(object sender, EventArgs e)
+        {
+            await CheckSqlStatusAsync();
+        }
+
+        private async Task CheckSqlStatusAsync()
+        {
+            try
+            {
+                bool connected = await _context.Database.CanConnectAsync();
+                SqlStatusEllipse.Fill = connected
+                    ? System.Windows.Media.Brushes.LimeGreen
+                    : System.Windows.Media.Brushes.Red;
+            }
+            catch
+            {
+                SqlStatusEllipse.Fill = System.Windows.Media.Brushes.Red;
+            }
+        }
+
         protected override void OnClosing(CancelEventArgs e)
         {
+            _sqlStatusTimer?.Stop();
             _context?.Dispose();
             base.OnClosing(e);
         }
