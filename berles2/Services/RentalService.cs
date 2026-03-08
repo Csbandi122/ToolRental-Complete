@@ -62,7 +62,10 @@ namespace berles2.Services
                             RentalId = rental.Id,
                             DeviceId = device.Id
                         });
-                        device.RentCount++;
+
+                        // A device-t a context-ből kérjük le, hogy a változás mentődjön
+                        var trackedDevice = _context.Devices.First(d => d.Id == device.Id);
+                        trackedDevice.RentCount++;
                     }
 
                     // 4. Financial rekord (bevétel)
