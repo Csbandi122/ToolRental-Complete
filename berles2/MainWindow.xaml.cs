@@ -290,16 +290,25 @@ namespace berles2
         // VÉGÖSSZEG SZÁMÍTÁS
         // ===========================================
 
+        private int ParseRentalDays()
+        {
+            return int.TryParse(RentalDaysTextBox?.Text, out int d) ? Math.Max(1, d) : 1;
+        }
+
+        private int ParseDiscount()
+        {
+            return int.TryParse(DiscountTextBox?.Text, out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
+        }
+
+        private decimal CalculateTotal()
+        {
+            return _selectedDevices.Sum(x => x.RentPrice) * (100 - ParseDiscount()) / 100 * ParseRentalDays();
+        }
+
         private void UpdateTotalAmount()
         {
-            if (RentalDaysTextBox == null || TotalAmountTextBox == null || DiscountTextBox == null)
-                return;
-
-            int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int d) ? Math.Max(1, d) : 1;
-            int discount   = int.TryParse(DiscountTextBox.Text,   out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
-            decimal total  = _selectedDevices.Sum(x => x.RentPrice) * (100 - discount) / 100 * rentalDays;
-
-            TotalAmountTextBox.Text = $"{total:N0} Ft";
+            if (TotalAmountTextBox == null) return;
+            TotalAmountTextBox.Text = $"{CalculateTotal():N0} Ft";
         }
 
         private void RentalDaysTextBox_TextChanged(object sender, TextChangedEventArgs e)
@@ -452,9 +461,6 @@ namespace berles2
 
             try
             {
-                int rentalDays  = int.TryParse(RentalDaysTextBox.Text, out int days) ? Math.Max(1, days) : 1;
-                int discount    = int.TryParse(DiscountTextBox.Text,   out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
-                decimal total   = _selectedDevices.Sum(d => d.RentPrice) * (100 - discount) / 100 * rentalDays;
                 string address  = $"{CustomerZipTextBox.Text} {CustomerCityTextBox.Text}, {CustomerAddressTextBox.Text}";
 
                 var confirmDialog = new ConfirmationDialog(
@@ -462,7 +468,7 @@ namespace berles2
                     address,
                     _selectedExistingCustomer?.Email ?? CustomerEmailTextBox.Text,
                     _selectedDevices,
-                    total
+                    CalculateTotal()
                 );
 
                 if (confirmDialog.ShowDialog() == true && confirmDialog.Confirmed)
@@ -491,17 +497,13 @@ namespace berles2
 
         private void SaveRental()
         {
-            int rentalDays  = int.TryParse(RentalDaysTextBox.Text, out int days) ? Math.Max(1, days) : 1;
-            int discount    = int.TryParse(DiscountTextBox.Text,   out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
-            decimal total   = _selectedDevices.Sum(d => d.RentPrice) * (100 - discount) / 100 * rentalDays;
-
             var data = new Services.RentalData
             {
                 TicketNr            = TicketNumberTextBox.Text,
-                RentalDays          = rentalDays,
+                RentalDays          = ParseRentalDays(),
                 PaymentMode         = ((ComboBoxItem)PaymentModeComboBox.SelectedItem).Content.ToString() ?? "Készpénz",
                 Comment             = RentalCommentTextBox.Text.Trim(),
-                TotalAmount         = total,
+                TotalAmount         = CalculateTotal(),
                 Devices             = _selectedDevices.ToList(),
                 ExistingCustomer    = _selectedExistingCustomer,
                 NewCustomerName     = CustomerNameTextBox.Text.Trim(),
@@ -528,9 +530,6 @@ namespace berles2
                     return;
                 }
 
-                int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int d) ? Math.Max(1, d) : 1;
-                int discount   = int.TryParse(DiscountTextBox.Text,   out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
-
                 var data = new Services.ContractData
                 {
                     CustomerName     = _selectedExistingCustomer?.Name      ?? CustomerNameTextBox.Text,
@@ -539,9 +538,9 @@ namespace berles2
                     CustomerAddress  = _selectedExistingCustomer?.Address   ?? CustomerAddressTextBox.Text,
                     CustomerEmail    = _selectedExistingCustomer?.Email     ?? CustomerEmailTextBox.Text,
                     CustomerIdNumber = _selectedExistingCustomer?.IdNumber  ?? CustomerIdNumberTextBox.Text,
-                    RentalDays       = rentalDays,
-                    DiscountPercent  = discount,
-                    TotalAmount      = _selectedDevices.Sum(dev => dev.RentPrice) * (100 - discount) / 100 * rentalDays,
+                    RentalDays       = ParseRentalDays(),
+                    DiscountPercent  = ParseDiscount(),
+                    TotalAmount      = CalculateTotal(),
                     Devices          = _selectedDevices.ToList()
                 };
 
@@ -646,9 +645,6 @@ namespace berles2
             var setting = _context.Settings.FirstOrDefault()
                 ?? throw new InvalidOperationException("Nincsenek beállítások! Kérlek állítsd be a beállításokban.");
 
-            int rentalDays = int.TryParse(RentalDaysTextBox.Text, out int days) ? days : 1;
-            int discount   = int.TryParse(DiscountTextBox.Text,   out int disc) ? Math.Max(0, Math.Min(100, disc)) : 0;
-
             var data = new Services.InvoiceData
             {
                 CustomerName    = _selectedExistingCustomer?.Name      ?? CustomerNameTextBox.Text,
@@ -657,7 +653,7 @@ namespace berles2
                 CustomerAddress = _selectedExistingCustomer?.Address   ?? CustomerAddressTextBox.Text,
                 CustomerEmail   = _selectedExistingCustomer?.Email     ?? CustomerEmailTextBox.Text,
                 PaymentMode     = (PaymentModeComboBox.SelectedItem as ComboBoxItem)?.Content?.ToString() ?? "Készpénz",
-                NetPrice        = _selectedDevices.Sum(d => d.RentPrice) * (100 - discount) / 100 * rentalDays,
+                NetPrice        = CalculateTotal(),
                 DevicesList     = string.Join(", ", _selectedDevices.Select(d => d.DeviceName))
             };
 
