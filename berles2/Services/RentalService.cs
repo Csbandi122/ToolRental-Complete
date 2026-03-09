@@ -82,7 +82,7 @@ namespace berles2.Services
                     };
 
                     _context.Financials.Add(financial);
-                    _context.SaveChanges();
+                    _context.SaveChanges(); // Financial Id generálásához szükséges
 
                     // 5. FinancialDevice kapcsolatok
                     foreach (var device in data.Devices)
@@ -94,7 +94,7 @@ namespace berles2.Services
                         });
                     }
 
-                    _context.SaveChanges();
+                    _context.SaveChanges(); // RentalDevice-ok, RentCount és FinancialDevice-ok mentése
                     transaction.Commit();
 
                     AppLogger.Logger.Information(

@@ -1,4 +1,5 @@
-﻿using System.Windows;
+﻿using System.Net.Mail;
+using System.Windows;
 using ToolRental.Core.Models;
 
 namespace berles2
@@ -100,9 +101,12 @@ namespace berles2
                 return false;
             }
 
-            // Egyszerű e-mail validáció
-            string email = EmailTextBox.Text.Trim();
-            if (!email.Contains("@") || !email.Contains("."))
+            // E-mail formátum validáció
+            try
+            {
+                var addr = new MailAddress(EmailTextBox.Text.Trim());
+            }
+            catch
             {
                 MessageBox.Show("Kérem adjon meg egy érvényes e-mail címet!", "Hiba",
                               MessageBoxButton.OK, MessageBoxImage.Warning);

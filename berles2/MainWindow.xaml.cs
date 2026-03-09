@@ -433,7 +433,11 @@ namespace berles2
                 MessageBox.Show("Az e-mail cím megadása kötelező!", "Hiba", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return false;
             }
-            if (!email.Contains("@") || !email.Contains(".") || email.IndexOf("@") > email.LastIndexOf("."))
+            try
+            {
+                var addr = new System.Net.Mail.MailAddress(email);
+            }
+            catch
             {
                 MessageBox.Show("Kérem adjon meg egy érvényes e-mail címet! (például: pelda@email.hu)",
                     "Hibás e-mail formátum", MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -961,7 +965,14 @@ namespace berles2
 
         private async void SqlStatusTimer_Tick(object sender, EventArgs e)
         {
-            await CheckSqlStatusAsync();
+            try
+            {
+                await CheckSqlStatusAsync();
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Logger.Warning(ex, "SQL státusz ellenőrzés sikertelen");
+            }
         }
 
         private async Task CheckSqlStatusAsync()
@@ -981,7 +992,9 @@ namespace berles2
 
         protected override void OnClosing(CancelEventArgs e)
         {
+            _searchTimer?.Stop();
             _sqlStatusTimer?.Stop();
+            this.Activated -= MainWindow_Activated;
             _context?.Dispose();
             base.OnClosing(e);
         }
