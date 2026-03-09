@@ -46,12 +46,16 @@ namespace berles2
                 }
             }
 
-            // Adatbázis létrehozása, ha még nem létezik
+            // Adatbázis létrehozása / frissítése migrációkkal
+            // A Migrate() automatikusan:
+            //   - Létrehozza a DB-t, ha nem létezik (az összes migráció lefut)
+            //   - Frissíti a meglévő DB-t, ha új migrációk vannak (csak az újak futnak le)
+            //   - Nem csinál semmit, ha minden naprakész
             try
             {
                 AppLogger.Logger.Information("Adatbázis kapcsolat ellenőrzése: {Server}", DatabaseConfig.Server);
                 using var context = new ToolRentalDbContext(DatabaseConfig.GetOptions());
-                context.Database.EnsureCreated();
+                context.Database.Migrate();
                 InitializeSequences(context);
                 AppLogger.Logger.Information("Adatbázis kapcsolat sikeres");
             }
