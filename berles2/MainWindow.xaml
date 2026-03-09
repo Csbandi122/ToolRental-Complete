@@ -56,6 +56,7 @@
                     <Button x:Name="TestModeButton"
                             Height="36" Margin="0,0,10,0" Padding="10,4"
                             FontSize="12" FontWeight="Bold"
+                            Background="#FF9800" Foreground="White"
                             VerticalAlignment="Center"
                             Click="TestModeButton_Click"
                             Content="TEST módra váltás"/>

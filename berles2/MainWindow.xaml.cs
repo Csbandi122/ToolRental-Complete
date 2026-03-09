@@ -953,8 +953,8 @@ namespace berles2
             {
                 HeaderBorder.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2E7D32"));
                 TestModeButton.Content = "TEST módra váltás";
-                TestModeButton.Background = Brushes.Transparent;
-                TestModeButton.Foreground = Brushes.White;
+                TestModeButton.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#FF9800"));
+                TestModeButton.Foreground = new SolidColorBrush(Colors.White);
                 Title = "Kerékpár Bérlő Rendszer";
             }
         }
