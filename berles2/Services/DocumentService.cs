@@ -210,13 +210,13 @@ namespace berles2.Services
             {
                 if (doc != null)
                 {
-                    doc.Close();
-                    System.Runtime.InteropServices.Marshal.ReleaseComObject(doc);
+                    try { doc.Close(false); } catch { /* ne akadályozza meg a wordApp.Quit()-ot */ }
+                    try { System.Runtime.InteropServices.Marshal.ReleaseComObject(doc); } catch { }
                 }
                 if (wordApp != null)
                 {
-                    wordApp.Quit();
-                    System.Runtime.InteropServices.Marshal.ReleaseComObject(wordApp);
+                    try { wordApp.Quit(false); } catch { }
+                    try { System.Runtime.InteropServices.Marshal.ReleaseComObject(wordApp); } catch { }
                 }
             }
 
