@@ -10,12 +10,17 @@ namespace ToolRental.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<int>(
-                name: "ReviewEmailDelayDays",
-                table: "Settings",
-                type: "int",
-                nullable: false,
-                defaultValue: 0);
+            // Feltételes hozzáadás – ha már létezik az oszlop (pl. kézi ALTER TABLE-ből),
+            // nem próbálja újra létrehozni.
+            migrationBuilder.Sql(@"
+                IF NOT EXISTS (
+                    SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'Settings' AND COLUMN_NAME = 'ReviewEmailDelayDays'
+                )
+                BEGIN
+                    ALTER TABLE [Settings] ADD [ReviewEmailDelayDays] int NOT NULL DEFAULT 0;
+                END
+            ");
 
             migrationBuilder.AlterColumn<string>(
                 name: "TicketNr",
