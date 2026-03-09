@@ -52,6 +52,7 @@ namespace berles2
                 AppLogger.Logger.Information("Adatbázis kapcsolat ellenőrzése: {Server}", DatabaseConfig.Server);
                 using var context = new ToolRentalDbContext(DatabaseConfig.GetOptions());
                 context.Database.EnsureCreated();
+                InitializeSequences(context);
                 AppLogger.Logger.Information("Adatbázis kapcsolat sikeres");
             }
             catch (Exception ex)
@@ -63,6 +64,44 @@ namespace berles2
                     "Adatbázis hiba",
                     MessageBoxButton.OK,
                     MessageBoxImage.Error);
+            }
+        }
+
+        /// <summary>
+        /// SEQUENCE objektumok és unique indexek létrehozása, ha még nem léteznek.
+        /// A SEQUENCE kezdőértéke a meglévő adatok alapján automatikusan beáll.
+        /// </summary>
+        private static void InitializeSequences(ToolRentalDbContext context)
+        {
+            try
+            {
+                context.Database.ExecuteSqlRaw(@"
+                    IF NOT EXISTS (SELECT * FROM sys.sequences WHERE name = 'RentalTicketSeq')
+                    BEGIN
+                        DECLARE @maxRnt INT = (SELECT ISNULL(MAX(TRY_CAST(SUBSTRING(TicketNr, 4, 10) AS INT)), 0) FROM Rentals WHERE TicketNr LIKE 'RNT%');
+                        DECLARE @startRnt INT = @maxRnt + 1;
+                        EXEC('CREATE SEQUENCE RentalTicketSeq AS INT START WITH ' + @startRnt + ' INCREMENT BY 1');
+                    END
+
+                    IF NOT EXISTS (SELECT * FROM sys.sequences WHERE name = 'ServiceTicketSeq')
+                    BEGIN
+                        DECLARE @maxSrv INT = (SELECT ISNULL(MAX(TRY_CAST(SUBSTRING(TicketNr, 4, 10) AS INT)), 0) FROM Services WHERE TicketNr LIKE 'SRV%');
+                        DECLARE @startSrv INT = @maxSrv + 1;
+                        EXEC('CREATE SEQUENCE ServiceTicketSeq AS INT START WITH ' + @startSrv + ' INCREMENT BY 1');
+                    END
+
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Rentals_TicketNr')
+                        CREATE UNIQUE INDEX IX_Rentals_TicketNr ON Rentals(TicketNr);
+
+                    IF NOT EXISTS (SELECT * FROM sys.indexes WHERE name = 'IX_Services_TicketNr')
+                        CREATE UNIQUE INDEX IX_Services_TicketNr ON Services(TicketNr);
+                ");
+
+                AppLogger.Logger.Information("Ticket SEQUENCE-ek és indexek inicializálva");
+            }
+            catch (Exception ex)
+            {
+                AppLogger.Logger.Error(ex, "Hiba a SEQUENCE inicializálásakor");
             }
         }
 

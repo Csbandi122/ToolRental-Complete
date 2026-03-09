@@ -56,24 +56,7 @@ namespace berles2
         {
             try
             {
-                // Legmagasabb SRV számot keresés
-                var lastService = _context.Services
-                    .Where(s => s.TicketNr.StartsWith("SRV"))
-                    .OrderByDescending(s => s.Id)
-                    .FirstOrDefault();
-
-                int nextNumber = 1;
-                if (lastService != null)
-                {
-                    // SRV0001 formátumból a számot kinyerjük
-                    string numberPart = lastService.TicketNr.Substring(3);
-                    if (int.TryParse(numberPart, out int lastNumber))
-                    {
-                        nextNumber = lastNumber + 1;
-                    }
-                }
-
-                TicketNrTextBox.Text = $"SRV{nextNumber:D4}";
+                TicketNrTextBox.Text = _context.GetNextServiceTicketNr();
             }
             catch (Exception ex)
             {

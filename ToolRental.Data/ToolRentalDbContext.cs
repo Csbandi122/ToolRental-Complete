@@ -73,5 +73,29 @@ namespace ToolRental.Data
 
             base.OnModelCreating(modelBuilder);
         }
+
+        // ===========================================
+        // TICKET SZÁM GENERÁLÁS (SQL Server SEQUENCE)
+        // ===========================================
+
+        /// <summary>
+        /// Következő bérlési ticket számot adja vissza (RNT0001 formátum).
+        /// Atomi művelet - 2 gép soha nem kapja ugyanazt a számot.
+        /// </summary>
+        public string GetNextRentalTicketNr()
+        {
+            var result = Database.SqlQueryRaw<int>("SELECT NEXT VALUE FOR RentalTicketSeq AS [Value]").AsEnumerable().First();
+            return $"RNT{result:D4}";
+        }
+
+        /// <summary>
+        /// Következő szerviz ticket számot adja vissza (SRV0001 formátum).
+        /// Atomi művelet - 2 gép soha nem kapja ugyanazt a számot.
+        /// </summary>
+        public string GetNextServiceTicketNr()
+        {
+            var result = Database.SqlQueryRaw<int>("SELECT NEXT VALUE FOR ServiceTicketSeq AS [Value]").AsEnumerable().First();
+            return $"SRV{result:D4}";
+        }
     }
 }

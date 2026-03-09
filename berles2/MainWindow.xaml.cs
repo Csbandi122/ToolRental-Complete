@@ -74,19 +74,7 @@ namespace berles2
         {
             try
             {
-                var allTicketNumbers = _context.Rentals
-                    .Where(r => r.TicketNr.StartsWith("RNT"))
-                    .Select(r => r.TicketNr)
-                    .ToList();
-
-                int maxNumber = 0;
-                foreach (var ticketNr in allTicketNumbers)
-                {
-                    if (int.TryParse(ticketNr.Replace("RNT", ""), out int number))
-                        maxNumber = Math.Max(maxNumber, number);
-                }
-
-                TicketNumberTextBox.Text = $"RNT{maxNumber + 1:D4}";
+                TicketNumberTextBox.Text = _context.GetNextRentalTicketNr();
             }
             catch (Exception ex)
             {
