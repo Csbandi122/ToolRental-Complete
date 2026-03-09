@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.Windows;
 using System.Windows.Controls;
+using ToolRental.Core;
 using ToolRental.Core.Models;
 using ToolRental.Data;
 
@@ -35,29 +36,29 @@ namespace berles2
 
                 // Mai bevételek/kiadások
                 var todayRevenue = _context.Financials
-                    .Where(f => f.Date.Date == today && f.EntryType == "bevétel")
+                    .Where(f => f.Date.Date == today && f.EntryType == EntryTypes.Bevetel)
                     .Sum(f => (decimal?)f.Amount) ?? 0;
 
                 var todayExpense = _context.Financials
-                    .Where(f => f.Date.Date == today && f.EntryType == "költség")
+                    .Where(f => f.Date.Date == today && f.EntryType == EntryTypes.Koltseg)
                     .Sum(f => (decimal?)f.Amount) ?? 0;
 
                 // Havi bevételek/kiadások
                 var monthRevenue = _context.Financials
-                    .Where(f => f.Date >= currentMonth && f.EntryType == "bevétel")
+                    .Where(f => f.Date >= currentMonth && f.EntryType == EntryTypes.Bevetel)
                     .Sum(f => (decimal?)f.Amount) ?? 0;
 
                 var monthExpense = _context.Financials
-                    .Where(f => f.Date >= currentMonth && f.EntryType == "költség")
+                    .Where(f => f.Date >= currentMonth && f.EntryType == EntryTypes.Koltseg)
                     .Sum(f => (decimal?)f.Amount) ?? 0;
 
                 // Éves bevételek/kiadások
                 var yearRevenue = _context.Financials
-                    .Where(f => f.Date >= currentYear && f.EntryType == "bevétel")
+                    .Where(f => f.Date >= currentYear && f.EntryType == EntryTypes.Bevetel)
                     .Sum(f => (decimal?)f.Amount) ?? 0;
 
                 var yearExpense = _context.Financials
-                    .Where(f => f.Date >= currentYear && f.EntryType == "költség")
+                    .Where(f => f.Date >= currentYear && f.EntryType == EntryTypes.Koltseg)
                     .Sum(f => (decimal?)f.Amount) ?? 0;
 
                 // Szép sorok létrehozása
@@ -207,11 +208,11 @@ namespace berles2
                         var monthEnd = monthStart.AddMonths(1);
 
                         var revenue = _context.Financials
-                            .Where(f => f.Date >= monthStart && f.Date < monthEnd && f.EntryType == "bevétel")
+                            .Where(f => f.Date >= monthStart && f.Date < monthEnd && f.EntryType == EntryTypes.Bevetel)
                             .Sum(f => (decimal?)f.Amount) ?? 0;
 
                         var expense = _context.Financials
-                            .Where(f => f.Date >= monthStart && f.Date < monthEnd && f.EntryType == "költség")
+                            .Where(f => f.Date >= monthStart && f.Date < monthEnd && f.EntryType == EntryTypes.Koltseg)
                             .Sum(f => (decimal?)f.Amount) ?? 0;
 
                         chartData.Add(new MonthlyData
@@ -243,11 +244,11 @@ namespace berles2
                         var yearEnd = yearStart.AddYears(1);
 
                         var revenue = _context.Financials
-                            .Where(f => f.Date >= yearStart && f.Date < yearEnd && f.EntryType == "bevétel")
+                            .Where(f => f.Date >= yearStart && f.Date < yearEnd && f.EntryType == EntryTypes.Bevetel)
                             .Sum(f => (decimal?)f.Amount) ?? 0;
 
                         var expense = _context.Financials
-                            .Where(f => f.Date >= yearStart && f.Date < yearEnd && f.EntryType == "költség")
+                            .Where(f => f.Date >= yearStart && f.Date < yearEnd && f.EntryType == EntryTypes.Koltseg)
                             .Sum(f => (decimal?)f.Amount) ?? 0;
 
                         chartData.Add(new MonthlyData
@@ -480,7 +481,7 @@ namespace berles2
 
                         // Megkeressük a Financial rekordot ehhez a bérléshez
                         var financial = _context.Financials
-                            .FirstOrDefault(f => f.SourceType == "bérlés" && f.SourceId == rental.Id);
+                            .FirstOrDefault(f => f.SourceType == SourceTypes.Berles && f.SourceId == rental.Id);
 
                         if (financial != null)
                         {
@@ -518,7 +519,7 @@ namespace berles2
                               fd => fd.FinancialId,
                               f => f.Id,
                               (fd, f) => new { fd, f })
-                        .Where(x => x.f.EntryType == "bevétel" && x.f.SourceType != "bérlés")
+                        .Where(x => x.f.EntryType == EntryTypes.Bevetel && x.f.SourceType != SourceTypes.Berles)
                         .ToList()
                         .Sum(x =>
                         {
@@ -536,7 +537,7 @@ namespace berles2
           fd => fd.FinancialId,
           f => f.Id,
           (fd, f) => new { fd, f })
-    .Where(x => x.f.EntryType == "költség" &&
+    .Where(x => x.f.EntryType == EntryTypes.Koltseg &&
                 (!_selectedDeviceYear.HasValue || x.f.Date.Year == _selectedDeviceYear.Value))
     .ToList()
     .Sum(x =>

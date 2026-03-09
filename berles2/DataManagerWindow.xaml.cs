@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Xaml;
+using ToolRental.Core;
 using ToolRental.Core.Models;
 using ToolRental.Data;
 using System.Windows.Input;
@@ -495,7 +496,7 @@ namespace berles2
             if (FinancialsDataGrid.SelectedItem is FinancialDisplayModel selectedFinancial)
             {
                 // Bérléshez kapcsolódó tételeket nem lehet törölni
-                if (selectedFinancial.SourceType == "bérlés" && selectedFinancial.SourceId.HasValue)
+                if (selectedFinancial.SourceType == SourceTypes.Berles && selectedFinancial.SourceId.HasValue)
                 {
                     MessageBox.Show("Bérléshez kapcsolódó pénzügyi tételeket nem lehet törölni!\n" +
                                   "A tétel automatikusan létrejött a bérléskor.",
@@ -608,8 +609,8 @@ namespace berles2
                                    f.SourceType.ToLower().Contains(searchText);
 
                 bool matchesType = selectedType == "Összes típus" ||
-                                 (selectedType == "Bevétel" && f.EntryType == "bevétel") ||
-                                 (selectedType == "Költség" && f.EntryType == "költség");
+                                 (selectedType == "Bevétel" && f.EntryType == EntryTypes.Bevetel) ||
+                                 (selectedType == "Költség" && f.EntryType == EntryTypes.Koltseg);
 
                 return matchesSearch && matchesType;
             }).ToList();
@@ -696,7 +697,7 @@ namespace berles2
                             {
                                 // 1. Kapcsolódó pénzügyi tétel keresése és törlése
                                 var relatedFinancial = _context.Financials
-                                    .FirstOrDefault(f => f.SourceType == "szervíz" && f.SourceId == service.Id);
+                                    .FirstOrDefault(f => f.SourceType == SourceTypes.Szerviz && f.SourceId == service.Id);
 
                                 if (relatedFinancial != null)
                                 {

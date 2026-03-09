@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
+using ToolRental.Core;
 using ToolRental.Core.Models;
 using ToolRental.Data;
 
@@ -213,8 +214,8 @@ namespace berles2
                     var financial = new Financial
                     {
                         TicketNr = Service.TicketNr,
-                        EntryType = "költség",
-                        SourceType = "szervíz",
+                        EntryType = EntryTypes.Koltseg,
+                        SourceType = SourceTypes.Szerviz,
                         SourceId = Service.Id,
                         Date = Service.ServiceDate,
                         Comment = $"Szervíz: {Service.ServiceType} - {Service.Description}",

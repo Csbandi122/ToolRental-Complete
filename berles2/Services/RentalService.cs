@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ToolRental.Core.Models;
+using ToolRental.Core;
 using ToolRental.Data;
 
 namespace berles2.Services
@@ -72,8 +73,8 @@ namespace berles2.Services
                     var financial = new Financial
                     {
                         TicketNr   = data.TicketNr,
-                        EntryType  = "bevétel",
-                        SourceType = "bérlés",
+                        EntryType  = EntryTypes.Bevetel,
+                        SourceType = SourceTypes.Berles,
                         SourceId   = rental.Id,
                         Date       = DateTime.Now,
                         Comment    = $"Bérlési díj - {data.TicketNr}",
