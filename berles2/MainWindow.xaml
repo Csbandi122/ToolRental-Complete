@@ -6,6 +6,8 @@
         xmlns:local="clr-namespace:berles2"
         mc:Ignorable="d"
         Title="Kerékpár Bérlő Rendszer" Height="800" Width="1200"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        MaxWidth="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Width}"
         WindowStartupLocation="CenterScreen">
 
     <Grid>

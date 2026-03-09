@@ -6,6 +6,8 @@
         xmlns:local="clr-namespace:berles2"
         mc:Ignorable="d"
         Title="Eszköz adatok" Height="651" Width="500"
+        MaxHeight="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Height}"
+        MaxWidth="{Binding Source={x:Static SystemParameters.WorkArea}, Path=Width}"
         WindowStartupLocation="CenterOwner" ResizeMode="NoResize">
 
     <Grid Margin="20">
