@@ -174,7 +174,7 @@ namespace berles2
             }
 
             // Bérlési ár ellenőrzése
-            if (!decimal.TryParse(RentPriceTextBox.Text, out decimal rentPrice) || rentPrice <= 0)
+            if (!decimal.TryParse(RentPriceTextBox.Text, out decimal rentPrice) || rentPrice < 0)
             {
                 MessageBox.Show("Kérem adjon meg egy érvényes bérlési árat!", "Hiba",
                               MessageBoxButton.OK, MessageBoxImage.Warning);
