@@ -74,15 +74,10 @@ namespace berles2
                         _emailPasswordDecryptionFailed = true;
                         EmailPasswordBox.Password = "";
                         AppLogger.Logger.Warning(ex,
-                            "DPAPI email jelszó visszafejtés sikertelen. " +
+                            "DPAPI email jelszó visszafejtés sikertelen a Beállítások ablakban. " +
                             "Titkosított érték hossza: {EncLen}, Windows felhasználó: {User}",
                             _currentSetting.EmailPassword?.Length ?? 0,
                             Environment.UserName);
-                        MessageBox.Show(
-                            "Az email jelszó visszafejtése sikertelen (Windows DPAPI hiba).\n" +
-                            "A korábban mentett jelszó az adatbázisban megmaradt.\n" +
-                            "Kérlek add meg újra a jelszót, vagy próbáld újraindítani a programot.",
-                            "Email jelszó figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
                     SenderNameTextBox.Text = _currentSetting.SenderName;
                     CcAddressTextBox.Text = _currentSetting.CcAddress ?? "";

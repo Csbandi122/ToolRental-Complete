@@ -93,6 +93,27 @@ namespace berles2
                     CompanyNameText.Text = settings.CompanyName;
                     if (!string.IsNullOrEmpty(settings.CompanyLogo) && SystemIO.File.Exists(settings.CompanyLogo))
                         CompanyLogo.Source = new BitmapImage(new Uri(settings.CompanyLogo));
+
+                    // Email jelszó DPAPI ellenőrzés induláskor
+                    if (!string.IsNullOrEmpty(settings.EmailPassword))
+                    {
+                        try
+                        {
+                            CredentialProtection.Unprotect(settings.EmailPassword);
+                        }
+                        catch (System.Security.Cryptography.CryptographicException ex)
+                        {
+                            AppLogger.Logger.Warning(ex,
+                                "DPAPI email jelszó visszafejtés sikertelen induláskor. " +
+                                "Titkosított érték hossza: {EncLen}, Windows felhasználó: {User}",
+                                settings.EmailPassword.Length, Environment.UserName);
+                            MessageBox.Show(
+                                "Az email jelszó visszafejtése sikertelen (Windows DPAPI hiba).\n" +
+                                "Az email küldés nem fog működni, amíg újra meg nem adod a jelszót.\n\n" +
+                                "Kérlek nyisd meg a Beállításokat és add meg újra az email jelszót.",
+                                "Email jelszó figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
