@@ -4,6 +4,7 @@ using Microsoft.Win32;
 using System;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Windows;
 using ToolRental.Core.Models;
 using ToolRental.Data;
@@ -14,6 +15,7 @@ namespace berles2
     {
         private ToolRentalDbContext? _context;
         private Setting? _currentSetting;
+        private bool _emailPasswordDecryptionFailed;
 
         public SettingsDialog()
         {
@@ -63,7 +65,25 @@ namespace berles2
                     EmailSmtpTextBox.Text = _currentSetting.EmailSmtp;
                     SmtpPortTextBox.Text = _currentSetting.SmtpPort.ToString();
                     SenderEmailTextBox.Text = _currentSetting.SenderEmail;
-                    EmailPasswordBox.Password = CredentialProtection.Unprotect(_currentSetting.EmailPassword);
+                    try
+                    {
+                        EmailPasswordBox.Password = CredentialProtection.Unprotect(_currentSetting.EmailPassword);
+                    }
+                    catch (CryptographicException ex)
+                    {
+                        _emailPasswordDecryptionFailed = true;
+                        EmailPasswordBox.Password = "";
+                        AppLogger.Logger.Warning(ex,
+                            "DPAPI email jelszó visszafejtés sikertelen. " +
+                            "Titkosított érték hossza: {EncLen}, Windows felhasználó: {User}",
+                            _currentSetting.EmailPassword?.Length ?? 0,
+                            Environment.UserName);
+                        MessageBox.Show(
+                            "Az email jelszó visszafejtése sikertelen (Windows DPAPI hiba).\n" +
+                            "A korábban mentett jelszó az adatbázisban megmaradt.\n" +
+                            "Kérlek add meg újra a jelszót, vagy próbáld újraindítani a programot.",
+                            "Email jelszó figyelmeztetés", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    }
                     SenderNameTextBox.Text = _currentSetting.SenderName;
                     CcAddressTextBox.Text = _currentSetting.CcAddress ?? "";
 
@@ -390,7 +410,21 @@ namespace berles2
             _currentSetting.EmailSmtp = EmailSmtpTextBox.Text.Trim();
             _currentSetting.SmtpPort = int.TryParse(SmtpPortTextBox.Text, out int parsedSmtpPort) && parsedSmtpPort > 0 ? parsedSmtpPort : 587;
             _currentSetting.SenderEmail = SenderEmailTextBox.Text.Trim();
-            _currentSetting.EmailPassword = CredentialProtection.Protect(EmailPasswordBox.Password);
+
+            // Ha a felhasználó beírt új jelszót, azt titkosítjuk és mentjük.
+            // Ha a mező üres ÉS a dekódolás korábban sikertelen volt, megtartjuk
+            // az adatbázisban lévő titkosított értéket (nem írjuk felül üressel).
+            if (!string.IsNullOrEmpty(EmailPasswordBox.Password))
+            {
+                _currentSetting.EmailPassword = CredentialProtection.Protect(EmailPasswordBox.Password);
+            }
+            else if (!_emailPasswordDecryptionFailed)
+            {
+                // A felhasználó szándékosan törölte a jelszót
+                _currentSetting.EmailPassword = "";
+            }
+            // else: dekódolás sikertelen volt és nem írt be újat → megtartjuk a régi titkosított értéket
+
             _currentSetting.SenderName = SenderNameTextBox.Text.Trim();
             _currentSetting.CcAddress = string.IsNullOrWhiteSpace(CcAddressTextBox.Text) ?
                                        null : CcAddressTextBox.Text.Trim();

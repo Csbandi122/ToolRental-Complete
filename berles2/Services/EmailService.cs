@@ -178,7 +178,17 @@ namespace berles2.Services
                 client.Connect(_setting.EmailSmtp, _setting.SmtpPort, socketOptions);
 
                 AppLogger.Logger.Debug("SMTP autentikáció: {Email}", _setting.SenderEmail);
-                client.Authenticate(_setting.SenderEmail, CredentialProtection.Unprotect(_setting.EmailPassword));
+                string emailPassword;
+                try
+                {
+                    emailPassword = CredentialProtection.Unprotect(_setting.EmailPassword);
+                }
+                catch (System.Security.Cryptography.CryptographicException ex)
+                {
+                    AppLogger.Logger.Error(ex, "DPAPI email jelszó visszafejtés sikertelen az email küldéskor");
+                    throw new Exception("Az email jelszó visszafejtése sikertelen (DPAPI hiba). Kérlek add meg újra a jelszót a Beállításokban.");
+                }
+                client.Authenticate(_setting.SenderEmail, emailPassword);
 
                 AppLogger.Logger.Debug("Email küldése...");
                 client.Send(message);

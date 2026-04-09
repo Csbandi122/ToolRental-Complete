@@ -31,8 +31,23 @@ namespace berles2
 
         /// <summary>
         /// A jelszót visszafejti, ha titkosítva van tárolva az appsettings.json-ban.
+        /// Ha a DPAPI visszafejtés sikertelen, üres stringet ad vissza (a connection hiba kezeli).
         /// </summary>
-        public static string Password => CredentialProtection.Unprotect(Configuration["DatabaseSettings:Password"] ?? "");
+        public static string Password
+        {
+            get
+            {
+                try
+                {
+                    return CredentialProtection.Unprotect(Configuration["DatabaseSettings:Password"] ?? "");
+                }
+                catch (System.Security.Cryptography.CryptographicException ex)
+                {
+                    AppLogger.Logger.Error(ex, "DPAPI adatbázis jelszó visszafejtés sikertelen");
+                    return string.Empty;
+                }
+            }
+        }
         public static bool TrustServerCertificate => bool.TryParse(Configuration["DatabaseSettings:TrustServerCertificate"], out bool t) ? t : true;
 
         /// <summary>

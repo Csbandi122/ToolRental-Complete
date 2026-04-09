@@ -30,24 +30,16 @@ namespace berles2
 
         /// <summary>
         /// Visszafejti a jelszót. Ha nem titkosított (régi adat), változatlanul adja vissza.
+        /// Sikertelen dekódolás esetén CryptographicException-t dob (a hívó felelős a kezelésért).
         /// </summary>
         public static string Unprotect(string value)
         {
             if (string.IsNullOrEmpty(value)) return value;
             if (!value.StartsWith(EncryptedPrefix)) return value; // visszamenőleges kompatibilitás
 
-            try
-            {
-                var encrypted = Convert.FromBase64String(value[EncryptedPrefix.Length..]);
-                var decrypted = ProtectedData.Unprotect(encrypted, Entropy, DataProtectionScope.CurrentUser);
-                return Encoding.UTF8.GetString(decrypted);
-            }
-            catch
-            {
-                // Ha a kulcs megváltozott (pl. Windows újratelepítés), inkább üres string,
-                // mint crash alkalmazás indításkor
-                return string.Empty;
-            }
+            var encrypted = Convert.FromBase64String(value[EncryptedPrefix.Length..]);
+            var decrypted = ProtectedData.Unprotect(encrypted, Entropy, DataProtectionScope.CurrentUser);
+            return Encoding.UTF8.GetString(decrypted);
         }
 
         public static bool IsProtected(string value) =>
