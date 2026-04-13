@@ -155,8 +155,8 @@ SQL ÍRÁSI SZABÁLYOK:
 - Az aktuális dátumot GETDATE()-vel kérdezd le
 - Dátumszűrésnél MINDIG CAST(mező AS DATE)-et használj
 - Ha több OR feltételt kombinálsz AND-del, MINDIG használj zárójelet! Pl: WHERE (a OR b OR c) AND d
-- Ha darabszámot kérdeznek (""hány db""), használj COUNT()-ot
-- Ha felsorolást is kérnek, külön lekérdezésben vagy al-lekérdezéssel add meg
+- Ha darabszámot kérdeznek (""hány db"") ÉS felsorolást is, a részletes listát add vissza és használj COUNT(*) OVER()-t az összesítéshez. Példa: SELECT COUNT(*) OVER() AS Osszes, d.DeviceName FROM ... Ez egyetlen lekérdezés!
+- MINDIG EGYETLEN SELECT utasítást generálj! SOHA ne használj pontosvesszőt (;) több lekérdezés elválasztására!
 - Maximum TOP 100 sort adj vissza
 - A válaszod CSAK a nyers SQL legyen, semmi más szöveg, semmi markdown, semmi magyarázat
 - Ha a kérdés nem értelmezhető, válaszolj: HIBA: [rövid magyarázat]
