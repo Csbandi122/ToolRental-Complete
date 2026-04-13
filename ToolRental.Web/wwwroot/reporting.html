@@ -286,13 +286,7 @@
                    onkeydown="if(event.key==='Enter') askAI()">
             <button class="ai-send-btn" id="aiSendBtn" onclick="askAI()">Kerdes</button>
         </div>
-        <div class="ai-examples">
-            <button class="ai-example" onclick="setQuestion('Hany berlest adtunk ki ma?')">Mai berlesek</button>
-            <button class="ai-example" onclick="setQuestion('Ki a legtobb berlest ado ugyfel iden?')">Top ugyfel</button>
-            <button class="ai-example" onclick="setQuestion('Melyik eszkoz volt a legnepszerubb az elmult honapban?')">Nepszeru eszkoz</button>
-            <button class="ai-example" onclick="setQuestion('Hany aktiv berlest van jelenleg?')">Aktiv berlesek</button>
-            <button class="ai-example" onclick="setQuestion('Mennyi bevetelt volt marciusban?')">Marciusi bevetel</button>
-        </div>
+        <div class="ai-examples" id="recentQuestions"></div>
         <div id="aiResult" class="ai-result"></div>
     </div>
 
@@ -393,6 +387,7 @@
                 }
 
                 resultDiv.innerHTML = html;
+                loadRecentQuestions();
             } catch (err) {
                 resultDiv.innerHTML = `<div class="ai-answer" style="color:#c62828">Hiba: ${err.message}</div>`;
             } finally {
@@ -401,8 +396,28 @@
             }
         }
 
+        async function loadRecentQuestions() {
+            try {
+                const response = await fetch('/api/recent-questions');
+                const questions = await response.json();
+                const container = document.getElementById('recentQuestions');
+
+                if (questions.length === 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+
+                container.innerHTML = questions.map(q =>
+                    `<button class="ai-example" onclick="setQuestion('${q.replace(/'/g, "\\'")}')">${q.length > 50 ? q.substring(0, 50) + '...' : q}</button>`
+                ).join('');
+            } catch (err) {
+                // Ha nem sikerül, nem gond
+            }
+        }
+
         // Automatikus betoltes indulaskor
         loadData();
+        loadRecentQuestions();
     </script>
 </body>
 </html>

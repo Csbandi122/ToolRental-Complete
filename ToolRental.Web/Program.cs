@@ -8,6 +8,11 @@ using ToolRental.Core;
 using ToolRental.Core.Models;
 using ToolRental.Data;
 
+// Utolsó kérdések memóriában (szerver újraindításig megmaradnak)
+var recentQuestions = new List<string>();
+var recentQuestionsLock = new object();
+const int MaxRecentQuestions = 5;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // SQL Server kapcsolat az appsettings.json-ból
@@ -86,6 +91,15 @@ app.MapPost("/api/ask", async (HttpRequest request, ToolRentalDbContext db, ICon
     if (string.IsNullOrWhiteSpace(question))
         return Results.BadRequest(new { error = "Kérlek adj meg egy kérdést." });
 
+    // Kérdés mentése az előzményekbe
+    lock (recentQuestionsLock)
+    {
+        recentQuestions.Remove(question); // ha már volt, ne legyen dupla
+        recentQuestions.Insert(0, question);
+        if (recentQuestions.Count > MaxRecentQuestions)
+            recentQuestions.RemoveAt(recentQuestions.Count - 1);
+    }
+
     // API kulcs ellenőrzése
     var apiKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY")
                  ?? config["Anthropic:ApiKey"]
@@ -106,6 +120,7 @@ A felhasználó természetes nyelven kérdez, te pedig SQL lekérdezést generá
 
 ÜZLETI KONTEXTUS:
 - Ez egy kerékpár-kölcsönző vállalkozás
+- A kérdések általában bevétellel, eszközökkel, felhasználókkal, vagy szervízzel kapcsolatosak. 
 - Ha a felhasználó ""bicikli""-t, ""kerékpár""-t, ""bringa""-t mond, az a Devices tábla eszközeire vonatkozik
 - Egy bérlés (Rental) több eszközt (Device) is tartalmazhat a RentalDevices kapcsolótáblán keresztül
 - Az ""kiadtunk"", ""kibéreltük"", ""kölcsönöztük"" kifejezések a Rentals táblára vonatkoznak
@@ -288,6 +303,15 @@ Ha nincs eredmény (0 sor), mondd el hogy nincs találat. Ne magyarázd az SQL-t
     catch (Exception ex)
     {
         return Results.Json(new { answer = $"Hiba: {ex.Message}", sql = "", rowCount = 0 });
+    }
+});
+
+// === KORÁBBI KÉRDÉSEK API ===
+app.MapGet("/api/recent-questions", () =>
+{
+    lock (recentQuestionsLock)
+    {
+        return Results.Json(recentQuestions.ToList());
     }
 });
 
