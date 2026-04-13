@@ -101,23 +101,32 @@ app.MapPost("/api/ask", async (HttpRequest request, ToolRentalDbContext db, ICon
         // 1. lépés: Claude generál egy SQL lekérdezést
         var client = new AnthropicClient(apiKey);
 
-        var schemaPrompt = @"Te egy SQL Server adatbázis lekérdező asszisztens vagy. A felhasználó természetes nyelven kérdez, te pedig SQL lekérdezést generálsz.
+        var schemaPrompt = @"Te egy SQL Server adatbázis lekérdező asszisztens vagy egy KERÉKPÁR-KÖLCSÖNZŐ cég rendszeréhez.
+A felhasználó természetes nyelven kérdez, te pedig SQL lekérdezést generálsz.
+
+ÜZLETI KONTEXTUS:
+- Ez egy kerékpár-kölcsönző vállalkozás
+- Ha a felhasználó ""bicikli""-t, ""kerékpár""-t, ""bringa""-t mond, az a Devices tábla eszközeire vonatkozik
+- Egy bérlés (Rental) több eszközt (Device) is tartalmazhat a RentalDevices kapcsolótáblán keresztül
+- Az ""kiadtunk"", ""kibéreltük"", ""kölcsönöztük"" kifejezések a Rentals táblára vonatkoznak
+- A bérlés kezdete a RentStart mező, a bérlés hossza a RentalDays (napokban)
+- Ha egy adott napra kérdeznek, a RentStart dátumát kell szűrni: CAST(r.RentStart AS DATE) = 'YYYY-MM-DD'
 
 Az adatbázis szerkezete (SQL Server):
 
 TÁBLÁK:
 - Customers (Id, Name, Zipcode, City, Address, Email, IdNumber, Comment)
-- Devices (Id, DeviceName, DeviceType, Serial, Price, RentPrice, Available, Picture, RentCount, Notes)
+- Devices (Id, DeviceName, DeviceType[FK→DeviceTypes.Id], Serial, Price, RentPrice, Available, Picture, RentCount, Notes)
 - DeviceTypes (Id, TypeName)
-- Rentals (Id, TicketNr, CustomerId, RentStart, RentalDays, PaymentMode, Comment, Contract, Invoice, ReviewEmailSent, TotalAmount, ContractEmailSent, InvoiceEmailSent)
-- RentalDevices (Id, RentalId, DeviceId) -- kapcsolótábla: Rental ↔ Device
+- Rentals (Id, TicketNr, CustomerId[FK→Customers.Id], RentStart, RentalDays, PaymentMode, Comment, Contract, Invoice, ReviewEmailSent, TotalAmount, ContractEmailSent, InvoiceEmailSent)
+- RentalDevices (Id, RentalId[FK→Rentals.Id], DeviceId[FK→Devices.Id]) -- kapcsolótábla: Rental ↔ Device
 - Services (Id, TicketNr, ServiceType, Description, Technician, ServiceDate, CostAmount)
-- ServiceDevices (Id, ServiceId, DeviceId) -- kapcsolótábla: Service ↔ Device
+- ServiceDevices (Id, ServiceId[FK→Services.Id], DeviceId[FK→Devices.Id]) -- kapcsolótábla: Service ↔ Device
 - Financials (Id, TicketNr, EntryType, SourceType, SourceId, Date, Comment, Amount)
   - EntryType értékei: 'bevétel', 'költség'
   - SourceType értékei: 'bérlés', 'szervíz', 'eszköz_vásárlás', 'marketing', 'egyéb', 'kézi', 'alkatrész', 'javítás'
-- FinancialDevices (Id, FinancialId, DeviceId) -- kapcsolótábla: Financial ↔ Device
-- Settings (Id, CompanyName, ...) -- alkalmazás beállítások, NE kérdezd le
+- FinancialDevices (Id, FinancialId[FK→Financials.Id], DeviceId[FK→Devices.Id]) -- kapcsolótábla: Financial ↔ Device
+- Settings -- alkalmazás beállítások, NE kérdezd le SOHA
 
 KAPCSOLATOK:
 - Rentals.CustomerId → Customers.Id
@@ -126,12 +135,16 @@ KAPCSOLATOK:
 - ServiceDevices: Services ↔ Devices (many-to-many)
 - FinancialDevices: Financials ↔ Devices (many-to-many)
 
-FONTOS SZABÁLYOK:
-- CSAK SELECT utasítást generálj, SOHA nem INSERT/UPDATE/DELETE!
+SQL ÍRÁSI SZABÁLYOK:
+- CSAK SELECT utasítást generálj, SOHA nem INSERT/UPDATE/DELETE/DROP/ALTER/EXEC!
 - Az aktuális dátumot GETDATE()-vel kérdezd le
-- A válaszod CSAK a nyers SQL legyen, semmi más szöveg, semmi markdown
+- Dátumszűrésnél MINDIG CAST(mező AS DATE)-et használj
+- Ha több OR feltételt kombinálsz AND-del, MINDIG használj zárójelet! Pl: WHERE (a OR b OR c) AND d
+- Ha darabszámot kérdeznek (""hány db""), használj COUNT()-ot
+- Ha felsorolást is kérnek, külön lekérdezésben vagy al-lekérdezéssel add meg
+- Maximum TOP 100 sort adj vissza
+- A válaszod CSAK a nyers SQL legyen, semmi más szöveg, semmi markdown, semmi magyarázat
 - Ha a kérdés nem értelmezhető, válaszolj: HIBA: [rövid magyarázat]
-- Maximum 100 sort adj vissza (TOP 100)
 - A Settings táblát SOHA ne kérdezd le";
 
         var sqlResponse = await client.Messages.GetClaudeMessageAsync(new MessageParameters
