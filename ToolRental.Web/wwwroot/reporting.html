@@ -57,10 +57,6 @@
             gap: 8px;
         }
 
-        .card-title .icon {
-            font-size: 20px;
-        }
-
         .card-title .period {
             font-size: 12px;
             color: #aaa;
@@ -131,6 +127,142 @@
         .refresh-btn:hover {
             background: #16213e;
         }
+
+        /* === AI KÉRDEZŐ === */
+        .ai-section {
+            max-width: 1000px;
+            margin: 30px auto 0;
+        }
+
+        .ai-section h2 {
+            font-size: 18px;
+            color: #1a1a2e;
+            margin-bottom: 12px;
+        }
+
+        .ai-input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .ai-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .ai-input:focus {
+            border-color: #1a1a2e;
+        }
+
+        .ai-input::placeholder {
+            color: #aaa;
+        }
+
+        .ai-send-btn {
+            padding: 12px 20px;
+            background: #1a1a2e;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .ai-send-btn:hover {
+            background: #16213e;
+        }
+
+        .ai-send-btn:disabled {
+            background: #999;
+            cursor: not-allowed;
+        }
+
+        .ai-result {
+            margin-top: 16px;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            display: none;
+        }
+
+        .ai-answer {
+            font-size: 15px;
+            line-height: 1.6;
+            color: #333;
+            white-space: pre-wrap;
+        }
+
+        .ai-sql {
+            margin-top: 12px;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 12px;
+            color: #666;
+            overflow-x: auto;
+        }
+
+        .ai-sql-toggle {
+            margin-top: 8px;
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 12px;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+
+        .ai-loading {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #888;
+            font-size: 14px;
+            padding: 16px;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #eee;
+            border-top-color: #1a1a2e;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .ai-examples {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .ai-example {
+            padding: 6px 12px;
+            background: #e8eaf6;
+            border: none;
+            border-radius: 20px;
+            font-size: 12px;
+            color: #3949ab;
+            cursor: pointer;
+        }
+
+        .ai-example:hover {
+            background: #c5cae9;
+        }
     </style>
 </head>
 <body>
@@ -145,6 +277,25 @@
 
     <button class="refresh-btn" onclick="loadData()">Frissites</button>
 
+    <!-- AI KÉRDEZŐ SZEKCIÓ -->
+    <div class="ai-section">
+        <h2>Kerdezz az adatbazisrol</h2>
+        <div class="ai-input-row">
+            <input type="text" class="ai-input" id="aiQuestion"
+                   placeholder="Pl.: Hany berlest adtunk ki ma?"
+                   onkeydown="if(event.key==='Enter') askAI()">
+            <button class="ai-send-btn" id="aiSendBtn" onclick="askAI()">Kerdes</button>
+        </div>
+        <div class="ai-examples">
+            <button class="ai-example" onclick="setQuestion('Hany berlest adtunk ki ma?')">Mai berlesek</button>
+            <button class="ai-example" onclick="setQuestion('Ki a legtobb berlest ado ugyfel iden?')">Top ugyfel</button>
+            <button class="ai-example" onclick="setQuestion('Melyik eszkoz volt a legnepszerubb az elmult honapban?')">Nepszeru eszkoz</button>
+            <button class="ai-example" onclick="setQuestion('Hany aktiv berlest van jelenleg?')">Aktiv berlesek</button>
+            <button class="ai-example" onclick="setQuestion('Mennyi bevetelt volt marciusban?')">Marciusi bevetel</button>
+        </div>
+        <div id="aiResult" class="ai-result"></div>
+    </div>
+
     <script>
         function formatMoney(amount) {
             return Math.round(amount).toLocaleString('hu-HU') + ' Ft';
@@ -157,7 +308,6 @@
             return `
                 <div class="card">
                     <div class="card-title">
-                        <span class="icon">${icon}</span>
                         ${title}
                         ${period ? `<span class="period">(${period})</span>` : ''}
                     </div>
@@ -205,6 +355,49 @@
                         Ellenorizd, hogy az SQL szerver elerheto-e.
                     </div>
                 `;
+            }
+        }
+
+        function setQuestion(q) {
+            document.getElementById('aiQuestion').value = q;
+            askAI();
+        }
+
+        async function askAI() {
+            const input = document.getElementById('aiQuestion');
+            const btn = document.getElementById('aiSendBtn');
+            const resultDiv = document.getElementById('aiResult');
+            const question = input.value.trim();
+
+            if (!question) return;
+
+            btn.disabled = true;
+            btn.textContent = '...';
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = '<div class="ai-loading"><div class="spinner"></div>Claude gondolkodik...</div>';
+
+            try {
+                const response = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+
+                const data = await response.json();
+
+                let html = `<div class="ai-answer">${data.answer}</div>`;
+
+                if (data.sql) {
+                    html += `<button class="ai-sql-toggle" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">SQL megtekintese</button>`;
+                    html += `<div class="ai-sql" style="display:none">${data.sql}</div>`;
+                }
+
+                resultDiv.innerHTML = html;
+            } catch (err) {
+                resultDiv.innerHTML = `<div class="ai-answer" style="color:#c62828">Hiba: ${err.message}</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Kerdes';
             }
         }
 

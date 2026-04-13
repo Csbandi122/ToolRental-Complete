@@ -1,4 +1,9 @@
+using Anthropic.SDK;
+using Anthropic.SDK.Messaging;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
+using System.Text.Json;
 using ToolRental.Core;
 using ToolRental.Core.Models;
 using ToolRental.Data;
@@ -67,6 +72,151 @@ app.MapGet("/api/reporting", async (ToolRentalDbContext db) =>
         month = new { revenue = monthRevenue, expense = monthExpense, profit = monthRevenue - monthExpense, startDate = monthStart.ToString("yyyy.MM.dd") },
         year = new { revenue = yearRevenue, expense = yearExpense, profit = yearRevenue - yearExpense, startDate = yearStart.ToString("yyyy.MM.dd") }
     });
+});
+
+// === AI LEKÉRDEZŐ API ===
+app.MapPost("/api/ask", async (HttpRequest request, ToolRentalDbContext db, IConfiguration config) =>
+{
+    // Kérdés kiolvasása
+    using var reader = new StreamReader(request.Body);
+    var body = await reader.ReadToEndAsync();
+    var json = JsonDocument.Parse(body);
+    var question = json.RootElement.GetProperty("question").GetString();
+
+    if (string.IsNullOrWhiteSpace(question))
+        return Results.BadRequest(new { error = "Kérlek adj meg egy kérdést." });
+
+    // API kulcs ellenőrzése
+    var apiKey = Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY")
+                 ?? config["Anthropic:ApiKey"]
+                 ?? "";
+
+    if (string.IsNullOrEmpty(apiKey))
+        return Results.Json(new { error = "Nincs beállítva az ANTHROPIC_API_KEY." }, statusCode: 500);
+
+    var connectionString = config.GetConnectionString("DefaultConnection") ?? "";
+
+    try
+    {
+        // 1. lépés: Claude generál egy SQL lekérdezést
+        var client = new AnthropicClient(apiKey);
+
+        var schemaPrompt = @"Te egy SQL Server adatbázis lekérdező asszisztens vagy. A felhasználó természetes nyelven kérdez, te pedig SQL lekérdezést generálsz.
+
+Az adatbázis szerkezete (SQL Server):
+
+TÁBLÁK:
+- Customers (Id, Name, Zipcode, City, Address, Email, IdNumber, Comment)
+- Devices (Id, DeviceName, DeviceType, Serial, Price, RentPrice, Available, Picture, RentCount, Notes)
+- DeviceTypes (Id, TypeName)
+- Rentals (Id, TicketNr, CustomerId, RentStart, RentalDays, PaymentMode, Comment, Contract, Invoice, ReviewEmailSent, TotalAmount, ContractEmailSent, InvoiceEmailSent)
+- RentalDevices (Id, RentalId, DeviceId) -- kapcsolótábla: Rental ↔ Device
+- Services (Id, TicketNr, ServiceType, Description, Technician, ServiceDate, CostAmount)
+- ServiceDevices (Id, ServiceId, DeviceId) -- kapcsolótábla: Service ↔ Device
+- Financials (Id, TicketNr, EntryType, SourceType, SourceId, Date, Comment, Amount)
+  - EntryType értékei: 'bevétel', 'költség'
+  - SourceType értékei: 'bérlés', 'szervíz', 'eszköz_vásárlás', 'marketing', 'egyéb', 'kézi', 'alkatrész', 'javítás'
+- FinancialDevices (Id, FinancialId, DeviceId) -- kapcsolótábla: Financial ↔ Device
+- Settings (Id, CompanyName, ...) -- alkalmazás beállítások, NE kérdezd le
+
+KAPCSOLATOK:
+- Rentals.CustomerId → Customers.Id
+- Devices.DeviceType → DeviceTypes.Id
+- RentalDevices: Rentals ↔ Devices (many-to-many)
+- ServiceDevices: Services ↔ Devices (many-to-many)
+- FinancialDevices: Financials ↔ Devices (many-to-many)
+
+FONTOS SZABÁLYOK:
+- CSAK SELECT utasítást generálj, SOHA nem INSERT/UPDATE/DELETE!
+- Az aktuális dátumot GETDATE()-vel kérdezd le
+- A válaszod CSAK a nyers SQL legyen, semmi más szöveg, semmi markdown
+- Ha a kérdés nem értelmezhető, válaszolj: HIBA: [rövid magyarázat]
+- Maximum 100 sort adj vissza (TOP 100)
+- A Settings táblát SOHA ne kérdezd le";
+
+        var sqlResponse = await client.Messages.GetClaudeMessageAsync(new MessageParameters
+        {
+            Model = "claude-sonnet-4-20250514",
+            MaxTokens = 500,
+            System = new List<SystemMessage> { new SystemMessage(schemaPrompt) },
+            Messages = new List<Message>
+            {
+                new Message(RoleType.User, question)
+            }
+        });
+
+        var generatedSql = sqlResponse.Message.ToString().Trim();
+
+        // Biztonsági ellenőrzés
+        if (generatedSql.StartsWith("HIBA:"))
+            return Results.Json(new { answer = generatedSql, sql = "" });
+
+        var sqlUpper = generatedSql.ToUpperInvariant();
+        var forbiddenKeywords = new[] { "INSERT", "UPDATE", "DELETE", "DROP", "ALTER", "EXEC", "TRUNCATE", "CREATE", "SETTINGS" };
+        if (forbiddenKeywords.Any(kw => sqlUpper.Contains(kw)))
+        {
+            return Results.Json(new { answer = "Biztonsagi okokbol csak olvasasi muveletek engedelyezettek.", sql = generatedSql });
+        }
+
+        // 2. lépés: SQL futtatása
+        var resultRows = new List<Dictionary<string, object?>>();
+        using var connection = new SqlConnection(connectionString);
+        await connection.OpenAsync();
+        using var command = new SqlCommand(generatedSql, connection);
+        command.CommandTimeout = 10;
+        using var dataReader = await command.ExecuteReaderAsync();
+
+        var columns = Enumerable.Range(0, dataReader.FieldCount)
+            .Select(i => dataReader.GetName(i)).ToList();
+
+        while (await dataReader.ReadAsync() && resultRows.Count < 100)
+        {
+            var row = new Dictionary<string, object?>();
+            foreach (var col in columns)
+            {
+                var val = dataReader[col];
+                row[col] = val == DBNull.Value ? null : val;
+            }
+            resultRows.Add(row);
+        }
+
+        // 3. lépés: Claude összefoglalja az eredményt magyarul
+        var resultText = new StringBuilder();
+        resultText.AppendLine($"SQL: {generatedSql}");
+        resultText.AppendLine($"Oszlopok: {string.Join(", ", columns)}");
+        resultText.AppendLine($"Sorok szama: {resultRows.Count}");
+        resultText.AppendLine("Adatok:");
+        foreach (var row in resultRows.Take(50))
+        {
+            resultText.AppendLine(string.Join(" | ", row.Select(kv => $"{kv.Key}: {kv.Value}")));
+        }
+
+        var summaryResponse = await client.Messages.GetClaudeMessageAsync(new MessageParameters
+        {
+            Model = "claude-sonnet-4-20250514",
+            MaxTokens = 1000,
+            System = new List<SystemMessage> { new SystemMessage(
+                @"A felhasználó feltett egy kérdést az adatbázisról. Lefuttattuk az SQL lekérdezést, és megkaptuk az eredményt.
+Foglald össze az eredményt magyarul, közérthetően, röviden. Ha számok vannak, formázd őket szépen (pl. 1 234 567 Ft).
+Ha nincs eredmény (0 sor), mondd el hogy nincs találat. Ne magyarázd az SQL-t, csak az eredményt.") },
+            Messages = new List<Message>
+            {
+                new Message(RoleType.User, $"Kérdés: {question}\n\nEredmény:\n{resultText}")
+            }
+        });
+
+        var answer = summaryResponse.Message.ToString().Trim();
+
+        return Results.Json(new { answer, sql = generatedSql, rowCount = resultRows.Count });
+    }
+    catch (SqlException ex)
+    {
+        return Results.Json(new { answer = $"SQL hiba: {ex.Message}", sql = "", rowCount = 0 });
+    }
+    catch (Exception ex)
+    {
+        return Results.Json(new { answer = $"Hiba: {ex.Message}", sql = "", rowCount = 0 });
+    }
 });
 
 // Főoldal → reporting.html
