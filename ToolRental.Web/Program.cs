@@ -112,6 +112,21 @@ A felhasználó természetes nyelven kérdez, te pedig SQL lekérdezést generá
 - A bérlés kezdete a RentStart mező, a bérlés hossza a RentalDays (napokban)
 - Ha egy adott napra kérdeznek, a RentStart dátumát kell szűrni: CAST(r.RentStart AS DATE) = 'YYYY-MM-DD'
 
+ESZKÖZTÍPUSOK (DeviceTypes.TypeName pontos értékei):
+- 'Férfi e-bike' -- férfi elektromos kerékpár
+- 'Férfi kerékpár' -- férfi hagyományos kerékpár
+- 'Gyerekbicikli' -- gyerek kerékpár
+- 'Gyerekülés' -- gyerekülés (kiegészítő, nem kerékpár)
+- 'Kerékpár Szállító' -- szállító kerékpár
+- 'Kiegészítő' -- egyéb kiegészítő (nem kerékpár)
+- 'Női e-bike' -- női elektromos kerékpár
+- 'Női kerékpár' -- női hagyományos kerékpár
+- 'Utánfutó' -- kerékpár utánfutó (kiegészítő)
+- 'Zár' -- kerékpárzár (kiegészítő)
+Ha ""bicikli""/""kerékpár"" kérdeznek, az ÖSSZES kerékpár típust szűrd (Férfi/Női kerékpár, e-bike, Gyerekbicikli, Kerékpár Szállító).
+Ha ""e-bike""/""elektromos"" kérdeznek, csak a 'Férfi e-bike' és 'Női e-bike' típusokat.
+A Gyerekülés, Kiegészítő, Utánfutó, Zár NEM kerékpár.
+
 Az adatbázis szerkezete (SQL Server):
 
 TÁBLÁK:
