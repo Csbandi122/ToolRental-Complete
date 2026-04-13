@@ -130,6 +130,14 @@ A felhasználó természetes nyelven kérdez, te pedig SQL lekérdezést generá
   - ""hányszor nem adtunk számlát"" = WHERE (Invoice IS NULL OR Invoice = '')
   - ""hányszor adtunk számlát"" = WHERE Invoice IS NOT NULL AND Invoice <> ''
   - Ha a számla nélküli bérlések értékére kíváncsiak, a TotalAmount mezőt kell összegezni
+- “Bevétel / költség / profit kérdéseknél elsődlegesen mindig a Financials táblából dolgozz. A Rentals.TotalAmount csak bérlési összeg, nem teljes pénzügyi főkönyv.”
+- “A Devices.Available nem azt jelenti, hogy az eszköz nincs épp kikölcsönözve, hanem egy manuális admin státusz. A jelenleg aktív bérlésekhez a Rentals + RentalDevices + dátumlogika kell.”
+- “Aktív bérlés: GETDATE() >= RentStart AND GETDATE() < DATEADD(day, RentalDays, RentStart).”
+- “Számla kiállítva: Invoice IS NOT NULL AND Invoice <> ''. Számla nincs: Invoice IS NULL OR Invoice = ''.”
+- “Ne használd a ContractEmailSent és InvoiceEmailSent mezőket üzleti döntéshez.”
+- “Ha a kérdés a legnépszerűbb eszközről szól időszakkal, a népszerűséget a RentalDevices rekordok számával számold az adott időszakra.”
+- “Fizetési mód szűrésnél a pontos értékeket használd.”
+- “Ha a kérdés ‘elérhető eszközökre’ vonatkozik, akkor Devices.Available = 1; ha ‘jelenleg kint lévő eszközökre’, akkor ne ezt használd.”
 
 ESZKÖZTÍPUSOK (DeviceTypes.TypeName pontos értékei):
 - 'Férfi e-bike' -- férfi elektromos kerékpár
@@ -285,7 +293,10 @@ SQL ÍRÁSI SZABÁLYOK:
             System = new List<SystemMessage> { new SystemMessage(
                 @"A felhasználó feltett egy kérdést az adatbázisról. Lefuttattuk az SQL lekérdezést, és megkaptuk az eredményt.
 Foglald össze az eredményt magyarul, közérthetően, röviden. Ha számok vannak, formázd őket szépen (pl. 1 234 567 Ft).
-Ha nincs eredmény (0 sor), mondd el hogy nincs találat. Ne magyarázd az SQL-t, csak az eredményt.") },
+Ha nincs eredmény (0 sor), mondd el hogy nincs találat. Ne magyarázd az SQL-t, csak az eredményt. Mondja ki, hogy ha van Osszes oszlop, azt tekintse teljes darabszámnak.
+Ha több sor jön vissza, előbb adjon 1 mondatos összegzést, utána legfeljebb 5 fontos tételt.
+Ha a találat a TOP 100 miatt csonkolt lehet, ezt jelezze.
+Ne csak “nincs találat”-ot mondjon, hanem ha időszakos kérdés volt, nevezze meg az időszakot is.") },
             Messages = new List<Message>
             {
                 new Message(RoleType.User, $"Kérdés: {question}\n\nEredmény:\n{resultText}")

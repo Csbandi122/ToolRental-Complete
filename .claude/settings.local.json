@@ -10,7 +10,15 @@
       "Bash(git stash:*)",
       "Bash(git merge:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nNaplózás: Serilog strukturált naplózás bekötése\n\n- AppLogger: új statikus segédosztály, naplófájl: %LocalAppData%\\\\ToolRental\\\\logs\\\\berles2-.log \\(30 napos rotáció\\)\n- App.xaml.cs: Serilog inicializálás indításkor, globális exception handler \\(DispatcherUnhandledException, UnhandledException\\)\n- MainWindow: Console.WriteLine cserék, catch blokkok naplózással kiegészítve \\(bérlés, szerződés, email, CURL\\)\n- SettingsDialog: betöltési és mentési hibák naplózva\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(find C:UserscsekesourcereposToolRental-Complete -type d -name *Models -o -name *Entities -o -name *Data)",
+      "Bash(grep -E \"\\\\.\\(cs\\)$\")",
+      "Bash(grep -r \"Settings\\\\|EmailPassword\" /c/Users/cseke/source/repos/ToolRental-Complete/berles2/*.cs)",
+      "Bash(git push:*)",
+      "Bash(dotnet new:*)",
+      "Bash(dotnet add:*)",
+      "WebSearch",
+      "WebFetch(domain:github.com)"
     ]
   }
 }

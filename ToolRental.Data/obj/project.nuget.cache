@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "0Ef9SpbRujM=",
+  "dgSpecHash": "u7k19CLf57Y=",
   "success": true,
-  "projectFilePath": "C:\\Users\\cseke\\Source\\Repos\\ToolRental-Complete\\ToolRental.Data\\ToolRental.Data.csproj",
+  "projectFilePath": "C:\\Users\\cseke\\source\\repos\\ToolRental-Complete\\ToolRental.Data\\ToolRental.Data.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\cseke\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\cseke\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
@@ -59,6 +59,7 @@
     "C:\\Users\\cseke\\.nuget\\packages\\system.clientmodel\\1.0.0\\system.clientmodel.1.0.0.nupkg.sha512",
     "C:\\Users\\cseke\\.nuget\\packages\\system.codedom\\6.0.0\\system.codedom.6.0.0.nupkg.sha512",
     "C:\\Users\\cseke\\.nuget\\packages\\system.collections.immutable\\7.0.0\\system.collections.immutable.7.0.0.nupkg.sha512",
+    "C:\\Users\\cseke\\.nuget\\packages\\system.componentmodel.annotations\\5.0.0\\system.componentmodel.annotations.5.0.0.nupkg.sha512",
     "C:\\Users\\cseke\\.nuget\\packages\\system.composition\\7.0.0\\system.composition.7.0.0.nupkg.sha512",
     "C:\\Users\\cseke\\.nuget\\packages\\system.composition.attributedmodel\\7.0.0\\system.composition.attributedmodel.7.0.0.nupkg.sha512",
     "C:\\Users\\cseke\\.nuget\\packages\\system.composition.convention\\7.0.0\\system.composition.convention.7.0.0.nupkg.sha512",
