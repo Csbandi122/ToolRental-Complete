@@ -111,6 +111,10 @@ A felhasználó természetes nyelven kérdez, te pedig SQL lekérdezést generá
 - Az ""kiadtunk"", ""kibéreltük"", ""kölcsönöztük"" kifejezések a Rentals táblára vonatkoznak
 - A bérlés kezdete a RentStart mező, a bérlés hossza a RentalDays (napokban)
 - Ha egy adott napra kérdeznek, a RentStart dátumát kell szűrni: CAST(r.RentStart AS DATE) = 'YYYY-MM-DD'
+- SZÁMLÁZÁS: a Rentals.Invoice mező tartalmazza a számla fájl elérési útját. Ha NULL vagy üres string, akkor NEM lett számla kiállítva ahhoz a bérléshez. Ha van benne szöveg (fájl útvonal), akkor LETT számla.
+  - ""hányszor nem adtunk számlát"" = WHERE (Invoice IS NULL OR Invoice = '')
+  - ""hányszor adtunk számlát"" = WHERE Invoice IS NOT NULL AND Invoice <> ''
+  - Ha a számla nélküli bérlések értékére kíváncsiak, a TotalAmount mezőt kell összegezni
 
 ESZKÖZTÍPUSOK (DeviceTypes.TypeName pontos értékei):
 - 'Férfi e-bike' -- férfi elektromos kerékpár
