@@ -130,17 +130,48 @@ A Gyerekülés, Kiegészítő, Utánfutó, Zár NEM kerékpár.
 Az adatbázis szerkezete (SQL Server):
 
 TÁBLÁK:
-- Customers (Id, Name, Zipcode, City, Address, Email, IdNumber, Comment)
-- Devices (Id, DeviceName, DeviceType[FK→DeviceTypes.Id], Serial, Price, RentPrice, Available, Picture, RentCount, Notes)
-- DeviceTypes (Id, TypeName)
-- Rentals (Id, TicketNr, CustomerId[FK→Customers.Id], RentStart, RentalDays, PaymentMode, Comment, Contract, Invoice, ReviewEmailSent, TotalAmount, ContractEmailSent, InvoiceEmailSent)
-- RentalDevices (Id, RentalId[FK→Rentals.Id], DeviceId[FK→Devices.Id]) -- kapcsolótábla: Rental ↔ Device
-- Services (Id, TicketNr, ServiceType, Description, Technician, ServiceDate, CostAmount)
-- ServiceDevices (Id, ServiceId[FK→Services.Id], DeviceId[FK→Devices.Id]) -- kapcsolótábla: Service ↔ Device
-- Financials (Id, TicketNr, EntryType, SourceType, SourceId, Date, Comment, Amount)
-  - EntryType értékei: 'bevétel', 'költség'
-  - SourceType értékei: 'bérlés', 'szervíz', 'eszköz_vásárlás', 'marketing', 'egyéb', 'kézi', 'alkatrész', 'javítás'
-- FinancialDevices (Id, FinancialId[FK→Financials.Id], DeviceId[FK→Devices.Id]) -- kapcsolótábla: Financial ↔ Device
+- Customers -- ÜGYFELEK: akik kerékpárt bérelnek nálunk
+  (Id, Name, Zipcode, City, Address, Email, IdNumber, Comment)
+
+- Devices -- ESZKÖZÖK: a kölcsönözhető kerékpárok, e-bike-ok és kiegészítők (sisak, zár, utánfutó, stb.)
+  (Id, DeviceName, DeviceType[FK→DeviceTypes.Id], Serial, Price, RentPrice, Available, Picture, RentCount, Notes)
+  - DeviceName: az eszköz neve/márkája (pl. ""Kelly's Cliff 90"", ""Merida Crossway 15"")
+  - Price: az eszköz beszerzési ára
+  - RentPrice: napi bérleti díj (Ft)
+  - Available: elérhető-e jelenleg kölcsönzésre (true/false)
+  - RentCount: hányszor bérelték ki eddig összesen
+
+- DeviceTypes -- ESZKÖZTÍPUSOK: kategóriák (pl. Férfi kerékpár, Női e-bike, Gyerekbicikli, Zár)
+  (Id, TypeName)
+
+- Rentals -- BÉRLÉSEK: egy-egy kölcsönzési tranzakció, amikor az ügyfél kerékpárokat vesz ki
+  (Id, TicketNr, CustomerId[FK→Customers.Id], RentStart, RentalDays, PaymentMode, Comment, Contract, Invoice, ReviewEmailSent, TotalAmount, ContractEmailSent, InvoiceEmailSent)
+  - TicketNr: bérlési jegy száma (pl. RNT0042)
+  - RentStart: mikor kezdődött a bérlés (dátum+idő)
+  - RentalDays: hány napra szól a bérlés
+  - TotalAmount: a bérlés teljes összege (Ft)
+  - PaymentMode: fizetési mód (pl. készpénz, kártya)
+
+- RentalDevices -- melyik bérlésben melyik eszközök szerepelnek (egy bérlés = több kerékpár is lehet)
+  (Id, RentalId[FK→Rentals.Id], DeviceId[FK→Devices.Id])
+
+- Services -- SZERVIZ: kerékpárok karbantartása, javítása
+  (Id, TicketNr, ServiceType, Description, Technician, ServiceDate, CostAmount)
+  - ServiceType: 'karbantartás', 'javítás', 'upgrade'
+  - CostAmount: a szerviz költsége (Ft)
+
+- ServiceDevices -- melyik szervizben melyik eszközök szerepelnek
+  (Id, ServiceId[FK→Services.Id], DeviceId[FK→Devices.Id])
+
+- Financials -- PÉNZÜGYI TÉTELEK: minden bevétel és kiadás nyilvántartása
+  (Id, TicketNr, EntryType, SourceType, SourceId, Date, Comment, Amount)
+  - EntryType: 'bevétel' vagy 'költség'
+  - SourceType: honnan származik ('bérlés', 'szervíz', 'eszköz_vásárlás', 'marketing', 'egyéb', 'kézi', 'alkatrész', 'javítás')
+  - Amount: összeg (Ft), MINDIG pozitív szám (az EntryType dönti el hogy bevétel vagy kiadás)
+
+- FinancialDevices -- melyik pénzügyi tételhez melyik eszközök tartoznak
+  (Id, FinancialId[FK→Financials.Id], DeviceId[FK→Devices.Id])
+
 - Settings -- alkalmazás beállítások, NE kérdezd le SOHA
 
 KAPCSOLATOK:
