@@ -210,6 +210,15 @@ SQL ÍRÁSI SZABÁLYOK:
 
         var generatedSql = sqlResponse.Message.ToString().Trim();
 
+        // Markdown kódblokk eltávolítása ha Claude backtick-ekkel válaszol (```sql ... ```)
+        if (generatedSql.Contains("```"))
+        {
+            var lines = generatedSql.Split('\n')
+                .Where(l => !l.TrimStart().StartsWith("```"))
+                .ToArray();
+            generatedSql = string.Join('\n', lines).Trim();
+        }
+
         // Biztonsági ellenőrzés
         if (generatedSql.StartsWith("HIBA:"))
             return Results.Json(new { answer = generatedSql, sql = "" });
