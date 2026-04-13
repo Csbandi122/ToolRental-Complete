@@ -50,12 +50,22 @@ app.MapGet("/api/reporting", async (ToolRentalDbContext db) =>
         .Where(f => f.Date >= monthStart && f.EntryType == EntryTypes.Koltseg)
         .SumAsync(f => (decimal?)f.Amount) ?? 0;
 
+    // Aktuális év
+    var yearStart = new DateTime(today.Year, 1, 1);
+    var yearRevenue = await db.Financials
+        .Where(f => f.Date >= yearStart && f.EntryType == EntryTypes.Bevetel)
+        .SumAsync(f => (decimal?)f.Amount) ?? 0;
+    var yearExpense = await db.Financials
+        .Where(f => f.Date >= yearStart && f.EntryType == EntryTypes.Koltseg)
+        .SumAsync(f => (decimal?)f.Amount) ?? 0;
+
     return Results.Json(new
     {
         generatedAt = DateTime.Now.ToString("yyyy.MM.dd HH:mm:ss"),
         today = new { revenue = todayRevenue, expense = todayExpense, profit = todayRevenue - todayExpense },
         week = new { revenue = weekRevenue, expense = weekExpense, profit = weekRevenue - weekExpense, startDate = weekStart.ToString("yyyy.MM.dd") },
-        month = new { revenue = monthRevenue, expense = monthExpense, profit = monthRevenue - monthExpense, startDate = monthStart.ToString("yyyy.MM.dd") }
+        month = new { revenue = monthRevenue, expense = monthExpense, profit = monthRevenue - monthExpense, startDate = monthStart.ToString("yyyy.MM.dd") },
+        year = new { revenue = yearRevenue, expense = yearExpense, profit = yearRevenue - yearExpense, startDate = yearStart.ToString("yyyy.MM.dd") }
     });
 });
 
