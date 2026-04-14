@@ -108,7 +108,10 @@ app.MapPost("/api/ask", async (HttpRequest request, ToolRentalDbContext db, ICon
     if (string.IsNullOrEmpty(apiKey))
         return Results.Json(new { error = "Nincs beállítva az ANTHROPIC_API_KEY." }, statusCode: 500);
 
-    var connectionString = config.GetConnectionString("DefaultConnection") ?? "";
+    // Csak olvasási jogú kapcsolat az AI lekérdezésekhez (biztonság)
+    var connectionString = config.GetConnectionString("ReadOnlyConnection")
+                           ?? config.GetConnectionString("DefaultConnection")
+                           ?? "";
 
     try
     {
