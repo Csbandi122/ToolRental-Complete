@@ -253,31 +253,70 @@ SQL ÍRÁSI SZABÁLYOK:
             return Results.Json(new { answer = "Biztonsagi okokbol csak olvasasi muveletek engedelyezettek.", sql = generatedSql });
         }
 
-        // 2. lépés: SQL futtatása
+        // 2. lépés: SQL futtatása (max 2 próbálkozás — ha hibás, Claude javítja)
         var resultRows = new List<Dictionary<string, object?>>();
-        using var connection = new SqlConnection(connectionString);
-        await connection.OpenAsync();
-        using var command = new SqlCommand(generatedSql, connection);
-        command.CommandTimeout = 10;
-        using var dataReader = await command.ExecuteReaderAsync();
+        var columns = new List<string>();
+        string executedSql = generatedSql;
 
-        var columns = Enumerable.Range(0, dataReader.FieldCount)
-            .Select(i => dataReader.GetName(i)).ToList();
-
-        while (await dataReader.ReadAsync() && resultRows.Count < 100)
+        for (int attempt = 0; attempt < 2; attempt++)
         {
-            var row = new Dictionary<string, object?>();
-            foreach (var col in columns)
+            try
             {
-                var val = dataReader[col];
-                row[col] = val == DBNull.Value ? null : val;
+                resultRows.Clear();
+                columns.Clear();
+                using var connection = new SqlConnection(connectionString);
+                await connection.OpenAsync();
+                using var command = new SqlCommand(executedSql, connection);
+                command.CommandTimeout = 10;
+                using var dataReader = await command.ExecuteReaderAsync();
+
+                columns = Enumerable.Range(0, dataReader.FieldCount)
+                    .Select(i => dataReader.GetName(i)).ToList();
+
+                while (await dataReader.ReadAsync() && resultRows.Count < 100)
+                {
+                    var row = new Dictionary<string, object?>();
+                    foreach (var col in columns)
+                    {
+                        var val = dataReader[col];
+                        row[col] = val == DBNull.Value ? null : val;
+                    }
+                    resultRows.Add(row);
+                }
+                break; // Sikeres — kilépünk a ciklusból
             }
-            resultRows.Add(row);
+            catch (SqlException sqlEx) when (attempt == 0)
+            {
+                // Első hiba: visszaküldjük Claude-nak javításra
+                var fixResponse = await client.Messages.GetClaudeMessageAsync(new MessageParameters
+                {
+                    Model = "claude-sonnet-4-20250514",
+                    MaxTokens = 500,
+                    System = new List<SystemMessage> { new SystemMessage(schemaPrompt) },
+                    Messages = new List<Message>
+                    {
+                        new Message(RoleType.User, question),
+                        new Message(RoleType.Assistant, executedSql),
+                        new Message(RoleType.User, $"Ez az SQL hibát dobott: {sqlEx.Message}\n\nKérlek javítsd ki! Csak a javított SQL-t add vissza, semmi mást.")
+                    }
+                });
+
+                executedSql = fixResponse.Message.ToString().Trim();
+
+                // Markdown kódblokk eltávolítása ha van
+                if (executedSql.Contains("```"))
+                {
+                    var lines = executedSql.Split('\n')
+                        .Where(l => !l.TrimStart().StartsWith("```"))
+                        .ToArray();
+                    executedSql = string.Join('\n', lines).Trim();
+                }
+            }
         }
 
         // 3. lépés: Claude összefoglalja az eredményt magyarul
         var resultText = new StringBuilder();
-        resultText.AppendLine($"SQL: {generatedSql}");
+        resultText.AppendLine($"SQL: {executedSql}");
         resultText.AppendLine($"Oszlopok: {string.Join(", ", columns)}");
         resultText.AppendLine($"Sorok szama: {resultRows.Count}");
         resultText.AppendLine("Adatok:");
@@ -305,11 +344,11 @@ Ne csak “nincs találat”-ot mondjon, hanem ha időszakos kérdés volt, neve
 
         var answer = summaryResponse.Message.ToString().Trim();
 
-        return Results.Json(new { answer, sql = generatedSql, rowCount = resultRows.Count });
+        return Results.Json(new { answer, sql = executedSql, rowCount = resultRows.Count });
     }
     catch (SqlException ex)
     {
-        return Results.Json(new { answer = $"SQL hiba: {ex.Message}", sql = "", rowCount = 0 });
+        return Results.Json(new { answer = $"SQL hiba (javítás után is): {ex.Message}", sql = "", rowCount = 0 });
     }
     catch (Exception ex)
     {
