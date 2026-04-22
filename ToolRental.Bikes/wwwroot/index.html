@@ -42,6 +42,41 @@
       letter-spacing: 0.02em;
     }
 
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .db-toggle {
+      border: 1px solid #4f4f7d;
+      background: #23233d;
+      color: #d8deff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      border-radius: 999px;
+      padding: 6px 10px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+
+    .db-toggle:active {
+      transform: scale(0.97);
+    }
+
+    .db-toggle.mode-prod {
+      border-color: #2f8f5b;
+      color: #b8ffd8;
+    }
+
+    .db-toggle.mode-test {
+      border-color: #d48b2f;
+      color: #ffe0b0;
+    }
+
     .header-info {
       font-size: 0.75rem;
       color: #7070a0;
@@ -466,7 +501,10 @@
 <div class="toast" id="toast"></div>
 
 <header>
-  <h1>🚲 Kerékpárok</h1>
+  <div class="header-left">
+    <h1>🚲 Kerékpárok</h1>
+    <button class="db-toggle mode-prod" id="dbToggleBtn" type="button">PROD</button>
+  </div>
   <div style="display:flex;align-items:center;gap:10px;">
     <span id="date-display"></span>
     <button class="refresh-btn" id="refreshBtn" title="Frissítés">↻</button>
@@ -521,6 +559,7 @@
   let releasing = new Set();
   let activeFilter = null;     // null | 'free' | 'occupied'
   let activeTypeFilter = null; // null | típusnév string
+  let currentDbMode = localStorage.getItem('toolrental-bikes-db-mode') === 'test' ? 'test' : 'prod';
 
   function formatDate(d) {
     const days = ['vasárnap','hétfő','kedd','szerda','csütörtök','péntek','szombat'];
@@ -528,6 +567,21 @@
   }
 
   document.getElementById('date-display').textContent = formatDate(new Date());
+
+  function updateDbToggle() {
+    const btn = document.getElementById('dbToggleBtn');
+    btn.textContent = currentDbMode === 'test' ? 'TEST' : 'PROD';
+    btn.classList.toggle('mode-prod', currentDbMode === 'prod');
+    btn.classList.toggle('mode-test', currentDbMode === 'test');
+    btn.title = currentDbMode === 'test'
+      ? 'Jelenleg a TEST adatbázist használod'
+      : 'Jelenleg a PROD adatbázist használod';
+  }
+
+  function apiUrl(path) {
+    const separator = path.includes('?') ? '&' : '?';
+    return `${path}${separator}db=${currentDbMode}`;
+  }
 
   function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
@@ -560,9 +614,10 @@
     btn.classList.add('spinning');
 
     try {
-      const resp = await fetch('/api/bikes/status');
+      const resp = await fetch(apiUrl('/api/bikes/status'));
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      allBikes = await resp.json();
+      const data = await resp.json();
+      allBikes = data.items || [];
       renderBikes(allBikes);
     } catch (e) {
       showError('Nem sikerült betölteni az adatokat. Ellenőrizd a kapcsolatot.');
@@ -694,7 +749,7 @@
 
   function renderCard(bike) {
     const stateClass = bike.isOccupied ? 'occupied' : 'free';
-    const imgSrc = bike.hasImage ? `/api/bikes/image/${bike.id}` : null;
+    const imgSrc = bike.hasImage ? apiUrl(`/api/bikes/image/${bike.id}`) : null;
 
     const imageHtml = imgSrc
       ? `<img src="${imgSrc}" alt="${escHtml(bike.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'no-image\\'>🚲</div>'" />`
@@ -745,7 +800,7 @@
     }
 
     try {
-      const resp = await fetch(`/api/bikes/${id}/release`, { method: 'POST' });
+      const resp = await fetch(apiUrl(`/api/bikes/${id}/release`), { method: 'POST' });
       if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
 
       await loadBikes(true);
@@ -764,6 +819,13 @@
   document.getElementById('refreshBtn').addEventListener('click', () => loadBikes(true));
   document.getElementById('filterFreeBtn').addEventListener('click', () => setFilter('free'));
   document.getElementById('filterOccupiedBtn').addEventListener('click', () => setFilter('occupied'));
+  document.getElementById('dbToggleBtn').addEventListener('click', async () => {
+    currentDbMode = currentDbMode === 'prod' ? 'test' : 'prod';
+    localStorage.setItem('toolrental-bikes-db-mode', currentDbMode);
+    updateDbToggle();
+    await loadBikes();
+    showToast(currentDbMode === 'test' ? 'TEST adatbázis aktiválva' : 'PROD adatbázis aktiválva');
+  });
 
   // Auto-frissítés 60 másodpercenként
   setInterval(() => loadBikes(true), 60000);
@@ -773,6 +835,7 @@
     if (!document.hidden) loadBikes(true);
   });
 
+  updateDbToggle();
   loadBikes();
 </script>
 </body>

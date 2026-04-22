@@ -1,3 +1,4 @@
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using ToolRental.Core.Models;
 using ToolRental.Data;
@@ -39,18 +40,27 @@ var bikeTypes = new[]
     "Gyerekbicikli", "Gyerekülés", "Utánfutó"
 };
 
+const string ProdMode = "prod";
+const string TestMode = "test";
+
 // === BIKES STATUS API ===
 // Aktív bérlés = a bérlési időszak még tart, és nem lett kézzel lezárva.
-app.MapGet("/api/bikes/status", async (ToolRentalDbContext db) =>
+app.MapGet("/api/bikes/status", async (HttpContext httpContext, IConfiguration config) =>
 {
+    await using var db = CreateDbContext(config, GetRequestedMode(httpContext));
     var result = await BuildBikeStatusesAsync(db, bikeTypes);
-    return Results.Json(result);
+    return Results.Json(new
+    {
+        databaseMode = GetRequestedMode(httpContext),
+        items = result
+    });
 });
 
 // === BÉRLÉS LEZÁRÁS API ===
 // Kézzel lezárja az aktuálisan aktív bérlést, hogy az eszköz még aznap újra kiadható legyen.
-app.MapPost("/api/bikes/{id:int}/release", async (int id, ToolRentalDbContext db) =>
+app.MapPost("/api/bikes/{id:int}/release", async (int id, HttpContext httpContext, IConfiguration config) =>
 {
+    await using var db = CreateDbContext(config, GetRequestedMode(httpContext));
     var device = await db.Devices.FindAsync(id);
     if (device == null)
         return Results.NotFound(new { error = "Eszköz nem található." });
@@ -87,6 +97,40 @@ static string ResolvePicturePath(string? dbPath)
         normalized = "/srv/samba/telihold/" + normalized[3..];
 
     return normalized;
+}
+
+static string GetRequestedMode(HttpContext httpContext)
+{
+    var requested = httpContext.Request.Query["db"].ToString();
+    return string.Equals(requested, TestMode, StringComparison.OrdinalIgnoreCase)
+        ? TestMode
+        : ProdMode;
+}
+
+static ToolRentalDbContext CreateDbContext(IConfiguration config, string mode)
+{
+    var optionsBuilder = new DbContextOptionsBuilder<ToolRentalDbContext>();
+    optionsBuilder.UseSqlServer(
+        GetConnectionString(config, mode),
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 3,
+            maxRetryDelay: TimeSpan.FromSeconds(5),
+            errorNumbersToAdd: null));
+
+    return new ToolRentalDbContext(optionsBuilder.Options);
+}
+
+static string GetConnectionString(IConfiguration config, string mode)
+{
+    var defaultConnection = config.GetConnectionString("DefaultConnection")
+        ?? throw new InvalidOperationException("Nincs beállítva a DefaultConnection.");
+
+    if (!string.Equals(mode, TestMode, StringComparison.OrdinalIgnoreCase))
+        return defaultConnection;
+
+    var builder = new SqlConnectionStringBuilder(defaultConnection);
+    builder.InitialCatalog = config["DatabaseSwitching:TestDatabaseName"] ?? "ToolRentalDB_Test";
+    return builder.ConnectionString;
 }
 
 static async Task<List<object>> BuildBikeStatusesAsync(ToolRentalDbContext db, string[] bikeTypes)
@@ -220,8 +264,9 @@ static bool IsRentalActiveToday(ActiveRentalRow rental, DateTime today)
     return today >= rentalStartDate && today < rentalEndExclusive;
 }
 
-app.MapGet("/api/bikes/image/{id:int}", async (int id, ToolRentalDbContext db) =>
+app.MapGet("/api/bikes/image/{id:int}", async (int id, HttpContext httpContext, IConfiguration config) =>
 {
+    await using var db = CreateDbContext(config, GetRequestedMode(httpContext));
     var device = await db.Devices.FindAsync(id);
     if (device == null || string.IsNullOrEmpty(device.Picture))
         return Results.NotFound();
