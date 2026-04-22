@@ -126,6 +126,54 @@
       font-style: italic;
     }
 
+    .type-summary {
+      background: #14142a;
+      border-bottom: 1px solid #2a2a4a;
+      padding: 10px 16px;
+      display: none;
+    }
+
+    .type-summary.visible {
+      display: block;
+    }
+
+    .type-summary-title {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #5a5a8a;
+      margin-bottom: 8px;
+    }
+
+    .type-summary-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .type-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      background: #1e1e38;
+      border-radius: 16px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+    }
+
+    .type-chip .chip-count {
+      font-weight: 700;
+      color: #c8d6f5;
+    }
+
+    .type-chip .chip-label {
+      color: #7070a0;
+    }
+
+    .type-chip.chip-free { border-left: 3px solid #22c55e; }
+    .type-chip.chip-occupied { border-left: 3px solid #4a4a6a; }
+
     .stat-dot {
       width: 10px;
       height: 10px;
@@ -417,6 +465,11 @@
 
 <div class="error-banner" id="errorBanner"></div>
 
+<div class="type-summary" id="typeSummary">
+  <div class="type-summary-title" id="typeSummaryTitle"></div>
+  <div class="type-summary-grid" id="typeSummaryGrid"></div>
+</div>
+
 <div id="content"></div>
 
 <script>
@@ -504,6 +557,39 @@
     renderBikes(allBikes);
   }
 
+  function renderTypeSummary(bikes) {
+    const summary = document.getElementById('typeSummary');
+    if (!activeFilter) {
+      summary.classList.remove('visible');
+      return;
+    }
+
+    const filtered = activeFilter === 'free' ? bikes.filter(b => !b.isOccupied) : bikes.filter(b => b.isOccupied);
+    const total = filtered.length;
+    const chipClass = activeFilter === 'free' ? 'chip-free' : 'chip-occupied';
+    const title = activeFilter === 'free'
+      ? `${total} szabad kerékpár típusonként:`
+      : `${total} kiadott kerékpár típusonként:`;
+
+    // Típusonkénti darabszám
+    const counts = {};
+    for (const bike of filtered) {
+      counts[bike.typeName] = (counts[bike.typeName] || 0) + 1;
+    }
+
+    const chips = TYPE_ORDER
+      .filter(t => counts[t])
+      .map(t => `<div class="type-chip ${chipClass}">
+        <span class="chip-count">${counts[t]} db</span>
+        <span class="chip-label">${t}</span>
+      </div>`)
+      .join('');
+
+    document.getElementById('typeSummaryTitle').textContent = title;
+    document.getElementById('typeSummaryGrid').innerHTML = chips;
+    summary.classList.add('visible');
+  }
+
   function renderBikes(bikes) {
     const content = document.getElementById('content');
 
@@ -513,6 +599,7 @@
     document.getElementById('freeCount').textContent = freeCount;
     document.getElementById('occupiedCount').textContent = occupiedCount;
     document.getElementById('statsBar').style.display = 'flex';
+    renderTypeSummary(bikes);
 
     // Szűrés alkalmazása
     const filtered = activeFilter === 'free' ? bikes.filter(b => !b.isOccupied)
