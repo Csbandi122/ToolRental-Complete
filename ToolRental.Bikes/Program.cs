@@ -47,7 +47,7 @@ app.MapGet("/api/bikes/status", async (ToolRentalDbContext db) =>
 
     var devices = await db.Devices
         .Include(d => d.DeviceTypeNavigation)
-        .Where(d => d.DeviceTypeNavigation != null && bikeTypes.Contains(d.DeviceTypeNavigation.TypeName))
+        .Where(d => d.Available && d.DeviceTypeNavigation != null && bikeTypes.Contains(d.DeviceTypeNavigation.TypeName))
         .OrderBy(d => d.DeviceTypeNavigation!.TypeName)
         .ThenBy(d => d.DeviceName)
         .ToListAsync();
