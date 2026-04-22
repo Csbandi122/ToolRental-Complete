@@ -84,7 +84,7 @@ app.MapGet("/api/bikes/status", async (ToolRentalDbContext db) =>
             isOccupied,
             rentalsToday = rentals,
             releasesToday = releases,
-            hasImage = !string.IsNullOrEmpty(d.Picture) && File.Exists(d.Picture)
+            hasImage = !string.IsNullOrEmpty(d.Picture) && File.Exists(ResolvePicturePath(d.Picture))
         };
     });
 
@@ -111,16 +111,28 @@ app.MapPost("/api/bikes/{id:int}/release", async (int id, ToolRentalDbContext db
 
 // === KÉP KISZOLGÁLÁS ===
 // Az adatbázisban tárolt fájlrendszeri elérési útból kiszolgálja a képet
+// Windows path (Z:\Sablonok\...) → Linux path (/srv/samba/telihold/Sablonok/...) fordítás
+static string ResolvePicturePath(string? dbPath)
+{
+    if (string.IsNullOrEmpty(dbPath)) return "";
+    // Windows Samba elérési út fordítása Linux path-ra
+    var normalized = dbPath.Replace('\\', '/');
+    if (normalized.StartsWith("Z:/", StringComparison.OrdinalIgnoreCase))
+        normalized = "/srv/samba/telihold/" + normalized[3..];
+    return normalized;
+}
+
 app.MapGet("/api/bikes/image/{id:int}", async (int id, ToolRentalDbContext db) =>
 {
     var device = await db.Devices.FindAsync(id);
     if (device == null || string.IsNullOrEmpty(device.Picture))
         return Results.NotFound();
 
-    if (!File.Exists(device.Picture))
+    var filePath = ResolvePicturePath(device.Picture);
+    if (!File.Exists(filePath))
         return Results.NotFound();
 
-    var ext = Path.GetExtension(device.Picture).ToLowerInvariant();
+    var ext = Path.GetExtension(filePath).ToLowerInvariant();
     var mimeType = ext switch
     {
         ".jpg" or ".jpeg" => "image/jpeg",
@@ -131,7 +143,7 @@ app.MapGet("/api/bikes/image/{id:int}", async (int id, ToolRentalDbContext db) =
         _ => "application/octet-stream"
     };
 
-    return Results.File(File.OpenRead(device.Picture), mimeType);
+    return Results.File(File.OpenRead(filePath), mimeType);
 });
 
 // Főoldal → index.html
