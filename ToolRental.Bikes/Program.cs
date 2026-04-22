@@ -24,7 +24,7 @@ var app = builder.Build();
 app.UseCors();
 app.UseStaticFiles();
 
-// Futtatáskor automatikusan alkalmazza a pending migration-öket (BikeReleases tábla létrehozása)
+// Futtatáskor automatikusan alkalmazza a pending migration-öket
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ToolRentalDbContext>();
@@ -40,8 +40,56 @@ var bikeTypes = new[]
 };
 
 // === BIKES STATUS API ===
-// Visszaadja az összes megjelenítendő eszközt és hogy foglalt-e ma
+// Aktív bérlés = a bérlési időszak még tart, és nem lett kézzel lezárva.
 app.MapGet("/api/bikes/status", async (ToolRentalDbContext db) =>
+{
+    var result = await BuildBikeStatusesAsync(db, bikeTypes);
+    return Results.Json(result);
+});
+
+// === BÉRLÉS LEZÁRÁS API ===
+// Kézzel lezárja az aktuálisan aktív bérlést, hogy az eszköz még aznap újra kiadható legyen.
+app.MapPost("/api/bikes/{id:int}/release", async (int id, ToolRentalDbContext db) =>
+{
+    var device = await db.Devices.FindAsync(id);
+    if (device == null)
+        return Results.NotFound(new { error = "Eszköz nem található." });
+
+    var activeRental = await GetCurrentActiveRentalAsync(db, id);
+    if (activeRental == null)
+        return Results.BadRequest(new { error = "Ehhez az eszközhöz jelenleg nincs aktív bérlés." });
+
+    db.BikeReleases.Add(new BikeRelease
+    {
+        DeviceId = id,
+        ReleaseDate = DateTime.Today
+    });
+
+    await db.SaveChangesAsync();
+
+    return Results.Ok(new
+    {
+        success = true,
+        rentalId = activeRental.RentalId,
+        ticketNr = activeRental.TicketNr
+    });
+});
+
+// === KÉP KISZOLGÁLÁS ===
+// Az adatbázisban tárolt fájlrendszeri elérési útból kiszolgálja a képet
+// Windows path (Z:\Sablonok\...) → Linux path (/srv/samba/telihold/Sablonok/...) fordítás
+static string ResolvePicturePath(string? dbPath)
+{
+    if (string.IsNullOrEmpty(dbPath)) return "";
+
+    var normalized = dbPath.Replace('\\', '/');
+    if (normalized.StartsWith("Z:/", StringComparison.OrdinalIgnoreCase))
+        normalized = "/srv/samba/telihold/" + normalized[3..];
+
+    return normalized;
+}
+
+static async Task<List<object>> BuildBikeStatusesAsync(ToolRentalDbContext db, string[] bikeTypes)
 {
     var today = DateTime.Today;
 
@@ -52,74 +100,124 @@ app.MapGet("/api/bikes/status", async (ToolRentalDbContext db) =>
         .ThenBy(d => d.DeviceName)
         .ToListAsync();
 
-    // Mai bérlések száma per eszköz
-    var todayRentals = await db.RentalDevices
-        .Include(rd => rd.Rental)
-        .Where(rd => rd.Rental != null && rd.Rental.RentStart.Date == today)
-        .GroupBy(rd => rd.DeviceId)
-        .Select(g => new { DeviceId = g.Key, Count = g.Count() })
+    if (devices.Count == 0)
+        return new List<object>();
+
+    var deviceIds = devices.Select(d => d.Id).ToList();
+
+    var rentals = await db.RentalDevices
+        .Where(rd => deviceIds.Contains(rd.DeviceId))
+        .Select(rd => new ActiveRentalRow(
+            rd.DeviceId,
+            rd.RentalId,
+            rd.Rental.TicketNr,
+            rd.Rental.RentStart,
+            rd.Rental.RentalDays,
+            rd.Rental.Customer.Name))
         .ToListAsync();
 
-    // Mai felszabadítások száma per eszköz
-    var todayReleases = await db.BikeReleases
-        .Where(br => br.ReleaseDate.Date == today)
-        .GroupBy(br => br.DeviceId)
-        .Select(g => new { DeviceId = g.Key, Count = g.Count() })
+    var activeRentals = rentals
+        .Where(r => IsRentalActiveToday(r, today))
+        .OrderBy(r => r.RentStart)
+        .ThenBy(r => r.RentalId)
+        .ToList();
+
+    var releasesQuery = db.BikeReleases
+        .Where(br => deviceIds.Contains(br.DeviceId) && br.ReleaseDate <= today);
+
+    var releases = await releasesQuery
+        .Select(br => new BikeReleaseRow(br.DeviceId, br.ReleaseDate))
         .ToListAsync();
 
-    var rentalMap = todayRentals.ToDictionary(r => r.DeviceId, r => r.Count);
-    var releaseMap = todayReleases.ToDictionary(r => r.DeviceId, r => r.Count);
+    var result = new List<object>(devices.Count);
 
-    var result = devices.Select(d =>
+    foreach (var device in devices)
     {
-        var rentals = rentalMap.GetValueOrDefault(d.Id, 0);
-        var releases = releaseMap.GetValueOrDefault(d.Id, 0);
-        var isOccupied = (rentals - releases) > 0;
+        var unresolvedRentals = ResolveUnclosedRentals(
+            activeRentals.Where(r => r.DeviceId == device.Id),
+            releases.Where(r => r.DeviceId == device.Id),
+            today);
 
-        return new
+        var currentRental = unresolvedRentals.LastOrDefault();
+
+        result.Add(new
         {
-            id = d.Id,
-            name = d.DeviceName,
-            typeName = d.DeviceTypeNavigation?.TypeName ?? "",
-            isOccupied,
-            rentalsToday = rentals,
-            releasesToday = releases,
-            hasImage = !string.IsNullOrEmpty(d.Picture) && File.Exists(ResolvePicturePath(d.Picture))
-        };
-    });
+            id = device.Id,
+            name = device.DeviceName,
+            typeName = device.DeviceTypeNavigation?.TypeName ?? "",
+            isOccupied = currentRental != null,
+            activeRentalCount = unresolvedRentals.Count,
+            currentRentalId = currentRental?.RentalId,
+            currentTicketNr = currentRental?.TicketNr,
+            currentCustomerName = currentRental?.CustomerName,
+            rentStartDate = currentRental?.RentStart.ToString("yyyy.MM.dd"),
+            plannedEndDate = currentRental == null
+                ? null
+                : currentRental.RentStart.Date.AddDays(currentRental.RentalDays - 1).ToString("yyyy.MM.dd"),
+            hasImage = !string.IsNullOrEmpty(device.Picture) && File.Exists(ResolvePicturePath(device.Picture))
+        });
+    }
 
-    return Results.Json(result);
-});
+    return result;
+}
 
-// === FELSZABADÍTÁS API ===
-// Hozzáad egy release rekordot az eszközhöz a mai napra
-app.MapPost("/api/bikes/{id:int}/release", async (int id, ToolRentalDbContext db) =>
+static async Task<ActiveRentalRow?> GetCurrentActiveRentalAsync(ToolRentalDbContext db, int deviceId)
 {
-    var device = await db.Devices.FindAsync(id);
-    if (device == null)
-        return Results.NotFound(new { error = "Eszköz nem található." });
+    var today = DateTime.Today;
 
-    db.BikeReleases.Add(new BikeRelease
-    {
-        DeviceId = id,
-        ReleaseDate = DateTime.Today
-    });
+    var rentals = await db.RentalDevices
+        .Where(rd => rd.DeviceId == deviceId)
+        .Select(rd => new ActiveRentalRow(
+            rd.DeviceId,
+            rd.RentalId,
+            rd.Rental.TicketNr,
+            rd.Rental.RentStart,
+            rd.Rental.RentalDays,
+            rd.Rental.Customer.Name))
+        .ToListAsync();
 
-    await db.SaveChangesAsync();
-    return Results.Ok(new { success = true });
-});
+    var activeRentals = rentals
+        .Where(r => IsRentalActiveToday(r, today))
+        .OrderBy(r => r.RentStart)
+        .ThenBy(r => r.RentalId)
+        .ToList();
 
-// === KÉP KISZOLGÁLÁS ===
-// Az adatbázisban tárolt fájlrendszeri elérési útból kiszolgálja a képet
-// Windows path (Z:\Sablonok\...) → Linux path (/srv/samba/telihold/Sablonok/...) fordítás
-static string ResolvePicturePath(string? dbPath)
+    if (activeRentals.Count == 0)
+        return null;
+
+    var releases = await db.BikeReleases
+        .Where(br => br.DeviceId == deviceId && br.ReleaseDate <= today)
+        .Select(br => new BikeReleaseRow(br.DeviceId, br.ReleaseDate))
+        .ToListAsync();
+
+    return ResolveUnclosedRentals(activeRentals, releases, today).LastOrDefault();
+}
+
+static List<ActiveRentalRow> ResolveUnclosedRentals(
+    IEnumerable<ActiveRentalRow> rentals,
+    IEnumerable<BikeReleaseRow> releases,
+    DateTime today)
 {
-    if (string.IsNullOrEmpty(dbPath)) return "";
-    // Windows Samba elérési út fordítása Linux path-ra
-    var normalized = dbPath.Replace('\\', '/');
-    if (normalized.StartsWith("Z:/", StringComparison.OrdinalIgnoreCase))
-        normalized = "/srv/samba/telihold/" + normalized[3..];
-    return normalized;
+    var orderedRentals = rentals
+        .OrderBy(r => r.RentStart)
+        .ThenBy(r => r.RentalId)
+        .ToList();
+
+    if (orderedRentals.Count == 0)
+        return orderedRentals;
+
+    var firstActiveRentalDate = orderedRentals.First().RentStart.Date;
+    var closureCount = releases.Count(r => r.ReleaseDate.Date >= firstActiveRentalDate && r.ReleaseDate.Date <= today);
+    var unresolved = orderedRentals.Skip(Math.Min(closureCount, orderedRentals.Count)).ToList();
+
+    return unresolved;
+}
+
+static bool IsRentalActiveToday(ActiveRentalRow rental, DateTime today)
+{
+    var rentalStartDate = rental.RentStart.Date;
+    var rentalEndExclusive = rentalStartDate.AddDays(rental.RentalDays);
+    return today >= rentalStartDate && today < rentalEndExclusive;
 }
 
 app.MapGet("/api/bikes/image/{id:int}", async (int id, ToolRentalDbContext db) =>
@@ -150,3 +248,15 @@ app.MapGet("/api/bikes/image/{id:int}", async (int id, ToolRentalDbContext db) =
 app.MapGet("/", () => Results.Redirect("/index.html"));
 
 app.Run("http://0.0.0.0:3001");
+
+internal sealed record ActiveRentalRow(
+    int DeviceId,
+    int RentalId,
+    string TicketNr,
+    DateTime RentStart,
+    int RentalDays,
+    string CustomerName);
+
+internal sealed record BikeReleaseRow(
+    int DeviceId,
+    DateTime ReleaseDate);
