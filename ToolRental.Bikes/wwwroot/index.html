@@ -94,6 +94,36 @@
       align-items: center;
       gap: 6px;
       font-size: 0.8rem;
+      cursor: pointer;
+      padding: 4px 10px;
+      border-radius: 20px;
+      border: 1.5px solid transparent;
+      transition: background 0.15s, border-color 0.15s;
+      user-select: none;
+    }
+
+    .stat-item:active {
+      transform: scale(0.96);
+    }
+
+    .stat-item.active-filter {
+      background: #2a2a4a;
+    }
+
+    .stat-item.active-filter.filter-free {
+      border-color: #22c55e;
+    }
+
+    .stat-item.active-filter.filter-occupied {
+      border-color: #5a5a8a;
+    }
+
+    .filter-hint {
+      font-size: 0.68rem;
+      color: #4a4a6a;
+      margin-left: auto;
+      align-self: center;
+      font-style: italic;
     }
 
     .stat-dot {
@@ -372,16 +402,17 @@
 </header>
 
 <div class="stats-bar" id="statsBar" style="display:none;">
-  <div class="stat-item">
+  <div class="stat-item filter-free" id="filterFreeBtn">
     <div class="stat-dot free"></div>
     <span class="stat-count" id="freeCount">0</span>
     <span class="stat-label">szabad</span>
   </div>
-  <div class="stat-item">
+  <div class="stat-item filter-occupied" id="filterOccupiedBtn">
     <div class="stat-dot occupied"></div>
     <span class="stat-count" id="occupiedCount">0</span>
     <span class="stat-label">kiadva</span>
   </div>
+  <span class="filter-hint" id="filterHint">szűréshez kattints</span>
 </div>
 
 <div class="error-banner" id="errorBanner"></div>
@@ -411,6 +442,7 @@
 
   let allBikes = [];
   let releasing = new Set();
+  let activeFilter = null; // null | 'free' | 'occupied'
 
   function formatDate(d) {
     const days = ['vasárnap','hétfő','kedd','szerda','csütörtök','péntek','szombat'];
@@ -463,6 +495,15 @@
     }
   }
 
+  function setFilter(f) {
+    activeFilter = activeFilter === f ? null : f;
+    document.getElementById('filterFreeBtn').classList.toggle('active-filter', activeFilter === 'free');
+    document.getElementById('filterOccupiedBtn').classList.toggle('active-filter', activeFilter === 'occupied');
+    const hint = document.getElementById('filterHint');
+    hint.textContent = activeFilter ? 'szűrő aktív — újra kattintva törlöd' : 'szűréshez kattints';
+    renderBikes(allBikes);
+  }
+
   function renderBikes(bikes) {
     const content = document.getElementById('content');
 
@@ -473,21 +514,26 @@
     document.getElementById('occupiedCount').textContent = occupiedCount;
     document.getElementById('statsBar').style.display = 'flex';
 
-    if (bikes.length === 0) {
+    // Szűrés alkalmazása
+    const filtered = activeFilter === 'free' ? bikes.filter(b => !b.isOccupied)
+                   : activeFilter === 'occupied' ? bikes.filter(b => b.isOccupied)
+                   : bikes;
+
+    if (filtered.length === 0) {
       content.innerHTML = `
         <div class="empty-state">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
             <circle cx="12" cy="12" r="10"/>
             <path d="M8 12h8M12 8v8"/>
           </svg>
-          <p>Nincs megjeleníthető eszköz.</p>
+          <p>${activeFilter ? 'Nincs ilyen állapotú kerékpár.' : 'Nincs megjeleníthető eszköz.'}</p>
         </div>`;
       return;
     }
 
     // Csoportosítás típus szerint
     const grouped = {};
-    for (const bike of bikes) {
+    for (const bike of filtered) {
       if (!grouped[bike.typeName]) grouped[bike.typeName] = [];
       grouped[bike.typeName].push(bike);
     }
@@ -587,6 +633,8 @@
   }
 
   document.getElementById('refreshBtn').addEventListener('click', () => loadBikes(true));
+  document.getElementById('filterFreeBtn').addEventListener('click', () => setFilter('free'));
+  document.getElementById('filterOccupiedBtn').addEventListener('click', () => setFilter('occupied'));
 
   // Auto-frissítés 60 másodpercenként
   setInterval(() => loadBikes(true), 60000);
