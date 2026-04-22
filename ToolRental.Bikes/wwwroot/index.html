@@ -173,6 +173,7 @@
 
     .type-chip.chip-free { border-left: 3px solid #22c55e; }
     .type-chip.chip-occupied { border-left: 3px solid #4a4a6a; }
+    .type-chip.chip-active { background: #2a2a50; outline: 1.5px solid #7070c0; }
 
     .stat-dot {
       width: 10px;
@@ -495,7 +496,8 @@
 
   let allBikes = [];
   let releasing = new Set();
-  let activeFilter = null; // null | 'free' | 'occupied'
+  let activeFilter = null;     // null | 'free' | 'occupied'
+  let activeTypeFilter = null; // null | típusnév string
 
   function formatDate(d) {
     const days = ['vasárnap','hétfő','kedd','szerda','csütörtök','péntek','szombat'];
@@ -550,10 +552,16 @@
 
   function setFilter(f) {
     activeFilter = activeFilter === f ? null : f;
+    activeTypeFilter = null; // főszűrő váltásakor típusszűrő törlődik
     document.getElementById('filterFreeBtn').classList.toggle('active-filter', activeFilter === 'free');
     document.getElementById('filterOccupiedBtn').classList.toggle('active-filter', activeFilter === 'occupied');
     const hint = document.getElementById('filterHint');
     hint.textContent = activeFilter ? 'szűrő aktív — újra kattintva törlöd' : 'szűréshez kattints';
+    renderBikes(allBikes);
+  }
+
+  function setTypeFilter(typeName) {
+    activeTypeFilter = activeTypeFilter === typeName ? null : typeName;
     renderBikes(allBikes);
   }
 
@@ -579,15 +587,24 @@
 
     const chips = TYPE_ORDER
       .filter(t => counts[t])
-      .map(t => `<div class="type-chip ${chipClass}">
-        <span class="chip-count">${counts[t]} db</span>
-        <span class="chip-label">${t}</span>
-      </div>`)
+      .map(t => {
+        const isActive = activeTypeFilter === t;
+        return `<div class="type-chip ${chipClass}${isActive ? ' chip-active' : ''}" data-type="${escHtml(t)}" style="cursor:pointer;">
+          <span class="chip-count">${counts[t]} db</span>
+          <span class="chip-label">${t}</span>
+          ${isActive ? '<span style="margin-left:3px;font-size:0.7rem;opacity:0.7;">✕</span>' : ''}
+        </div>`;
+      })
       .join('');
 
     document.getElementById('typeSummaryTitle').textContent = title;
     document.getElementById('typeSummaryGrid').innerHTML = chips;
     summary.classList.add('visible');
+
+    // Kattintás esemény a chipekre
+    document.querySelectorAll('[data-type]').forEach(el => {
+      el.addEventListener('click', () => setTypeFilter(el.dataset.type));
+    });
   }
 
   function renderBikes(bikes) {
@@ -601,10 +618,11 @@
     document.getElementById('statsBar').style.display = 'flex';
     renderTypeSummary(bikes);
 
-    // Szűrés alkalmazása
-    const filtered = activeFilter === 'free' ? bikes.filter(b => !b.isOccupied)
-                   : activeFilter === 'occupied' ? bikes.filter(b => b.isOccupied)
-                   : bikes;
+    // Szűrés alkalmazása (főszűrő + típusszűrő)
+    let filtered = activeFilter === 'free' ? bikes.filter(b => !b.isOccupied)
+                 : activeFilter === 'occupied' ? bikes.filter(b => b.isOccupied)
+                 : bikes;
+    if (activeTypeFilter) filtered = filtered.filter(b => b.typeName === activeTypeFilter);
 
     if (filtered.length === 0) {
       content.innerHTML = `
