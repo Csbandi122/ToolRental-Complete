@@ -21,6 +21,7 @@ namespace ToolRental.Data
         public DbSet<FinancialDevice> FinancialDevices { get; set; }
         public DbSet<Setting> Settings { get; set; }
         public DbSet<ServiceDevice> ServiceDevices { get; set; }
+        public DbSet<BikeRelease> BikeReleases { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

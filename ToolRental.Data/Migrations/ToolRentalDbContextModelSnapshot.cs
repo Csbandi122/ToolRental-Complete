@@ -22,6 +22,28 @@ namespace ToolRental.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ToolRental.Core.Models.BikeRelease", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DeviceId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("ReleaseDate")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeviceId", "ReleaseDate")
+                        .HasDatabaseName("IX_BikeReleases_DeviceId_ReleaseDate");
+
+                    b.ToTable("BikeReleases");
+                });
+
             modelBuilder.Entity("ToolRental.Core.Models.Customer", b =>
                 {
                     b.Property<int>("Id")
@@ -419,6 +441,17 @@ namespace ToolRental.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Settings");
+                });
+
+            modelBuilder.Entity("ToolRental.Core.Models.BikeRelease", b =>
+                {
+                    b.HasOne("ToolRental.Core.Models.Device", "Device")
+                        .WithMany()
+                        .HasForeignKey("DeviceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Device");
                 });
 
             modelBuilder.Entity("ToolRental.Core.Models.Device", b =>
