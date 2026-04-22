@@ -47,6 +47,7 @@
       align-items: center;
       gap: 10px;
       min-width: 0;
+      flex: 1;
     }
 
     .db-toggle {
@@ -61,6 +62,13 @@
       cursor: pointer;
       transition: background 0.15s, border-color 0.15s, transform 0.1s;
       white-space: nowrap;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
     }
 
     .db-toggle:active {
@@ -81,11 +89,6 @@
       font-size: 0.75rem;
       color: #7070a0;
       text-align: right;
-    }
-
-    #date-display {
-      font-size: 0.8rem;
-      color: #9090c0;
     }
 
     .refresh-btn {
@@ -505,8 +508,7 @@
     <h1>🚲 Kerékpárok</h1>
     <button class="db-toggle mode-prod" id="dbToggleBtn" type="button">PROD</button>
   </div>
-  <div style="display:flex;align-items:center;gap:10px;">
-    <span id="date-display"></span>
+  <div class="header-right">
     <button class="refresh-btn" id="refreshBtn" title="Frissítés">↻</button>
   </div>
 </header>
@@ -560,13 +562,6 @@
   let activeFilter = null;     // null | 'free' | 'occupied'
   let activeTypeFilter = null; // null | típusnév string
   let currentDbMode = localStorage.getItem('toolrental-bikes-db-mode') === 'test' ? 'test' : 'prod';
-
-  function formatDate(d) {
-    const days = ['vasárnap','hétfő','kedd','szerda','csütörtök','péntek','szombat'];
-    return `${d.getFullYear()}. ${(d.getMonth()+1).toString().padStart(2,'0')}. ${d.getDate().toString().padStart(2,'0')}. — ${days[d.getDay()]}`;
-  }
-
-  document.getElementById('date-display').textContent = formatDate(new Date());
 
   function updateDbToggle() {
     const btn = document.getElementById('dbToggleBtn');
