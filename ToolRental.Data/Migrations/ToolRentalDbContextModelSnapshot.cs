@@ -127,6 +127,9 @@ namespace ToolRental.Data.Migrations
                     b.Property<decimal>("RentPrice")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<DateTime?>("ReservedUntil")
+                        .HasColumnType("date");
+
                     b.Property<string>("Serial")
                         .IsRequired()
                         .HasMaxLength(100)

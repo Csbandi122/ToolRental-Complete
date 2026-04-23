@@ -85,6 +85,39 @@ app.MapPost("/api/bikes/{id:int}/release", async (int id, HttpContext httpContex
     });
 });
 
+// === FOGLALÁS API ===
+// Csak elérhető (nem kiadott) eszközön állítható be. Másnap automatikusan lejár.
+app.MapPost("/api/bikes/{id:int}/reserve", async (int id, HttpContext httpContext, IConfiguration config) =>
+{
+    await using var db = CreateDbContext(config, GetRequestedMode(httpContext));
+    var device = await db.Devices.FindAsync(id);
+    if (device == null)
+        return Results.NotFound(new { error = "Eszköz nem található." });
+
+    var activeRental = await GetCurrentActiveRentalAsync(db, id);
+    if (activeRental != null)
+        return Results.BadRequest(new { error = "Kiadott eszközt nem lehet foglaltra állítani." });
+
+    device.ReservedUntil = DateTime.Today;
+    await db.SaveChangesAsync();
+
+    return Results.Ok(new { success = true });
+});
+
+// === FOGLALÁS TÖRLÉS API ===
+app.MapPost("/api/bikes/{id:int}/unreserve", async (int id, HttpContext httpContext, IConfiguration config) =>
+{
+    await using var db = CreateDbContext(config, GetRequestedMode(httpContext));
+    var device = await db.Devices.FindAsync(id);
+    if (device == null)
+        return Results.NotFound(new { error = "Eszköz nem található." });
+
+    device.ReservedUntil = null;
+    await db.SaveChangesAsync();
+
+    return Results.Ok(new { success = true });
+});
+
 // === KÉP KISZOLGÁLÁS ===
 // Az adatbázisban tárolt fájlrendszeri elérési útból kiszolgálja a képet
 // Windows path (Z:\Sablonok\...) → Linux path (/srv/samba/telihold/Sablonok/...) fordítás
@@ -184,12 +217,16 @@ static async Task<List<object>> BuildBikeStatusesAsync(ToolRentalDbContext db, s
 
         var currentRental = unresolvedRentals.LastOrDefault();
 
+        var isOccupied = currentRental != null;
+        var isReserved = !isOccupied && device.ReservedUntil.HasValue && device.ReservedUntil.Value.Date >= today;
+
         result.Add(new
         {
             id = device.Id,
             name = device.DeviceName,
             typeName = device.DeviceTypeNavigation?.TypeName ?? "",
-            isOccupied = currentRental != null,
+            isOccupied,
+            isReserved,
             activeRentalCount = unresolvedRentals.Count,
             currentRentalId = currentRental?.RentalId,
             currentTicketNr = currentRental?.TicketNr,

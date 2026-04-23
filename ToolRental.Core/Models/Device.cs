@@ -31,6 +31,8 @@ namespace ToolRental.Core.Models
         [StringLength(1000)]
         public string? Notes { get; set; }
 
+        public DateTime? ReservedUntil { get; set; }
+
         // Navigation Properties
         public DeviceType? DeviceTypeNavigation { get; set; }
         public ICollection<RentalDevice> RentalDevices { get; set; } = new List<RentalDevice>();
