@@ -79,6 +79,32 @@ app.MapGet("/api/reporting", async (ToolRentalDbContext db) =>
     });
 });
 
+// === ÉVES STATISZTIKA API ===
+app.MapGet("/api/stats", async (ToolRentalDbContext db) =>
+{
+    var yearStart = new DateTime(DateTime.Today.Year, 1, 1);
+    var yearEnd = new DateTime(DateTime.Today.Year + 1, 1, 1);
+
+    var bikeTypes = new[] { "Férfi kerékpár", "Női kerékpár", "Férfi e-bike", "Női e-bike", "Utánfutó", "Gyerekbicikli" };
+
+    var totalRentals = await db.Rentals
+        .Where(r => r.RentStart >= yearStart && r.RentStart < yearEnd)
+        .CountAsync();
+
+    var bikesRented = await db.RentalDevices
+        .Where(rd => rd.Rental.RentStart >= yearStart && rd.Rental.RentStart < yearEnd
+                  && bikeTypes.Contains(rd.Device.DeviceTypeNavigation!.TypeName))
+        .CountAsync();
+
+    return Results.Json(new
+    {
+        year = DateTime.Today.Year,
+        totalRentals,
+        bikesRented,
+        kmEstimate = bikesRented * 30
+    });
+});
+
 // === AI LEKÉRDEZŐ API ===
 app.MapPost("/api/ask", async (HttpRequest request, ToolRentalDbContext db, IConfiguration config) =>
 {

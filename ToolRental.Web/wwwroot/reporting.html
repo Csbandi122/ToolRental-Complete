@@ -264,12 +264,76 @@
         .ai-example:hover {
             background: #c5cae9;
         }
+
+        /* === ÉVES STATISZTIKA === */
+        .stats-strip {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            max-width: 1000px;
+            margin: 0 auto 28px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px 16px 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        .stat-card .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a2e;
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .stat-card .stat-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #999;
+        }
+
+        .stat-card .stat-sub {
+            font-size: 11px;
+            color: #bbb;
+            margin-top: 3px;
+        }
+
+        .stat-card.accent-blue .stat-value { color: #1565c0; }
+        .stat-card.accent-green .stat-value { color: #2e7d32; }
+        .stat-card.accent-orange .stat-value { color: #e65100; }
+
+        @media (max-width: 500px) {
+            .stats-strip { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
     <div class="header">
         <h1>ToolRental Reporting</h1>
         <div class="timestamp" id="timestamp"></div>
+    </div>
+
+    <div class="stats-strip" id="statsStrip" style="display:none;">
+        <div class="stat-card accent-blue">
+            <div class="stat-value" id="statRentals">—</div>
+            <div class="stat-label">Összes bérlés</div>
+            <div class="stat-sub" id="statRentalsYear"></div>
+        </div>
+        <div class="stat-card accent-green">
+            <div class="stat-value" id="statBikes">—</div>
+            <div class="stat-label">Kiadott biciklik</div>
+            <div class="stat-sub" id="statBikesYear"></div>
+        </div>
+        <div class="stat-card accent-orange">
+            <div class="stat-value" id="statKm">—</div>
+            <div class="stat-label">Becsült km</div>
+            <div class="stat-sub">30 km/kör × biciklik</div>
+        </div>
     </div>
 
     <div id="content">
@@ -416,8 +480,24 @@
             }
         }
 
+        async function loadStats() {
+            try {
+                const resp = await fetch('/api/stats');
+                if (!resp.ok) return;
+                const d = await resp.json();
+
+                document.getElementById('statRentals').textContent = d.totalRentals.toLocaleString('hu-HU');
+                document.getElementById('statBikes').textContent = d.bikesRented.toLocaleString('hu-HU');
+                document.getElementById('statKm').textContent = d.kmEstimate.toLocaleString('hu-HU') + ' km';
+                document.getElementById('statRentalsYear').textContent = d.year + '-ban';
+                document.getElementById('statBikesYear').textContent = d.year + '-ban';
+                document.getElementById('statsStrip').style.display = 'grid';
+            } catch (e) { /* csendben ha nem megy */ }
+        }
+
         // Automatikus betoltes indulaskor
         loadData();
+        loadStats();
         loadRecentQuestions();
     </script>
 </body>
