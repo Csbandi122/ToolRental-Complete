@@ -96,12 +96,23 @@ app.MapGet("/api/stats", async (ToolRentalDbContext db) =>
                   && bikeTypes.Contains(rd.Device.DeviceTypeNavigation!.TypeName))
         .CountAsync();
 
+    var defektCount = await db.Services
+        .Where(s => s.ServiceDate >= yearStart && s.ServiceDate < yearEnd && s.ServiceType == "defekt")
+        .CountAsync();
+
+    var repairMinutes = await db.Services
+        .Where(s => s.ServiceDate >= yearStart && s.ServiceDate < yearEnd)
+        .SumAsync(s => s.WorkHours * 60 + s.WorkMinutes);
+
     return Results.Json(new
     {
         year = DateTime.Today.Year,
         totalRentals,
         bikesRented,
-        kmEstimate = bikesRented * 30
+        kmEstimate = bikesRented * 30,
+        defektCount,
+        repairHours = repairMinutes / 60,
+        repairMinutes = repairMinutes % 60
     });
 });
 

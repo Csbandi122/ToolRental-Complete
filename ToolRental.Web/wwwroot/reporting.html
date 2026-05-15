@@ -268,7 +268,7 @@
         /* === ÉVES STATISZTIKA === */
         .stats-strip {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(5, 1fr);
             gap: 16px;
             max-width: 1000px;
             margin: 0 auto 28px;
@@ -306,7 +306,12 @@
         .stat-card.accent-blue .stat-value { color: #1565c0; }
         .stat-card.accent-green .stat-value { color: #2e7d32; }
         .stat-card.accent-orange .stat-value { color: #e65100; }
+        .stat-card.accent-red .stat-value { color: #c62828; }
+        .stat-card.accent-purple .stat-value { color: #6a1b9a; }
 
+        @media (max-width: 768px) {
+            .stats-strip { grid-template-columns: repeat(3, 1fr); }
+        }
         @media (max-width: 500px) {
             .stats-strip { grid-template-columns: 1fr; }
         }
@@ -333,6 +338,16 @@
             <div class="stat-value" id="statKm">—</div>
             <div class="stat-label">Becsült km</div>
             <div class="stat-sub">30 km/kör × biciklik</div>
+        </div>
+        <div class="stat-card accent-red">
+            <div class="stat-value" id="statDefekt">—</div>
+            <div class="stat-label">Defektek</div>
+            <div class="stat-sub" id="statDefektYear"></div>
+        </div>
+        <div class="stat-card accent-purple">
+            <div class="stat-value" id="statWorkTime">—</div>
+            <div class="stat-label">Szervíz munkaóra</div>
+            <div class="stat-sub" id="statWorkTimeYear"></div>
         </div>
     </div>
 
@@ -491,6 +506,10 @@
                 document.getElementById('statKm').textContent = d.kmEstimate.toLocaleString('hu-HU') + ' km';
                 document.getElementById('statRentalsYear').textContent = d.year + '-ban';
                 document.getElementById('statBikesYear').textContent = d.year + '-ban';
+                document.getElementById('statDefekt').textContent = d.defektCount.toLocaleString('hu-HU');
+                document.getElementById('statDefektYear').textContent = d.year + '-ban';
+                document.getElementById('statWorkTime').textContent = d.repairHours + 'ó ' + d.repairMinutes + 'p';
+                document.getElementById('statWorkTimeYear').textContent = d.year + '-ban';
                 document.getElementById('statsStrip').style.display = 'grid';
             } catch (e) { /* csendben ha nem megy */ }
         }
