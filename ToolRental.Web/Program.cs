@@ -211,13 +211,24 @@ TÁBLÁK:
 - RentalDevices -- melyik bérlésben melyik eszközök szerepelnek (egy bérlés = több kerékpár is lehet)
   (Id, RentalId[FK→Rentals.Id], DeviceId[FK→Devices.Id])
 
-- Services -- SZERVIZ: kerékpárok karbantartása, javítása
-  (Id, TicketNr, ServiceType, Description, Technician, ServiceDate, CostAmount)
-  - ServiceType: 'karbantartás', 'javítás', 'upgrade'
+- Services -- SZERVIZ: kerékpárok karbantartása, javítása, munkalapok
+  (Id, TicketNr, ServiceType, Description, ServiceDate, CostAmount, WorkHours, WorkMinutes)
+  - ServiceType: 'defekt', 'karbantartás', 'javítás', 'upgrade'
   - CostAmount: a szerviz költsége (Ft)
+  - WorkHours: a szervízmunka időtartamának óra része (pl. 2 óra 30 perc → WorkHours=2)
+  - WorkMinutes: a szervízmunka időtartamának perc része (pl. 2 óra 30 perc → WorkMinutes=30)
+  - A teljes munkaóra percben: (WorkHours * 60 + WorkMinutes). Formázáshoz: CONCAT(WorkHours, 'ó ', WorkMinutes, 'p')
 
 - ServiceDevices -- melyik szervizben melyik eszközök szerepelnek
   (Id, ServiceId[FK→Services.Id], DeviceId[FK→Devices.Id])
+
+- Parts -- ALKATRÉSZEK: felhasznált alkatrészek törzsadata (pl. belsőgumi, fékbetét, lánc)
+  (Id, Name)
+
+- ServiceParts -- melyik szervizben milyen alkatrészeket használtunk és mennyit
+  (Id, ServiceId[FK→Services.Id], PartId[FK→Parts.Id], Quantity)
+  - Quantity: felhasznált darabszám (default 1)
+  - Egy szervízhez több alkatrész tartozhat, és egy alkatrész több szervízben is szerepelhet
 
 - Financials -- PÉNZÜGYI TÉTELEK: minden bevétel és kiadás nyilvántartása
   (Id, TicketNr, EntryType, SourceType, SourceId, Date, Comment, Amount)
@@ -235,7 +246,15 @@ KAPCSOLATOK:
 - Devices.DeviceType → DeviceTypes.Id
 - RentalDevices: Rentals ↔ Devices (many-to-many)
 - ServiceDevices: Services ↔ Devices (many-to-many)
+- ServiceParts: Services ↔ Parts (many-to-many, Quantity-vel)
 - FinancialDevices: Financials ↔ Devices (many-to-many)
+
+SZERVÍZ LEKÉRDEZÉSI MINTÁK:
+- Összes munkaóra egy eszközön: SELECT SUM(s.WorkHours * 60 + s.WorkMinutes) AS OsszesPerc FROM Services s JOIN ServiceDevices sd ON s.Id = sd.ServiceId WHERE sd.DeviceId = X
+- Milyen alkatrészeket cseréltem X eszközön: SELECT p.Name, sp.Quantity, s.ServiceDate FROM ServiceParts sp JOIN Parts p ON sp.PartId = p.Id JOIN Services s ON sp.ServiceId = s.Id JOIN ServiceDevices sd ON s.Id = sd.ServiceId JOIN Devices d ON sd.DeviceId = d.Id WHERE d.DeviceName LIKE '%X%'
+- Hányszor cseréltem belsőgumit: SELECT SUM(sp.Quantity) FROM ServiceParts sp JOIN Parts p ON sp.PartId = p.Id WHERE p.Name LIKE '%belsőgumi%'
+- Melyik eszközt javítottam legtöbbször: SELECT TOP 1 d.DeviceName, COUNT(DISTINCT s.Id) AS SzervizDb FROM Services s JOIN ServiceDevices sd ON s.Id = sd.ServiceId JOIN Devices d ON sd.DeviceId = d.Id GROUP BY d.DeviceName ORDER BY SzervizDb DESC
+- ""munkalap"" = Services tábla (egy szervíz jegy = egy munkalap)
 
 SQL ÍRÁSI SZABÁLYOK:
 - CSAK SELECT utasítást generálj, SOHA nem INSERT/UPDATE/DELETE/DROP/ALTER/EXEC!
