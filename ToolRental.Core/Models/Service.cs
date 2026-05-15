@@ -15,15 +15,16 @@ namespace ToolRental.Core.Models
         [StringLength(1000)]
         public string Description { get; set; } = string.Empty;
 
-        [StringLength(100)]
-        public string Technician { get; set; } = string.Empty;
-
         public DateTime ServiceDate { get; set; }
 
         [Range(0, double.MaxValue)]
         public decimal CostAmount { get; set; }
 
+        public int WorkHours { get; set; }
+        public int WorkMinutes { get; set; }
+
         // Navigation Properties
         public ICollection<ServiceDevice> ServiceDevices { get; set; } = new List<ServiceDevice>();
+        public ICollection<ServicePart> ServiceParts { get; set; } = new List<ServicePart>();
     }
 }

@@ -21,6 +21,8 @@ namespace ToolRental.Data
         public DbSet<FinancialDevice> FinancialDevices { get; set; }
         public DbSet<Setting> Settings { get; set; }
         public DbSet<ServiceDevice> ServiceDevices { get; set; }
+        public DbSet<Part> Parts { get; set; }
+        public DbSet<ServicePart> ServiceParts { get; set; }
         public DbSet<BikeRelease> BikeReleases { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -71,6 +73,17 @@ namespace ToolRental.Data
                 .HasOne(sd => sd.Device)
                 .WithMany(d => d.ServiceDevices)
                 .HasForeignKey(sd => sd.DeviceId);
+
+            // ServicePart many-to-many kapcsolat
+            modelBuilder.Entity<ServicePart>()
+                .HasOne(sp => sp.Service)
+                .WithMany(s => s.ServiceParts)
+                .HasForeignKey(sp => sp.ServiceId);
+
+            modelBuilder.Entity<ServicePart>()
+                .HasOne(sp => sp.Part)
+                .WithMany(p => p.ServiceParts)
+                .HasForeignKey(sp => sp.PartId);
 
             base.OnModelCreating(modelBuilder);
         }

@@ -26,6 +26,7 @@ namespace ToolRental.Core
     /// </summary>
     public static class ServiceTypes
     {
+        public const string Defekt = "defekt";
         public const string Karbantartas = "karbantartás";
         public const string Javitas = "javítás";
         public const string Upgrade = "upgrade";

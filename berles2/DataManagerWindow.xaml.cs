@@ -632,6 +632,8 @@ namespace berles2
                 var services = _context.Services
                     .Include(s => s.ServiceDevices)
                     .ThenInclude(sd => sd.Device)
+                    .Include(s => s.ServiceParts)
+                    .ThenInclude(sp => sp.Part)
                     .OrderByDescending(s => s.ServiceDate)
                     .Select(s => new ServiceDisplayModel
                     {
@@ -639,10 +641,14 @@ namespace berles2
                         TicketNr = s.TicketNr,
                         ServiceDate = s.ServiceDate,
                         ServiceType = s.ServiceType,
-                        Technician = s.Technician,
                         CostAmount = s.CostAmount,
+                        WorkTime = s.WorkHours > 0 || s.WorkMinutes > 0
+                            ? $"{s.WorkHours}ó {s.WorkMinutes}p"
+                            : "",
                         Description = s.Description,
-                        DeviceNames = string.Join(", ", s.ServiceDevices.Select(sd => sd.Device.DeviceName))
+                        DeviceNames = string.Join(", ", s.ServiceDevices.Select(sd => sd.Device.DeviceName)),
+                        PartsText = string.Join(", ", s.ServiceParts.Select(sp =>
+                            sp.Quantity > 1 ? $"{sp.Part.Name} x{sp.Quantity}" : sp.Part.Name))
                     })
                     .ToList();
 
@@ -660,8 +666,26 @@ namespace berles2
         private void ServicesDataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             bool hasSelection = ServicesDataGrid.SelectedItem != null;
-            
+            EditServiceButton.IsEnabled = hasSelection;
             DeleteServiceButton.IsEnabled = hasSelection;
+        }
+
+        private void EditServiceButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (ServicesDataGrid.SelectedItem is ServiceDisplayModel selectedService)
+            {
+                var service = _context.Services.Find(selectedService.Id);
+                if (service == null) return;
+
+                var serviceDialog = new ServiceDialog(service);
+                if (serviceDialog.ShowDialog() == true)
+                {
+                    LoadServices();
+                    LoadFinancials();
+                    MessageBox.Show("Szervíz jegy sikeresen módosítva!",
+                                  "Siker", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
         }
 
         private void AddServiceButton_Click(object sender, RoutedEventArgs e)
@@ -747,8 +771,8 @@ namespace berles2
                     s.TicketNr.ToLower().Contains(searchText) ||
                     s.Description.ToLower().Contains(searchText) ||
                     s.ServiceType.ToLower().Contains(searchText) ||
-                    s.Technician.ToLower().Contains(searchText) ||
-                    s.DeviceNames.ToLower().Contains(searchText)
+                    s.DeviceNames.ToLower().Contains(searchText) ||
+                    s.PartsText.ToLower().Contains(searchText)
                 ).ToList();
 
                 _services.Clear();
@@ -873,10 +897,11 @@ namespace berles2
         public string TicketNr { get; set; } = string.Empty;
         public DateTime ServiceDate { get; set; }
         public string ServiceType { get; set; } = string.Empty;
-        public string Technician { get; set; } = string.Empty;
         public decimal CostAmount { get; set; }
+        public string WorkTime { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
         public string DeviceNames { get; set; } = string.Empty;
+        public string PartsText { get; set; } = string.Empty;
     }
 
 }

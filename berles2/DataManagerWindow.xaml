@@ -351,14 +351,17 @@
 
                     <!-- FELSŐ GOMBOK ÉS KERESÉS -->
                     <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="10">
-                        <Button x:Name="AddServiceButton" Content="➕ Új szervíz jegy" 
+                        <Button x:Name="AddServiceButton" Content="➕ Új szervíz jegy"
                     Width="150" Height="35" Margin="0,0,10,0"
                     Background="#FF6B1F" Foreground="White" FontWeight="Bold"
                     Click="AddServiceButton_Click"/>
 
-                       
+                        <Button x:Name="EditServiceButton" Content="✏️ Szerkesztés"
+                    Width="120" Height="35" Margin="0,0,10,0" IsEnabled="False"
+                    Background="#2196F3" Foreground="White" FontWeight="Bold"
+                    Click="EditServiceButton_Click"/>
 
-                        <Button x:Name="DeleteServiceButton" Content="🗑️ Törlés" 
+                        <Button x:Name="DeleteServiceButton" Content="🗑️ Törlés"
                     Width="100" Height="35" Margin="0,0,20,0" IsEnabled="False"
                     Background="#F44336" Foreground="White" FontWeight="Bold"
                     Click="DeleteServiceButton_Click"/>
@@ -367,16 +370,16 @@
                         <TextBox x:Name="ServiceSearchTextBox" Width="250" Height="35"
                      VerticalContentAlignment="Center"
                      TextChanged="ServiceSearchTextBox_TextChanged"/>
-                        <TextBlock Text="🔍 Keresés jegy szám, leírás vagy eszköz alapján" 
-                      VerticalAlignment="Center" Margin="10,0,0,0" 
+                        <TextBlock Text="🔍 Keresés jegy szám, leírás, eszköz vagy alkatrész alapján"
+                      VerticalAlignment="Center" Margin="10,0,0,0"
                       FontWeight="Bold" Foreground="Gray"/>
                     </StackPanel>
 
                     <!-- SZERVÍZ LISTA -->
                     <DataGrid Grid.Row="1" x:Name="ServicesDataGrid" Margin="10"
-                 AutoGenerateColumns="False" CanUserAddRows="False" 
-                 CanUserDeleteRows="False" IsReadOnly="True" 
-                 SelectionMode="Single" GridLinesVisibility="Horizontal" 
+                 AutoGenerateColumns="False" CanUserAddRows="False"
+                 CanUserDeleteRows="False" IsReadOnly="True"
+                 SelectionMode="Single" GridLinesVisibility="Horizontal"
                  AlternatingRowBackground="#F5F5F5"
                  SelectionChanged="ServicesDataGrid_SelectionChanged">
                         <DataGrid.Columns>
@@ -387,14 +390,15 @@
                                     <Binding Path="ServiceDate" StringFormat="{}{0:yyyy.MM.dd}"/>
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="Típus" Binding="{Binding ServiceType}" Width="100"/>
-                            <DataGridTextColumn Header="Technikus" Binding="{Binding Technician}" Width="80"/>
-                            <DataGridTextColumn Header="Költség" Width="100">
+                            <DataGridTextColumn Header="Típus" Binding="{Binding ServiceType}" Width="90"/>
+                            <DataGridTextColumn Header="Költség" Width="90">
                                 <DataGridTextColumn.Binding>
                                     <Binding Path="CostAmount" StringFormat="{}{0:N0} Ft"/>
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="Leírás" Binding="{Binding Description}" Width="200"/>
+                            <DataGridTextColumn Header="Munkaóra" Binding="{Binding WorkTime}" Width="70"/>
+                            <DataGridTextColumn Header="Leírás" Binding="{Binding Description}" Width="180"/>
+                            <DataGridTextColumn Header="Alkatrészek" Binding="{Binding PartsText}" Width="150"/>
                             <DataGridTextColumn Header="Eszközök" Binding="{Binding DeviceNames}" Width="*"/>
                         </DataGrid.Columns>
                     </DataGrid>
