@@ -645,6 +645,7 @@ namespace berles2
                         WorkTime = s.WorkHours > 0 || s.WorkMinutes > 0
                             ? $"{s.WorkHours}ó {s.WorkMinutes}p"
                             : "",
+                        RescueRequired = s.RescueRequired,
                         Description = s.Description,
                         DeviceNames = string.Join(", ", s.ServiceDevices.Select(sd => sd.Device.DeviceName)),
                         PartsText = string.Join(", ", s.ServiceParts.Select(sp =>
@@ -899,6 +900,7 @@ namespace berles2
         public string ServiceType { get; set; } = string.Empty;
         public decimal CostAmount { get; set; }
         public string WorkTime { get; set; } = string.Empty;
+        public bool RescueRequired { get; set; }
         public string Description { get; set; } = string.Empty;
         public string DeviceNames { get; set; } = string.Empty;
         public string PartsText { get; set; } = string.Empty;

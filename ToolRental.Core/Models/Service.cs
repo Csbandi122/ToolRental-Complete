@@ -22,6 +22,7 @@ namespace ToolRental.Core.Models
 
         public int WorkHours { get; set; }
         public int WorkMinutes { get; set; }
+        public bool RescueRequired { get; set; }
 
         // Navigation Properties
         public ICollection<ServiceDevice> ServiceDevices { get; set; } = new List<ServiceDevice>();

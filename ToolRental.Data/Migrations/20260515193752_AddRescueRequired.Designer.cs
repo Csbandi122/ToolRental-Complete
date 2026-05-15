@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ToolRental.Data;
 
@@ -11,9 +12,11 @@ using ToolRental.Data;
 namespace ToolRental.Data.Migrations
 {
     [DbContext(typeof(ToolRentalDbContext))]
-    partial class ToolRentalDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260515193752_AddRescueRequired")]
+    partial class AddRescueRequired
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

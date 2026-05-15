@@ -88,6 +88,7 @@ namespace berles2
             WorkHoursTextBox.Text = svc.WorkHours.ToString();
             WorkMinutesTextBox.Text = svc.WorkMinutes.ToString();
             DescriptionTextBox.Text = svc.Description;
+            RescueRequiredCheckBox.IsChecked = svc.RescueRequired;
 
             foreach (var sp in svc.ServiceParts)
             {
@@ -306,6 +307,7 @@ namespace berles2
                 Service.Description = DescriptionTextBox.Text.Trim();
                 Service.WorkHours = int.TryParse(WorkHoursTextBox.Text, out int h) ? h : 0;
                 Service.WorkMinutes = int.TryParse(WorkMinutesTextBox.Text, out int m) ? m : 0;
+                Service.RescueRequired = RescueRequiredCheckBox.IsChecked == true;
 
                 if (_isEditMode)
                 {

@@ -397,6 +397,7 @@
                                 </DataGridTextColumn.Binding>
                             </DataGridTextColumn>
                             <DataGridTextColumn Header="Munkaóra" Binding="{Binding WorkTime}" Width="70"/>
+                            <DataGridCheckBoxColumn Header="Mentés" Binding="{Binding RescueRequired}" Width="55" IsReadOnly="True"/>
                             <DataGridTextColumn Header="Leírás" Binding="{Binding Description}" Width="180"/>
                             <DataGridTextColumn Header="Alkatrészek" Binding="{Binding PartsText}" Width="150"/>
                             <DataGridTextColumn Header="Eszközök" Binding="{Binding DeviceNames}" Width="*"/>

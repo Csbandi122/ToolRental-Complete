@@ -229,6 +229,7 @@ TÁBLÁK:
   - WorkHours: a szervízmunka időtartamának óra része (pl. 2 óra 30 perc → WorkHours=2)
   - WorkMinutes: a szervízmunka időtartamának perc része (pl. 2 óra 30 perc → WorkMinutes=30)
   - A teljes munkaóra percben: (WorkHours * 60 + WorkMinutes). Formázáshoz: CONCAT(WorkHours, 'ó ', WorkMinutes, 'p')
+  - RescueRequired: kellett-e menteni a meghibásodott biciklit (bit, true/false). Ha ""mentés"", ""menteni kellett"", ""kiszállás"" kérdeznek, ez a mező
 
 - ServiceDevices -- melyik szervizben melyik eszközök szerepelnek
   (Id, ServiceId[FK→Services.Id], DeviceId[FK→Devices.Id])
