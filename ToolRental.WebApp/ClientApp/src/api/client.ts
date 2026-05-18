@@ -1,4 +1,10 @@
-import type { Device, DeviceType, DeviceTypeCreateUpdate } from "@/types";
+import type {
+  Device,
+  DeviceType,
+  DeviceTypeCreateUpdate,
+  SettingsResponse,
+  SqlConnectionSettings,
+} from "@/types";
 
 const BASE = "/api";
 
@@ -71,4 +77,26 @@ export async function updateDeviceType(id: number, data: DeviceTypeCreateUpdate)
 export async function deleteDeviceType(id: number): Promise<void> {
   const res = await fetch(`${BASE}/devicetypes/${id}`, { method: "DELETE" });
   return handleResponse<void>(res);
+}
+
+export async function fetchSettings(): Promise<SettingsResponse> {
+  const res = await fetch(`${BASE}/settings`);
+  return handleResponse<SettingsResponse>(res);
+}
+
+export async function testSqlConnection(settings: SqlConnectionSettings): Promise<{ success: boolean; message: string }> {
+  const res = await fetch(`${BASE}/settings/test-sql`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(settings),
+  });
+  return handleResponse<{ success: boolean; message: string }>(res);
+}
+
+export async function saveSettings(formData: FormData): Promise<{ success: boolean; message: string }> {
+  const res = await fetch(`${BASE}/settings`, {
+    method: "POST",
+    body: formData,
+  });
+  return handleResponse<{ success: boolean; message: string }>(res);
 }
