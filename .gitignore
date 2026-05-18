@@ -20,6 +20,7 @@ berles2/appsettings.json
 node_modules/
 
 ## Frontend build output (buildelni kell a szerveren)
-ToolRental.WebApp/wwwroot/assets/
-ToolRental.WebApp/wwwroot/index.html
-ToolRental.WebApp/wwwroot/favicon.svg
+ToolRental.WebApp/wwwroot/
+
+## Web runtime data
+ToolRental.WebApp/App_Data/
