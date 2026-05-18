@@ -2,952 +2,421 @@
 <html lang="hu">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <meta name="theme-color" content="#1a1a2e" />
-  <title>Kerékpár Kölcsönző</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚲</text></svg>" />
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: #0f0f1a;
-      color: #e8e8f0;
-      min-height: 100vh;
-      overflow-x: hidden;
-      max-width: 100vw;
-    }
-
-    header {
-      background: #1a1a2e;
-      padding: 14px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      border-bottom: 1px solid #2a2a4a;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-    }
-
-    header h1 {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #c8d6f5;
-      letter-spacing: 0.02em;
-    }
-
-    .header-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-      flex: 1;
-    }
-
-    .db-toggle {
-      border: 1px solid #4f4f7d;
-      background: #23233d;
-      color: #d8deff;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      border-radius: 999px;
-      padding: 6px 10px;
-      cursor: pointer;
-      transition: background 0.15s, border-color 0.15s, transform 0.1s;
-      white-space: nowrap;
-    }
-
-    .header-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-shrink: 0;
-    }
-
-    .db-toggle:active {
-      transform: scale(0.97);
-    }
-
-    .db-toggle.mode-prod {
-      border-color: #2f8f5b;
-      color: #b8ffd8;
-    }
-
-    .db-toggle.mode-test {
-      border-color: #d48b2f;
-      color: #ffe0b0;
-    }
-
-    .header-info {
-      font-size: 0.75rem;
-      color: #7070a0;
-      text-align: right;
-    }
-
-    .refresh-btn {
-      background: #2a2a4a;
-      border: none;
-      color: #9090d0;
-      font-size: 1.1rem;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.15s, transform 0.2s;
-    }
-
-    .refresh-btn:active {
-      background: #3a3a6a;
-      transform: scale(0.92);
-    }
-
-    .refresh-btn.spinning {
-      animation: spin 0.6s linear infinite;
-    }
-
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .stats-bar {
-      background: #1a1a2e;
-      padding: 8px 10px;
-      display: flex;
-      gap: 6px;
-      border-bottom: 1px solid #2a2a4a;
-      overflow-x: hidden;
-    }
-
-    .stat-item {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 0.75rem;
-      cursor: pointer;
-      padding: 4px 8px;
-      border-radius: 20px;
-      border: 1.5px solid transparent;
-      transition: background 0.15s, border-color 0.15s;
-      user-select: none;
-      white-space: nowrap;
-    }
-
-    .stat-item:active {
-      transform: scale(0.96);
-    }
-
-    .stat-item.active-filter {
-      background: #2a2a4a;
-    }
-
-    .stat-item.active-filter.filter-free {
-      border-color: #22c55e;
-    }
-
-    .stat-item.active-filter.filter-reserved {
-      border-color: #7c3aed;
-    }
-
-    .stat-item.active-filter.filter-occupied {
-      border-color: #5a5a8a;
-    }
-
-    .filter-hint {
-      font-size: 0.68rem;
-      color: #4a4a6a;
-      margin-left: auto;
-      align-self: center;
-      font-style: italic;
-      display: none;
-    }
-
-    @media (min-width: 480px) {
-      .filter-hint { display: block; }
-    }
-
-    .type-summary {
-      background: #14142a;
-      border-bottom: 1px solid #2a2a4a;
-      padding: 10px 16px;
-      display: none;
-    }
-
-    .type-summary.visible {
-      display: block;
-    }
-
-    .type-summary-title {
-      font-size: 0.68rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: #5a5a8a;
-      margin-bottom: 8px;
-    }
-
-    .type-summary-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-
-    .type-chip {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      background: #1e1e38;
-      border-radius: 16px;
-      padding: 4px 10px;
-      font-size: 0.78rem;
-    }
-
-    .type-chip .chip-count {
-      font-weight: 700;
-      color: #c8d6f5;
-    }
-
-    .type-chip .chip-label {
-      color: #7070a0;
-    }
-
-    .type-chip.chip-free { border-left: 3px solid #22c55e; }
-    .type-chip.chip-reserved { border-left: 3px solid #7c3aed; }
-    .type-chip.chip-occupied { border-left: 3px solid #4a4a6a; }
-    .type-chip.chip-active { background: #2a2a50; outline: 1.5px solid #7070c0; }
-
-    .stat-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      flex-shrink: 0;
-    }
-
-    .stat-dot.free { background: #22c55e; }
-    .stat-dot.reserved { background: #7c3aed; }
-    .stat-dot.occupied { background: #4a4a6a; }
-
-    .stat-count {
-      font-weight: 700;
-      font-size: 0.95rem;
-    }
-
-    .stat-label {
-      color: #7070a0;
-    }
-
-    .type-section {
-      margin: 0;
-    }
-
-    .type-header {
-      padding: 10px 16px 6px;
-      font-size: 0.7rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      color: #5a5a8a;
-      background: #0f0f1a;
-      position: sticky;
-      top: 61px;
-      z-index: 50;
-    }
-
-    .bikes-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      padding: 6px 10px 10px;
-    }
-
-    .bike-card {
-      border-radius: 12px;
-      overflow: hidden;
-      border: 2.5px solid transparent;
-      background: #1a1a2e;
-      transition: border-color 0.3s, filter 0.3s, opacity 0.3s;
-      position: relative;
-      cursor: default;
-    }
-
-    .bike-card.free {
-      border-color: #22c55e;
-      box-shadow: 0 0 10px rgba(34, 197, 94, 0.25), 0 2px 8px rgba(0,0,0,0.3);
-    }
-
-    .bike-card.occupied {
-      border-color: #c08a3f;
-      background: linear-gradient(180deg, #1d1b2a 0%, #171724 100%);
-      box-shadow: 0 0 0 1px rgba(192, 138, 63, 0.12), 0 2px 10px rgba(0,0,0,0.35);
-    }
-
-    .bike-card.reserved {
-      border-color: #7c3aed;
-      background: linear-gradient(180deg, #1a1630 0%, #150f28 100%);
-      box-shadow: 0 0 10px rgba(124, 58, 237, 0.22), 0 2px 8px rgba(0,0,0,0.3);
-    }
-
-    .bike-image-wrap {
-      position: relative;
-      width: 100%;
-      aspect-ratio: 4/3;
-      background: #12121f;
-      overflow: hidden;
-    }
-
-    .bike-image-wrap img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-    }
-
-    .bike-card.occupied .bike-image-wrap img {
-      filter: grayscale(35%) brightness(0.72);
-    }
-
-    .bike-card.reserved .bike-image-wrap img {
-      filter: saturate(0.7) brightness(0.85);
-    }
-
-    .no-image {
-      width: 100%;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-      color: #3a3a5a;
-    }
-
-    .occupied-overlay {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: flex-start;
-      justify-content: flex-start;
-      padding: 8px;
-      background: linear-gradient(180deg, rgba(10, 10, 20, 0.32) 0%, rgba(10, 10, 20, 0.05) 45%, rgba(10, 10, 20, 0.12) 100%);
-    }
-
-    .occupied-badge {
-      background: rgba(27, 20, 10, 0.84);
-      color: #ffd6a1;
-      font-size: 0.62rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      padding: 4px 9px;
-      border-radius: 20px;
-      border: 1px solid rgba(255, 193, 103, 0.5);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-    }
-
-    .reserved-badge {
-      background: rgba(15, 8, 35, 0.88);
-      color: #c4b5fd;
-      font-size: 0.62rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      padding: 4px 9px;
-      border-radius: 20px;
-      border: 1px solid rgba(167, 139, 250, 0.5);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-    }
-
-    .bike-info {
-      padding: 8px 8px 4px;
-    }
-
-    .bike-name {
-      font-size: 0.78rem;
-      font-weight: 600;
-      line-height: 1.3;
-      color: #d0d0f0;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .bike-card.occupied .bike-name {
-      color: #f1ecff;
-    }
-
-    .bike-card.reserved .bike-name {
-      color: #ddd6fe;
-    }
-
-    .bike-meta {
-      margin-top: 6px;
-      display: grid;
-      gap: 3px;
-      font-size: 0.68rem;
-      color: #8d8db8;
-      line-height: 1.3;
-    }
-
-    .bike-meta-row strong {
-      color: #c8d6f5;
-      font-weight: 700;
-    }
-
-    .bike-card.occupied .bike-meta {
-      color: #d0c7e6;
-    }
-
-    .bike-card.occupied .bike-meta-row strong {
-      color: #ffdcae;
-    }
-
-    .bike-card.reserved .bike-meta {
-      color: #c4b5fd;
-    }
-
-    .bike-actions {
-      padding: 4px 8px 8px;
-    }
-
-    .release-btn {
-      width: 100%;
-      padding: 7px;
-      border: none;
-      border-radius: 8px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.1s, opacity 0.15s;
-      letter-spacing: 0.03em;
-    }
-
-    .release-btn:active {
-      transform: scale(0.96);
-    }
-
-    .release-btn.btn-release {
-      background: #d6b98a;
-      color: #24190b;
-    }
-
-    .release-btn.btn-release:hover {
-      background: #e4c99b;
-    }
-
-    .release-btn.btn-free {
-      background: #1f2d1f;
-      color: #4a7a4a;
-      cursor: default;
-      opacity: 0.5;
-    }
-
-    .release-btn.btn-reserve {
-      background: #2d1f4a;
-      color: #c4b5fd;
-      border: 1px solid #5b21b6;
-    }
-
-    .release-btn.btn-reserve:hover {
-      background: #3b2860;
-    }
-
-    .release-btn.btn-unreserve {
-      background: #7c3aed;
-      color: #fff;
-    }
-
-    .release-btn.btn-unreserve:hover {
-      background: #6d28d9;
-    }
-
-    .release-btn:disabled {
-      cursor: default;
-    }
-
-    .loading-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 15, 26, 0.85);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .loading-overlay.hidden { display: none; }
-
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 3px solid #2a2a4a;
-      border-top-color: #6060d0;
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-
-    .loading-text {
-      color: #7070a0;
-      font-size: 0.85rem;
-    }
-
-    .error-banner {
-      background: #2d1a1a;
-      border: 1px solid #7a2a2a;
-      color: #f08080;
-      padding: 12px 16px;
-      margin: 12px;
-      border-radius: 8px;
-      font-size: 0.85rem;
-      display: none;
-    }
-
-    .error-banner.visible { display: block; }
-
-    .empty-state {
-      padding: 48px 24px;
-      text-align: center;
-      color: #4a4a7a;
-    }
-
-    .empty-state svg {
-      margin-bottom: 12px;
-      opacity: 0.4;
-    }
-
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: #2a2a4a;
-      color: #c8d6f5;
-      padding: 10px 20px;
-      border-radius: 24px;
-      font-size: 0.85rem;
-      font-weight: 500;
-      z-index: 500;
-      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-      white-space: nowrap;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-    }
-
-    .toast.show {
-      transform: translateX(-50%) translateY(0);
-    }
-
-    .toast.success { border-left: 3px solid #22c55e; }
-    .toast.error { border-left: 3px solid #ef4444; }
-
-    @media (min-width: 600px) {
-      .bikes-grid {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
-
-    @media (min-width: 900px) {
-      .bikes-grid {
-        grid-template-columns: repeat(4, 1fr);
-      }
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#132033" />
+  <title>ToolRental Admin</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧰</text></svg>" />
+  <link rel="stylesheet" href="/app.css" />
 </head>
 <body>
-
-<div class="loading-overlay" id="loading">
-  <div class="spinner"></div>
-  <div class="loading-text">Betöltés...</div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<header>
-  <div class="header-left">
-    <h1>🚲 Kerékpárok</h1>
-    <button class="db-toggle mode-prod" id="dbToggleBtn" type="button">PROD</button>
-  </div>
-  <div class="header-right">
-    <button class="refresh-btn" id="refreshBtn" title="Frissítés">↻</button>
-  </div>
-</header>
-
-<div class="stats-bar" id="statsBar" style="display:none;">
-  <div class="stat-item filter-free" id="filterFreeBtn">
-    <div class="stat-dot free"></div>
-    <span class="stat-count" id="freeCount">0</span>
-    <span class="stat-label">szabad</span>
-  </div>
-  <div class="stat-item filter-reserved" id="filterReservedBtn">
-    <div class="stat-dot reserved"></div>
-    <span class="stat-count" id="reservedCount">0</span>
-    <span class="stat-label">foglalt</span>
-  </div>
-  <div class="stat-item filter-occupied" id="filterOccupiedBtn">
-    <div class="stat-dot occupied"></div>
-    <span class="stat-count" id="occupiedCount">0</span>
-    <span class="stat-label">kiadva</span>
-  </div>
-  <span class="filter-hint" id="filterHint">szűréshez kattints</span>
-</div>
-
-<div class="error-banner" id="errorBanner"></div>
-
-<div class="type-summary" id="typeSummary">
-  <div class="type-summary-title" id="typeSummaryTitle"></div>
-  <div class="type-summary-grid" id="typeSummaryGrid"></div>
-</div>
-
-<div id="content"></div>
-
-<script>
-  const TYPE_ORDER = [
-    'Férfi kerékpár',
-    'Női kerékpár',
-    'Férfi e-bike',
-    'Női e-bike',
-    'Gyerekbicikli',
-    'Gyerekülés',
-    'Utánfutó'
-  ];
-
-  const TYPE_ICONS = {
-    'Férfi kerékpár': '🚲',
-    'Női kerékpár': '🚲',
-    'Férfi e-bike': '⚡',
-    'Női e-bike': '⚡',
-    'Gyerekbicikli': '🔵',
-    'Gyerekülés': '👶',
-    'Utánfutó': '🚛'
-  };
-
-  let allBikes = [];
-  let releasing = new Set();
-  let reserving = new Set();
-  let activeFilter = null;     // null | 'free' | 'reserved' | 'occupied'
-  let activeTypeFilter = null;
-  let currentDbMode = localStorage.getItem('toolrental-bikes-db-mode') === 'test' ? 'test' : 'prod';
-
-  function updateDbToggle() {
-    const btn = document.getElementById('dbToggleBtn');
-    btn.textContent = currentDbMode === 'test' ? 'TEST' : 'PROD';
-    btn.classList.toggle('mode-prod', currentDbMode === 'prod');
-    btn.classList.toggle('mode-test', currentDbMode === 'test');
-    btn.title = currentDbMode === 'test'
-      ? 'Jelenleg a TEST adatbázist használod'
-      : 'Jelenleg a PROD adatbázist használod';
-  }
-
-  function apiUrl(path) {
-    const separator = path.includes('?') ? '&' : '?';
-    return `${path}${separator}db=${currentDbMode}`;
-  }
-
-  function showToast(msg, type = 'success') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = `toast ${type}`;
-    void t.offsetWidth;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2800);
-  }
-
-  function showError(msg) {
-    const b = document.getElementById('errorBanner');
-    b.textContent = msg;
-    b.classList.add('visible');
-  }
-
-  function hideError() {
-    document.getElementById('errorBanner').classList.remove('visible');
-  }
-
-  function setLoading(on) {
-    document.getElementById('loading').classList.toggle('hidden', !on);
-  }
-
-  async function loadBikes(silent = false) {
-    if (!silent) setLoading(true);
-    hideError();
-
-    const btn = document.getElementById('refreshBtn');
-    btn.classList.add('spinning');
-
-    try {
-      const resp = await fetch(apiUrl('/api/bikes/status'));
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const data = await resp.json();
-      allBikes = data.items || [];
-      renderBikes(allBikes);
-    } catch (e) {
-      showError('Nem sikerült betölteni az adatokat. Ellenőrizd a kapcsolatot.');
-      console.error(e);
-    } finally {
-      setLoading(false);
-      btn.classList.remove('spinning');
-    }
-  }
-
-  function bikeState(bike) {
-    if (bike.isOccupied) return 'occupied';
-    if (bike.isReserved) return 'reserved';
-    return 'free';
-  }
-
-  function setFilter(f) {
-    activeFilter = activeFilter === f ? null : f;
-    activeTypeFilter = null;
-    document.getElementById('filterFreeBtn').classList.toggle('active-filter', activeFilter === 'free');
-    document.getElementById('filterReservedBtn').classList.toggle('active-filter', activeFilter === 'reserved');
-    document.getElementById('filterOccupiedBtn').classList.toggle('active-filter', activeFilter === 'occupied');
-    const hint = document.getElementById('filterHint');
-    hint.textContent = activeFilter ? 'szűrő aktív — újra kattintva törlöd' : 'szűréshez kattints';
-    renderBikes(allBikes);
-  }
-
-  function setTypeFilter(typeName) {
-    activeTypeFilter = activeTypeFilter === typeName ? null : typeName;
-    renderBikes(allBikes);
-  }
-
-  function renderTypeSummary(bikes) {
-    const summary = document.getElementById('typeSummary');
-    if (!activeFilter) {
-      summary.classList.remove('visible');
-      return;
-    }
-
-    const filtered = bikes.filter(b => bikeState(b) === activeFilter);
-    const total = filtered.length;
-    const chipClass = activeFilter === 'free' ? 'chip-free'
-                    : activeFilter === 'reserved' ? 'chip-reserved'
-                    : 'chip-occupied';
-    const title = activeFilter === 'free'
-      ? `${total} szabad kerékpár típusonként:`
-      : activeFilter === 'reserved'
-      ? `${total} foglalt kerékpár típusonként:`
-      : `${total} kiadott kerékpár típusonként:`;
-
-    const counts = {};
-    for (const bike of filtered) {
-      counts[bike.typeName] = (counts[bike.typeName] || 0) + 1;
-    }
-
-    const chips = TYPE_ORDER
-      .filter(t => counts[t])
-      .map(t => {
-        const isActive = activeTypeFilter === t;
-        return `<div class="type-chip ${chipClass}${isActive ? ' chip-active' : ''}" data-type="${escHtml(t)}" style="cursor:pointer;">
-          <span class="chip-count">${counts[t]} db</span>
-          <span class="chip-label">${t}</span>
-          ${isActive ? '<span style="margin-left:3px;font-size:0.7rem;opacity:0.7;">✕</span>' : ''}
-        </div>`;
-      })
-      .join('');
-
-    document.getElementById('typeSummaryTitle').textContent = title;
-    document.getElementById('typeSummaryGrid').innerHTML = chips;
-    summary.classList.add('visible');
-
-    document.querySelectorAll('[data-type]').forEach(el => {
-      el.addEventListener('click', () => setTypeFilter(el.dataset.type));
-    });
-  }
-
-  function renderBikes(bikes) {
-    const content = document.getElementById('content');
-
-    const freeCount = bikes.filter(b => bikeState(b) === 'free').length;
-    const reservedCount = bikes.filter(b => bikeState(b) === 'reserved').length;
-    const occupiedCount = bikes.filter(b => bikeState(b) === 'occupied').length;
-
-    document.getElementById('freeCount').textContent = freeCount;
-    document.getElementById('reservedCount').textContent = reservedCount;
-    document.getElementById('occupiedCount').textContent = occupiedCount;
-    document.getElementById('statsBar').style.display = 'flex';
-    renderTypeSummary(bikes);
-
-    let filtered = activeFilter
-      ? bikes.filter(b => bikeState(b) === activeFilter)
-      : bikes;
-    if (activeTypeFilter) filtered = filtered.filter(b => b.typeName === activeTypeFilter);
-
-    if (filtered.length === 0) {
-      content.innerHTML = `
-        <div class="empty-state">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="12" cy="12" r="10"/>
-            <path d="M8 12h8M12 8v8"/>
-          </svg>
-          <p>${activeFilter ? 'Nincs ilyen állapotú kerékpár.' : 'Nincs megjeleníthető eszköz.'}</p>
-        </div>`;
-      return;
-    }
-
-    const grouped = {};
-    for (const bike of filtered) {
-      if (!grouped[bike.typeName]) grouped[bike.typeName] = [];
-      grouped[bike.typeName].push(bike);
-    }
-
-    const orderedTypes = TYPE_ORDER.filter(t => grouped[t]);
-
-    let html = '';
-    for (const typeName of orderedTypes) {
-      const group = grouped[typeName];
-      const icon = TYPE_ICONS[typeName] || '🚲';
-      html += `<div class="type-section">
-        <div class="type-header">${icon} ${typeName}</div>
-        <div class="bikes-grid">`;
-      for (const bike of group) {
-        html += renderCard(bike);
-      }
-      html += `</div></div>`;
-    }
-
-    content.innerHTML = html;
-
-    content.querySelectorAll('[data-release-id]').forEach(btn => {
-      btn.addEventListener('click', () => handleRelease(parseInt(btn.dataset.releaseId)));
-    });
-    content.querySelectorAll('[data-reserve-id]').forEach(btn => {
-      btn.addEventListener('click', () => handleReserve(parseInt(btn.dataset.reserveId)));
-    });
-    content.querySelectorAll('[data-unreserve-id]').forEach(btn => {
-      btn.addEventListener('click', () => handleUnreserve(parseInt(btn.dataset.unreserveId)));
-    });
-  }
-
-  function renderCard(bike) {
-    const state = bikeState(bike);
-    const imgSrc = bike.hasImage ? apiUrl(`/api/bikes/image/${bike.id}`) : null;
-
-    const imageHtml = imgSrc
-      ? `<img src="${imgSrc}" alt="${escHtml(bike.name)}" loading="lazy" onerror="this.parentElement.innerHTML='<div class=\\'no-image\\'>🚲</div>'" />`
-      : `<div class="no-image">🚲</div>`;
-
-    const overlayHtml = state === 'occupied'
-      ? `<div class="occupied-overlay"><span class="occupied-badge">Kiadva</span></div>`
-      : state === 'reserved'
-      ? `<div class="occupied-overlay"><span class="reserved-badge">Foglalva</span></div>`
-      : '';
-
-    const metaHtml = state === 'occupied' ? `
-      <div class="bike-meta">
-        <div class="bike-meta-row"><strong>Bérlés:</strong> ${escHtml(bike.currentTicketNr || '')}</div>
-        <div class="bike-meta-row"><strong>Ügyfél:</strong> ${escHtml(bike.currentCustomerName || '')}</div>
-        <div class="bike-meta-row"><strong>Lejárat:</strong> ${escHtml(bike.plannedEndDate || '')}</div>
-      </div>` : '';
-
-    const btnHtml = state === 'occupied'
-      ? `<button class="release-btn btn-release" data-release-id="${bike.id}">Bérlés lezárása ↩</button>`
-      : state === 'reserved'
-      ? `<button class="release-btn btn-unreserve" data-unreserve-id="${bike.id}">Foglalás törlése ✕</button>`
-      : `<button class="release-btn btn-reserve" data-reserve-id="${bike.id}">Foglalás 🔒</button>`;
-
-    return `
-      <div class="bike-card ${state}" id="card-${bike.id}">
-        <div class="bike-image-wrap">
-          ${imageHtml}
-          ${overlayHtml}
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand-block">
+        <div class="brand-mark">TR</div>
+        <div class="brand-copy">
+          <strong>ToolRental</strong>
+          <span>Admin felület</span>
         </div>
-        <div class="bike-info">
-          <div class="bike-name">${escHtml(bike.name)}</div>
-          ${metaHtml}
+      </div>
+
+      <nav class="nav-menu">
+        <button class="nav-item" data-route="home">
+          <span class="nav-icon">⌂</span>
+          <span>Főoldal</span>
+        </button>
+        <button class="nav-item" data-route="bikes">
+          <span class="nav-icon">⚙</span>
+          <span>Eszközkezelő</span>
+        </button>
+        <button class="nav-item" data-route="settings">
+          <span class="nav-icon">☰</span>
+          <span>Beállítások</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="sidebar-foot-label">Aktív adatbázis</div>
+        <button class="mode-switch" id="sidebarDbToggle" type="button">PROD</button>
+      </div>
+    </aside>
+
+    <button class="sidebar-backdrop" id="sidebarBackdrop" type="button" aria-label="Menü bezárása"></button>
+
+    <div class="main-shell">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="menu-toggle" id="menuToggle" type="button" aria-label="Menü megnyitása">☰</button>
+          <div>
+            <h1 id="pageTitle">Főoldal</h1>
+            <p id="pageSubtitle">Innen fog indulni majd a teljes webes rendszer.</p>
+          </div>
         </div>
-        <div class="bike-actions">${btnHtml}</div>
-      </div>`;
-  }
 
-  function escHtml(str) {
-    return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+        <div class="topbar-right">
+          <div class="db-pill" id="topbarDbIndicator">PROD</div>
+          <div class="company-badge" id="companyBadge">
+            <div class="company-badge-logo" id="companyBadgeLogo">TR</div>
+            <div class="company-badge-copy">
+              <strong id="companyBadgeName">ToolRental</strong>
+              <span id="companyBadgeHint">Webes admin</span>
+            </div>
+          </div>
+        </div>
+      </header>
 
-  async function handleRelease(id) {
-    if (releasing.has(id)) return;
-    releasing.add(id);
-    const btn = document.querySelector(`[data-release-id="${id}"]`);
-    if (btn) { btn.textContent = 'Lezárás...'; btn.disabled = true; }
-    try {
-      const resp = await fetch(apiUrl(`/api/bikes/${id}/release`), { method: 'POST' });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      await loadBikes(true);
-      showToast('Bérlés sikeresen lezárva!', 'success');
-    } catch (e) {
-      showToast('Hiba! Próbáld újra.', 'error');
-      if (btn) { btn.textContent = 'Bérlés lezárása ↩'; btn.disabled = false; }
-    } finally {
-      releasing.delete(id);
-    }
-  }
+      <main class="page-area">
+        <section class="page-view" data-view="home">
+          <div class="hero-card">
+            <div class="hero-kicker">Új kezdőoldal</div>
+            <h2>Itt lesz majd a főoldal.</h2>
+            <p>
+              Az eszközkezelő mostantól csak egy almenü, a rendszer pedig erre a vázra tud tovább épülni.
+            </p>
+          </div>
+        </section>
 
-  async function handleReserve(id) {
-    if (reserving.has(id)) return;
-    reserving.add(id);
-    const btn = document.querySelector(`[data-reserve-id="${id}"]`);
-    if (btn) { btn.textContent = 'Foglalás...'; btn.disabled = true; }
-    try {
-      const resp = await fetch(apiUrl(`/api/bikes/${id}/reserve`), { method: 'POST' });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      await loadBikes(true);
-      showToast('Eszköz foglaltra állítva!', 'success');
-    } catch (e) {
-      showToast('Hiba! Próbáld újra.', 'error');
-      if (btn) { btn.textContent = 'Foglalás 🔒'; btn.disabled = false; }
-    } finally {
-      reserving.delete(id);
-    }
-  }
+        <section class="page-view" data-view="bikes" hidden>
+          <div class="view-header">
+            <div>
+              <div class="view-kicker">Aktív modul</div>
+              <h2>Eszközkezelő</h2>
+            </div>
+            <div class="view-actions">
+              <button class="button secondary" id="refreshBikesButton" type="button">Frissítés</button>
+            </div>
+          </div>
 
-  async function handleUnreserve(id) {
-    if (reserving.has(id)) return;
-    reserving.add(id);
-    const btn = document.querySelector(`[data-unreserve-id="${id}"]`);
-    if (btn) { btn.textContent = 'Törlés...'; btn.disabled = true; }
-    try {
-      const resp = await fetch(apiUrl(`/api/bikes/${id}/unreserve`), { method: 'POST' });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      await loadBikes(true);
-      showToast('Foglalás törölve.', 'success');
-    } catch (e) {
-      showToast('Hiba! Próbáld újra.', 'error');
-      if (btn) { btn.textContent = 'Foglalás törlése ✕'; btn.disabled = false; }
-    } finally {
-      reserving.delete(id);
-    }
-  }
+          <div class="status-banner" id="bikesErrorBanner" hidden></div>
 
-  document.getElementById('refreshBtn').addEventListener('click', () => loadBikes(true));
-  document.getElementById('filterFreeBtn').addEventListener('click', () => setFilter('free'));
-  document.getElementById('filterReservedBtn').addEventListener('click', () => setFilter('reserved'));
-  document.getElementById('filterOccupiedBtn').addEventListener('click', () => setFilter('occupied'));
-  document.getElementById('dbToggleBtn').addEventListener('click', async () => {
-    currentDbMode = currentDbMode === 'prod' ? 'test' : 'prod';
-    localStorage.setItem('toolrental-bikes-db-mode', currentDbMode);
-    updateDbToggle();
-    await loadBikes();
-    showToast(currentDbMode === 'test' ? 'TEST adatbázis aktiválva' : 'PROD adatbázis aktiválva');
-  });
+          <div class="panel loading-panel" id="bikesLoadingPanel">
+            <div class="spinner"></div>
+            <span>Eszközök betöltése...</span>
+          </div>
 
-  setInterval(() => loadBikes(true), 60000);
+          <div class="stats-bar" id="statsBar" hidden>
+            <button class="stat-item filter-free" id="filterFreeBtn" type="button">
+              <span class="stat-dot free"></span>
+              <span class="stat-count" id="freeCount">0</span>
+              <span class="stat-label">szabad</span>
+            </button>
+            <button class="stat-item filter-reserved" id="filterReservedBtn" type="button">
+              <span class="stat-dot reserved"></span>
+              <span class="stat-count" id="reservedCount">0</span>
+              <span class="stat-label">foglalt</span>
+            </button>
+            <button class="stat-item filter-occupied" id="filterOccupiedBtn" type="button">
+              <span class="stat-dot occupied"></span>
+              <span class="stat-count" id="occupiedCount">0</span>
+              <span class="stat-label">kiadva</span>
+            </button>
+            <span class="filter-hint" id="filterHint">szűréshez kattints</span>
+          </div>
 
-  document.addEventListener('visibilitychange', () => {
-    if (!document.hidden) loadBikes(true);
-  });
+          <div class="type-summary" id="typeSummary" hidden>
+            <div class="type-summary-title" id="typeSummaryTitle"></div>
+            <div class="type-summary-grid" id="typeSummaryGrid"></div>
+          </div>
 
-  updateDbToggle();
-  loadBikes();
-</script>
+          <div id="bikesContent"></div>
+        </section>
+
+        <section class="page-view" data-view="settings" hidden>
+          <div class="view-header">
+            <div>
+              <div class="view-kicker">Windows app logika, webes működés</div>
+              <h2>Beállítások</h2>
+            </div>
+            <div class="view-actions">
+              <button class="button secondary" id="testSqlButton" type="button">SQL kapcsolat tesztelése</button>
+              <button class="button primary" id="saveSettingsButton" type="submit" form="settingsForm">Mentés</button>
+            </div>
+          </div>
+
+          <div class="status-banner info" id="settingsModeBanner">
+            A beállítások mindig az aktuálisan kiválasztott adatbázishoz töltődnek be.
+          </div>
+          <div class="status-banner" id="settingsStatusBanner" hidden></div>
+
+          <form id="settingsForm" class="settings-form">
+            <div class="settings-grid">
+              <section class="panel settings-section">
+                <div class="section-head">
+                  <h3>SQL kapcsolat</h3>
+                  <p>Ugyanaz a logika, mint a desktop appban, csak most weben szerkeszthető.</p>
+                </div>
+
+                <label class="field">
+                  <span>Szerver neve / IP cím *</span>
+                  <input type="text" id="sqlServer" name="sqlServer" />
+                </label>
+
+                <div class="field-row two">
+                  <label class="field">
+                    <span>Port *</span>
+                    <input type="number" id="sqlPort" name="sqlPort" min="1" />
+                  </label>
+                  <label class="field">
+                    <span>Test adatbázis neve</span>
+                    <input type="text" id="testDatabaseName" name="testDatabaseName" />
+                  </label>
+                </div>
+
+                <label class="field">
+                  <span>PROD adatbázis neve *</span>
+                  <input type="text" id="sqlDatabase" name="sqlDatabase" />
+                </label>
+
+                <div class="field-row two">
+                  <label class="field">
+                    <span>Felhasználónév *</span>
+                    <input type="text" id="sqlUserId" name="sqlUserId" />
+                  </label>
+                  <label class="field">
+                    <span>Jelszó *</span>
+                    <input type="password" id="sqlPassword" name="sqlPassword" />
+                  </label>
+                </div>
+
+                <label class="checkbox-field">
+                  <input type="checkbox" id="sqlTrustServerCertificate" name="sqlTrustServerCertificate" />
+                  <span>TrustServerCertificate használata</span>
+                </label>
+              </section>
+
+              <section class="panel settings-section">
+                <div class="section-head">
+                  <h3>Cég adatok</h3>
+                  <p>A logó most már feltöltéssel kerül a szerverre, nem kézi fájlútvonallal.</p>
+                </div>
+
+                <label class="field">
+                  <span>Cégnév *</span>
+                  <input type="text" id="companyName" name="companyName" />
+                </label>
+
+                <div class="file-card" data-file-key="companyLogo">
+                  <div class="file-card-head">
+                    <div>
+                      <strong>Céglogó</strong>
+                      <p>Kép fájl: `.jpg`, `.png`, `.svg`, `.webp`</p>
+                    </div>
+                    <img class="logo-preview" id="companyLogoPreview" alt="Céglogó előnézet" hidden />
+                  </div>
+
+                  <div class="file-card-meta">
+                    <div class="file-status" id="companyLogoStatus">Nincs fájl feltöltve.</div>
+                    <div class="file-path" id="companyLogoPath"></div>
+                  </div>
+
+                  <div class="file-card-actions">
+                    <input class="hidden-file-input" type="file" id="companyLogoInput" accept=".jpg,.jpeg,.png,.bmp,.gif,.webp,.svg" />
+                    <label class="button secondary" for="companyLogoInput">Feltöltés</label>
+                    <button class="button ghost" type="button" data-clear-file="companyLogo">Fájl törlése</button>
+                  </div>
+                  <div class="file-selected" id="companyLogoSelected"></div>
+                </div>
+              </section>
+
+              <section class="panel settings-section">
+                <div class="section-head">
+                  <h3>Email kapcsolat</h3>
+                  <p>A web ugyanazokat a mezőket kapja meg, mint a Windows app.</p>
+                </div>
+
+                <div class="field-row two">
+                  <label class="field">
+                    <span>SMTP szerver</span>
+                    <input type="text" id="emailSmtp" name="emailSmtp" />
+                  </label>
+                  <label class="field">
+                    <span>SMTP port</span>
+                    <input type="number" id="smtpPort" name="smtpPort" min="1" />
+                  </label>
+                </div>
+
+                <label class="field">
+                  <span>Email cím</span>
+                  <input type="email" id="senderEmail" name="senderEmail" />
+                </label>
+
+                <label class="field">
+                  <span>Email jelszó</span>
+                  <input type="password" id="emailPassword" name="emailPassword" autocomplete="new-password" />
+                </label>
+
+                <div class="inline-note" id="emailPasswordHint"></div>
+
+                <div class="field-row two">
+                  <label class="field">
+                    <span>Küldő neve</span>
+                    <input type="text" id="senderName" name="senderName" />
+                  </label>
+                  <label class="field">
+                    <span>CC címzett</span>
+                    <input type="text" id="ccAddress" name="ccAddress" />
+                  </label>
+                </div>
+
+                <button class="button ghost compact" id="clearEmailPasswordButton" type="button">Mentéskor törölje az email jelszót</button>
+              </section>
+
+              <section class="panel settings-section">
+                <div class="section-head">
+                  <h3>Dokumentum sablonok</h3>
+                  <p>A desktopos sablonfájlok most szerveroldali feltöltésként élnek tovább.</p>
+                </div>
+
+                <div class="file-card" data-file-key="templateContract">
+                  <div class="file-card-head">
+                    <div>
+                      <strong>Szerződés sablon</strong>
+                      <p>Word fájl: `.docx`</p>
+                    </div>
+                  </div>
+                  <div class="file-card-meta">
+                    <div class="file-status" id="templateContractStatus"></div>
+                    <div class="file-path" id="templateContractPath"></div>
+                  </div>
+                  <div class="file-card-actions">
+                    <input class="hidden-file-input" type="file" id="templateContractInput" accept=".docx" />
+                    <label class="button secondary" for="templateContractInput">Feltöltés</label>
+                    <button class="button ghost" type="button" data-clear-file="templateContract">Fájl törlése</button>
+                  </div>
+                  <div class="file-selected" id="templateContractSelected"></div>
+                </div>
+
+                <div class="file-card" data-file-key="aszfFile">
+                  <div class="file-card-head">
+                    <div>
+                      <strong>ÁSZF PDF</strong>
+                      <p>PDF fájl: `.pdf`</p>
+                    </div>
+                  </div>
+                  <div class="file-card-meta">
+                    <div class="file-status" id="aszfFileStatus"></div>
+                    <div class="file-path" id="aszfFilePath"></div>
+                  </div>
+                  <div class="file-card-actions">
+                    <input class="hidden-file-input" type="file" id="aszfFileInput" accept=".pdf" />
+                    <label class="button secondary" for="aszfFileInput">Feltöltés</label>
+                    <button class="button ghost" type="button" data-clear-file="aszfFile">Fájl törlése</button>
+                  </div>
+                  <div class="file-selected" id="aszfFileSelected"></div>
+                </div>
+              </section>
+
+              <section class="panel settings-section">
+                <div class="section-head">
+                  <h3>Email template-ek</h3>
+                  <p>HTML sablonok és tárgyak, a desktop felépítését követve.</p>
+                </div>
+
+                <label class="field">
+                  <span>Szerződés email tárgy</span>
+                  <input type="text" id="emailSubject" name="emailSubject" />
+                </label>
+
+                <div class="file-card" data-file-key="contractEmailTemplate">
+                  <div class="file-card-head">
+                    <div>
+                      <strong>Szerződés email template</strong>
+                      <p>HTML fájl: `.html`, `.htm`</p>
+                    </div>
+                  </div>
+                  <div class="file-card-meta">
+                    <div class="file-status" id="contractEmailTemplateStatus"></div>
+                    <div class="file-path" id="contractEmailTemplatePath"></div>
+                  </div>
+                  <div class="file-card-actions">
+                    <input class="hidden-file-input" type="file" id="contractEmailTemplateInput" accept=".html,.htm" />
+                    <label class="button secondary" for="contractEmailTemplateInput">Feltöltés</label>
+                    <button class="button ghost" type="button" data-clear-file="contractEmailTemplate">Fájl törlése</button>
+                  </div>
+                  <div class="file-selected" id="contractEmailTemplateSelected"></div>
+                </div>
+
+                <label class="field">
+                  <span>Értékelés email tárgy</span>
+                  <input type="text" id="reviewEmailSubject" name="reviewEmailSubject" />
+                </label>
+
+                <div class="file-card" data-file-key="reviewEmailTemplate">
+                  <div class="file-card-head">
+                    <div>
+                      <strong>Értékelés email template</strong>
+                      <p>HTML fájl: `.html`, `.htm`</p>
+                    </div>
+                  </div>
+                  <div class="file-card-meta">
+                    <div class="file-status" id="reviewEmailTemplateStatus"></div>
+                    <div class="file-path" id="reviewEmailTemplatePath"></div>
+                  </div>
+                  <div class="file-card-actions">
+                    <input class="hidden-file-input" type="file" id="reviewEmailTemplateInput" accept=".html,.htm" />
+                    <label class="button secondary" for="reviewEmailTemplateInput">Feltöltés</label>
+                    <button class="button ghost" type="button" data-clear-file="reviewEmailTemplate">Fájl törlése</button>
+                  </div>
+                  <div class="file-selected" id="reviewEmailTemplateSelected"></div>
+                </div>
+              </section>
+
+              <section class="panel settings-section">
+                <div class="section-head">
+                  <h3>Marketing és számla</h3>
+                  <p>A későbbi email és számlázás funkciókhoz minden mező elő van készítve.</p>
+                </div>
+
+                <label class="field">
+                  <span>Google értékelés link</span>
+                  <input type="url" id="googleReview" name="googleReview" />
+                </label>
+
+                <div class="file-card" data-file-key="invoiceXml">
+                  <div class="file-card-head">
+                    <div>
+                      <strong>Számla XML sablon</strong>
+                      <p>XML fájl: `.xml`</p>
+                    </div>
+                  </div>
+                  <div class="file-card-meta">
+                    <div class="file-status" id="invoiceXmlStatus"></div>
+                    <div class="file-path" id="invoiceXmlPath"></div>
+                  </div>
+                  <div class="file-card-actions">
+                    <input class="hidden-file-input" type="file" id="invoiceXmlInput" accept=".xml" />
+                    <label class="button secondary" for="invoiceXmlInput">Feltöltés</label>
+                    <button class="button ghost" type="button" data-clear-file="invoiceXml">Fájl törlése</button>
+                  </div>
+                  <div class="file-selected" id="invoiceXmlSelected"></div>
+                </div>
+              </section>
+
+              <section class="panel settings-section">
+                <div class="section-head">
+                  <h3>Alapértelmezések</h3>
+                  <p>Ugyanazok az alapbeállítások, mint a desktop verzióban.</p>
+                </div>
+
+                <div class="field-row two">
+                  <label class="field">
+                    <span>Alapértelmezett bérlési napok</span>
+                    <input type="number" id="defaultRentalDays" name="defaultRentalDays" min="1" />
+                  </label>
+                  <label class="field">
+                    <span>Értékelő email késleltetés (nap)</span>
+                    <input type="number" id="reviewEmailDelayDays" name="reviewEmailDelayDays" min="0" />
+                  </label>
+                </div>
+              </section>
+            </div>
+          </form>
+        </section>
+      </main>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="/app.js"></script>
 </body>
 </html>

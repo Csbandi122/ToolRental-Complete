@@ -15,3 +15,6 @@ packages/
 
 ## Sensitive config - ne kerüljön repóba éles kapcsolati adatokkal
 berles2/appsettings.json
+
+## Runtime storage
+ToolRental.Bikes/App_Data/
