@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolRental.Web", "..\ToolRe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolRental.Bikes", "..\ToolRental.Bikes\ToolRental.Bikes.csproj", "{2084ED1A-F360-40E5-9315-E6A24AF937A1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolRental.WebApp", "..\ToolRental.WebApp\ToolRental.WebApp.csproj", "{648AAA7D-74F4-42C6-9399-597374F0FF03}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{2084ED1A-F360-40E5-9315-E6A24AF937A1}.Release|x64.Build.0 = Release|Any CPU
 		{2084ED1A-F360-40E5-9315-E6A24AF937A1}.Release|x86.ActiveCfg = Release|Any CPU
 		{2084ED1A-F360-40E5-9315-E6A24AF937A1}.Release|x86.Build.0 = Release|Any CPU
+		{648AAA7D-74F4-42C6-9399-597374F0FF03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{648AAA7D-74F4-42C6-9399-597374F0FF03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{648AAA7D-74F4-42C6-9399-597374F0FF03}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{648AAA7D-74F4-42C6-9399-597374F0FF03}.Debug|x64.Build.0 = Debug|Any CPU
+		{648AAA7D-74F4-42C6-9399-597374F0FF03}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{648AAA7D-74F4-42C6-9399-597374F0FF03}.Debug|x86.Build.0 = Debug|Any CPU
+		{648AAA7D-74F4-42C6-9399-597374F0FF03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{648AAA7D-74F4-42C6-9399-597374F0FF03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{648AAA7D-74F4-42C6-9399-597374F0FF03}.Release|x64.ActiveCfg = Release|Any CPU
+		{648AAA7D-74F4-42C6-9399-597374F0FF03}.Release|x64.Build.0 = Release|Any CPU
+		{648AAA7D-74F4-42C6-9399-597374F0FF03}.Release|x86.ActiveCfg = Release|Any CPU
+		{648AAA7D-74F4-42C6-9399-597374F0FF03}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
