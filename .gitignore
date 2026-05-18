@@ -15,3 +15,11 @@ packages/
 
 ## Sensitive config - ne kerüljön repóba éles kapcsolati adatokkal
 berles2/appsettings.json
+
+## Node.js
+node_modules/
+
+## Frontend build output (buildelni kell a szerveren)
+ToolRental.WebApp/wwwroot/assets/
+ToolRental.WebApp/wwwroot/index.html
+ToolRental.WebApp/wwwroot/favicon.svg
