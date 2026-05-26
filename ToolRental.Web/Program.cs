@@ -155,130 +155,238 @@ app.MapPost("/api/ask", async (HttpRequest request, ToolRentalDbContext db, ICon
         // 1. lépés: Claude generál egy SQL lekérdezést
         var client = new AnthropicClient(apiKey);
 
+        var promptToday = DateTime.Today;
         var schemaPrompt = @"Te egy SQL Server adatbázis lekérdező asszisztens vagy egy KERÉKPÁR-KÖLCSÖNZŐ cég rendszeréhez.
-A felhasználó természetes nyelven kérdez, te pedig SQL lekérdezést generálsz.
+A felhasználó természetes nyelven kérdez magyarul, te pedig EGYETLEN SQL SELECT lekérdezést generálsz.
+A válaszod KIZÁRÓLAG a nyers SQL kód legyen — semmi más szöveg, semmi markdown (```), semmi magyarázat!
 
-ÜZLETI KONTEXTUS:
-- Ez egy kerékpár-kölcsönző vállalkozás
-- A kérdések általában bevétellel, eszközökkel, felhasználókkal, vagy szervízzel kapcsolatosak. 
-- Ha a felhasználó ""bicikli""-t, ""kerékpár""-t, ""bringa""-t mond, az a Devices tábla eszközeire vonatkozik
-- Egy bérlés (Rental) több eszközt (Device) is tartalmazhat a RentalDevices kapcsolótáblán keresztül
-- Az ""kiadtunk"", ""kibéreltük"", ""kölcsönöztük"" kifejezések a Rentals táblára vonatkoznak
-- A bérlés kezdete a RentStart mező, a bérlés hossza a RentalDays (napokban)
-- Ha egy adott napra kérdeznek, a RentStart dátumát kell szűrni: CAST(r.RentStart AS DATE) = 'YYYY-MM-DD'
-- SZÁMLÁZÁS: a Rentals.Invoice mező tartalmazza a számla fájl elérési útját. Ha NULL vagy üres string, akkor NEM lett számla kiállítva ahhoz a bérléshez. Ha van benne szöveg (fájl útvonal), akkor LETT számla.
-  - ""hányszor nem adtunk számlát"" = WHERE (Invoice IS NULL OR Invoice = '')
-  - ""hányszor adtunk számlát"" = WHERE Invoice IS NOT NULL AND Invoice <> ''
-  - Ha a számla nélküli bérlések értékére kíváncsiak, a TotalAmount mezőt kell összegezni
-- “Bevétel / költség / profit kérdéseknél elsődlegesen mindig a Financials táblából dolgozz. A Rentals.TotalAmount csak bérlési összeg, nem teljes pénzügyi főkönyv.”
-- “A Devices.Available nem azt jelenti, hogy az eszköz nincs épp kikölcsönözve, hanem egy manuális admin státusz. A jelenleg aktív bérlésekhez a Rentals + RentalDevices + dátumlogika kell.”
-- “Aktív bérlés: GETDATE() >= RentStart AND GETDATE() < DATEADD(day, RentalDays, RentStart).”
-- “Számla kiállítva: Invoice IS NOT NULL AND Invoice <> ''. Számla nincs: Invoice IS NULL OR Invoice = ''.”
-- “Ne használd a ContractEmailSent és InvoiceEmailSent mezőket üzleti döntéshez.”
-- “Ha a kérdés a legnépszerűbb eszközről szól időszakkal, a népszerűséget a RentalDevices rekordok számával számold az adott időszakra.”
-- “Fizetési mód szűrésnél a pontos értékeket használd.”
-- “Ha a kérdés ‘elérhető eszközökre’ vonatkozik, akkor Devices.Available = 1; ha ‘jelenleg kint lévő eszközökre’, akkor ne ezt használd.”
+══════════════════════════════════════
+MAI DÁTUM: ##TODAY## (##DAYNAME##), ##YEAR##. év
+══════════════════════════════════════
 
-ESZKÖZTÍPUSOK (DeviceTypes.TypeName pontos értékei):
-- 'Férfi e-bike' -- férfi elektromos kerékpár
-- 'Férfi kerékpár' -- férfi hagyományos kerékpár
-- 'Gyerekbicikli' -- gyerek kerékpár
-- 'Gyerekülés' -- gyerekülés (kiegészítő, nem kerékpár)
-- 'Kerékpár Szállító' -- szállító kerékpár
-- 'Kiegészítő' -- egyéb kiegészítő (nem kerékpár)
-- 'Női e-bike' -- női elektromos kerékpár
-- 'Női kerékpár' -- női hagyományos kerékpár
-- 'Utánfutó' -- kerékpár utánfutó (kiegészítő)
-- 'Zár' -- kerékpárzár (kiegészítő)
-Ha ""bicikli""/""kerékpár"" kérdeznek, az ÖSSZES kerékpár típust szűrd (Férfi/Női kerékpár, e-bike, Gyerekbicikli, Kerékpár Szállító).
-Ha ""e-bike""/""elektromos"" kérdeznek, csak a 'Férfi e-bike' és 'Női e-bike' típusokat.
-A Gyerekülés, Kiegészítő, Utánfutó, Zár NEM kerékpár.
+DÁTUMKEZELÉS (nagyon fontos!):
+- ""ma"" / ""mai nap"" = '##TODAY##'
+- ""tegnap"" = '##YESTERDAY##'
+- ""múlt héten"" = az előző hét hétfőjétől vasárnapjáig (számold ki ##TODAY## alapján)
+- ""ezen a héten"" / ""héten"" = aktuális hét hétfőjétől ##TODAY##-ig
+- ""ebben a hónapban"" / ""hónapban"" = aktuális hónap 1-jétől ##TODAY##-ig
+- ""idén"" = '##YEAR##-01-01'-tól ##TODAY##-ig
+- ""tavaly"" = '##LASTYEAR##-01-01'-tól '##LASTYEAR##-12-31'-ig
+- Ha CSAK hónapot és napot mond (pl. ""május 12""): használd a ##YEAR##. évet. Ha az a dátum még nem jött el ##YEAR##-ben, akkor a ##LASTYEAR##. évet.
+- Ha intervallumot mond (pl. ""május 12-14""): mindkét végpont BENNE van, >= és <= operátorokkal.
+- Magyar ünnepek: értsd meg és számold ki a ##YEAR##. évi dátumot (pl. Húsvét hétfő, Pünkösd, Karácsony stb.)
+- SQL-ben az aktuális dátum/idő: GETDATE()
+- Dátumszűrésnél MINDIG: CAST(mező AS DATE) a pontos összehasonlításhoz
 
-Az adatbázis szerkezete (SQL Server):
+ESZKÖZ NÉV SZERINTI KERESÉS (nagyon fontos!):
+Ha a felhasználó egy konkrét eszköz nevét vagy márkáját említi (pl. ""Merida"", ""Genesis"", ""Kelly""):
+→ MINDIG LIKE '%kulcsszó%' keresést használj a Devices.DeviceName mezőn!
+→ Több azonos márkájú eszköz is létezhet — MINDIG az ÖSSZESET add vissza!
+→ Példa: ""Merida bicikli"" → WHERE d.DeviceName LIKE '%Merida%'
+→ Ez a szabály MINDEN kérdéstípusnál érvényes ahol eszközre szűrünk!
 
-TÁBLÁK:
-- Customers -- ÜGYFELEK: akik kerékpárt bérelnek nálunk
-  (Id, Name, Zipcode, City, Address, Email, IdNumber, Comment)
+══════════════════════════════════════
+ADATBÁZIS SÉMA (SQL Server)
+══════════════════════════════════════
 
-- Devices -- ESZKÖZÖK: a kölcsönözhető kerékpárok, e-bike-ok és kiegészítők (sisak, zár, utánfutó, stb.)
-  (Id, DeviceName, DeviceType[FK→DeviceTypes.Id], Serial, Price, RentPrice, Available, Picture, RentCount, Notes)
-  - DeviceName: az eszköz neve/márkája (pl. ""Kelly's Cliff 90"", ""Merida Crossway 15"")
-  - Price: az eszköz beszerzési ára
+Customers (ÜGYFELEK)
+  Id, Name, Zipcode, City, Address, Email, IdNumber, Comment
+  - Name: teljes név
+  - Zipcode + City + Address = lakcím
+  - Email: email cím
+  - IdNumber: igazolvány szám
+  - Comment: megjegyzés
+  - NINCS telefon mező a rendszerben!
+
+Devices (ESZKÖZÖK)
+  Id, DeviceName, DeviceType[FK→DeviceTypes.Id], Serial, Price, RentPrice, Available, Picture, RentCount, Notes
+  - DeviceName: eszköz neve/márkája (pl. ""Kelly's Cliff 90"", ""Merida Crossway 15"")
+  - Price: beszerzési ár (Ft)
   - RentPrice: napi bérleti díj (Ft)
-  - Available: elérhető-e jelenleg kölcsönzésre (true/false)
-  - RentCount: hányszor bérelték ki eddig összesen
+  - Available: admin által beállított státusz (NEM jelzi hogy épp ki van-e adva!)
+  - RentCount: összesített eddigi kiadási szám
 
-- DeviceTypes -- ESZKÖZTÍPUSOK: kategóriák (pl. Férfi kerékpár, Női e-bike, Gyerekbicikli, Zár)
-  (Id, TypeName)
+DeviceTypes (ESZKÖZTÍPUSOK)
+  Id, TypeName
+  Értékek: 'Férfi e-bike', 'Női e-bike', 'Férfi kerékpár', 'Női kerékpár', 'Gyerekbicikli', 'Kerékpár Szállító', 'Gyerekülés', 'Kiegészítő', 'Utánfutó', 'Zár'
+  Ha ""bicikli""/""kerékpár""/""bringa"" → ÖSSZES kerékpár típus (Férfi/Női kerékpár, e-bike, Gyerekbicikli, Kerékpár Szállító)
+  Ha ""e-bike""/""elektromos"" → csak 'Férfi e-bike' és 'Női e-bike'
+  Gyerekülés, Kiegészítő, Utánfutó, Zár = NEM kerékpár!
 
-- Rentals -- BÉRLÉSEK: egy-egy kölcsönzési tranzakció, amikor az ügyfél kerékpárokat vesz ki
-  (Id, TicketNr, CustomerId[FK→Customers.Id], RentStart, RentalDays, PaymentMode, Comment, Contract, Invoice, ReviewEmailSent, TotalAmount, ContractEmailSent, InvoiceEmailSent)
-  - TicketNr: bérlési jegy száma (pl. RNT0042)
-  - RentStart: mikor kezdődött a bérlés (dátum+idő)
-  - RentalDays: hány napra szól a bérlés
+Rentals (BÉRLÉSEK / BÉRLÉSI JEGYEK)
+  Id, TicketNr, CustomerId[FK→Customers.Id], RentStart, RentalDays, PaymentMode, Comment, Contract, Invoice, TotalAmount, ReviewEmailSent, ContractEmailSent, InvoiceEmailSent
+  - TicketNr: jegyszám (pl. RNT0042)
+  - RentStart: bérlés kezdő dátum+idő
+  - RentalDays: bérlés hossza napokban
   - TotalAmount: a bérlés teljes összege (Ft)
   - PaymentMode: fizetési mód (pl. készpénz, kártya)
+  - Invoice: számla fájl útvonala VAGY 'nincs számla' szöveg VAGY NULL/üres → lásd SZÁMLÁZÁS részt
+  - Bérlés aktív adott napon ha: adott_nap >= CAST(RentStart AS DATE) AND adott_nap < CAST(DATEADD(day, RentalDays, RentStart) AS DATE)
 
-- RentalDevices -- melyik bérlésben melyik eszközök szerepelnek (egy bérlés = több kerékpár is lehet)
-  (Id, RentalId[FK→Rentals.Id], DeviceId[FK→Devices.Id])
+RentalDevices (BÉRLÉS ↔ ESZKÖZ kapcsolótábla, many-to-many)
+  Id, RentalId[FK→Rentals.Id], DeviceId[FK→Devices.Id]
+  Egy bérléshez több eszköz tartozhat!
 
-- Services -- SZERVIZ: kerékpárok karbantartása, javítása, munkalapok
-  (Id, TicketNr, ServiceType, Description, ServiceDate, CostAmount, WorkHours, WorkMinutes)
+Services (SZERVIZ / MUNKALAPOK)
+  Id, TicketNr, ServiceType, Description, ServiceDate, CostAmount, WorkHours, WorkMinutes, RescueRequired
   - ServiceType: 'defekt', 'karbantartás', 'javítás', 'upgrade'
-  - CostAmount: a szerviz költsége (Ft)
-  - WorkHours: a szervízmunka időtartamának óra része (pl. 2 óra 30 perc → WorkHours=2)
-  - WorkMinutes: a szervízmunka időtartamának perc része (pl. 2 óra 30 perc → WorkMinutes=30)
-  - A teljes munkaóra percben: (WorkHours * 60 + WorkMinutes). Formázáshoz: CONCAT(WorkHours, 'ó ', WorkMinutes, 'p')
-  - RescueRequired: kellett-e menteni a meghibásodott biciklit (bit, true/false). Ha ""mentés"", ""menteni kellett"", ""kiszállás"" kérdeznek, ez a mező
+  - Description: hiba/munka leírása
+  - WorkHours + WorkMinutes: szervíz időtartama (pl. 2ó 30p → WorkHours=2, WorkMinutes=30)
+  - Teljes idő percben: (WorkHours * 60 + WorkMinutes). Formázáshoz: CONCAT(WorkHours, 'ó ', WorkMinutes, 'p')
+  - RescueRequired: kellett-e helyszíni mentés/kiszállás (bit)
+  - ""munkalap"" = Services tábla
 
-- ServiceDevices -- melyik szervizben melyik eszközök szerepelnek
-  (Id, ServiceId[FK→Services.Id], DeviceId[FK→Devices.Id])
+ServiceDevices (SZERVIZ ↔ ESZKÖZ kapcsolótábla, many-to-many)
+  Id, ServiceId[FK→Services.Id], DeviceId[FK→Devices.Id]
 
-- Parts -- ALKATRÉSZEK: felhasznált alkatrészek törzsadata (pl. belsőgumi, fékbetét, lánc)
-  (Id, Name)
+Parts (ALKATRÉSZEK törzsadat)
+  Id, Name
 
-- ServiceParts -- melyik szervizben milyen alkatrészeket használtunk és mennyit
-  (Id, ServiceId[FK→Services.Id], PartId[FK→Parts.Id], Quantity)
-  - Quantity: felhasznált darabszám (default 1)
-  - Egy szervízhez több alkatrész tartozhat, és egy alkatrész több szervízben is szerepelhet
+ServiceParts (SZERVIZ ↔ ALKATRÉSZ kapcsolat)
+  Id, ServiceId[FK→Services.Id], PartId[FK→Parts.Id], Quantity (default 1)
+  Egy szervízhez több alkatrész, egy alkatrész több szervízben.
 
-- Financials -- PÉNZÜGYI TÉTELEK: minden bevétel és kiadás nyilvántartása
-  (Id, TicketNr, EntryType, SourceType, SourceId, Date, Comment, Amount)
+Financials (PÉNZÜGYI TÉTELEK — teljes könyvelés)
+  Id, TicketNr, EntryType, SourceType, SourceId, Date, Comment, Amount
   - EntryType: 'bevétel' vagy 'költség'
-  - SourceType: honnan származik ('bérlés', 'szervíz', 'eszköz_vásárlás', 'marketing', 'egyéb', 'kézi', 'alkatrész', 'javítás')
-  - Amount: összeg (Ft), MINDIG pozitív szám (az EntryType dönti el hogy bevétel vagy kiadás)
+  - SourceType: 'bérlés', 'szervíz', 'eszköz_vásárlás', 'marketing', 'egyéb', 'kézi', 'alkatrész', 'javítás'
+  - Amount: MINDIG pozitív szám (az EntryType dönti el az irányt)
 
-- FinancialDevices -- melyik pénzügyi tételhez melyik eszközök tartoznak
-  (Id, FinancialId[FK→Financials.Id], DeviceId[FK→Devices.Id])
+FinancialDevices (PÉNZÜGY ↔ ESZKÖZ kapcsolat)
+  Id, FinancialId[FK→Financials.Id], DeviceId[FK→Devices.Id]
 
-- Settings -- alkalmazás beállítások, NE kérdezd le SOHA
+Settings → TILOS LEKÉRDEZNI!
 
-KAPCSOLATOK:
-- Rentals.CustomerId → Customers.Id
-- Devices.DeviceType → DeviceTypes.Id
-- RentalDevices: Rentals ↔ Devices (many-to-many)
-- ServiceDevices: Services ↔ Devices (many-to-many)
-- ServiceParts: Services ↔ Parts (many-to-many, Quantity-vel)
-- FinancialDevices: Financials ↔ Devices (many-to-many)
+SZÁMLÁZÁS LOGIKA:
+A Rentals.Invoice mező tartalmazza a számla állapotát:
+- SZÁMLÁZATLAN: Invoice IS NULL OR Invoice = '' OR Invoice = 'nincs számla'
+- SZÁMLÁZOTT: Invoice IS NOT NULL AND Invoice <> '' AND Invoice <> 'nincs számla'
 
-SZERVÍZ LEKÉRDEZÉSI MINTÁK:
-- Összes munkaóra egy eszközön: SELECT SUM(s.WorkHours * 60 + s.WorkMinutes) AS OsszesPerc FROM Services s JOIN ServiceDevices sd ON s.Id = sd.ServiceId WHERE sd.DeviceId = X
-- Milyen alkatrészeket cseréltem X eszközön: SELECT p.Name, sp.Quantity, s.ServiceDate FROM ServiceParts sp JOIN Parts p ON sp.PartId = p.Id JOIN Services s ON sp.ServiceId = s.Id JOIN ServiceDevices sd ON s.Id = sd.ServiceId JOIN Devices d ON sd.DeviceId = d.Id WHERE d.DeviceName LIKE '%X%'
-- Hányszor cseréltem belsőgumit: SELECT SUM(sp.Quantity) FROM ServiceParts sp JOIN Parts p ON sp.PartId = p.Id WHERE p.Name LIKE '%belsőgumi%'
-- Melyik eszközt javítottam legtöbbször: SELECT TOP 1 d.DeviceName, COUNT(DISTINCT s.Id) AS SzervizDb FROM Services s JOIN ServiceDevices sd ON s.Id = sd.ServiceId JOIN Devices d ON sd.DeviceId = d.Id GROUP BY d.DeviceName ORDER BY SzervizDb DESC
-- ""munkalap"" = Services tábla (egy szervíz jegy = egy munkalap)
+══════════════════════════════════════
+KÉRDÉSTÍPUSOK ÉS SQL MINTÁK
+══════════════════════════════════════
 
-SQL ÍRÁSI SZABÁLYOK:
-- CSAK SELECT utasítást generálj, SOHA nem INSERT/UPDATE/DELETE/DROP/ALTER/EXEC!
-- Az aktuális dátumot GETDATE()-vel kérdezd le
-- Dátumszűrésnél MINDIG CAST(mező AS DATE)-et használj
-- Ha több OR feltételt kombinálsz AND-del, MINDIG használj zárójelet! Pl: WHERE (a OR b OR c) AND d
-- Ha darabszámot kérdeznek (""hány db"") ÉS felsorolást is, a részletes listát add vissza és használj COUNT(*) OVER()-t az összesítéshez. Példa: SELECT COUNT(*) OVER() AS Osszes, d.DeviceName FROM ... Ez egyetlen lekérdezés!
-- MINDIG EGYETLEN SELECT utasítást generálj! SOHA ne használj pontosvesszőt (;) több lekérdezés elválasztására!
-- Maximum TOP 100 sort adj vissza
-- A válaszod CSAK a nyers SQL legyen, semmi más szöveg, semmi markdown, semmi magyarázat
-- Ha a kérdés nem értelmezhető, válaszolj: HIBA: [rövid magyarázat]
-- A Settings táblát SOHA ne kérdezd le";
+--- 1. ""Hány eszközt adtunk ki [napon/héten/időszakban]?"" ---
+Adott időszak bérlési jegyei (Rentals.RentStart) → RentalDevices → eszközök COUNT.
+MINTA:
+  SELECT COUNT(rd.Id) AS KiadottEszkozokSzama
+  FROM Rentals r
+  JOIN RentalDevices rd ON r.Id = rd.RentalId
+  WHERE CAST(r.RentStart AS DATE) = '2026-05-20'
+
+--- 2. ""Kinél van [ma/adott napon] az XXX eszköz?"" ---
+Adott napon INDÍTOTT bérlések + eszköz DeviceName LIKE keresés → ügyfél + minden találat.
+MINTA:
+  SELECT c.Name AS Ugyfel, d.DeviceName AS Eszkoz, r.TicketNr, CAST(r.RentStart AS DATE) AS BerlesKezdete, r.RentalDays
+  FROM Rentals r
+  JOIN RentalDevices rd ON r.Id = rd.RentalId
+  JOIN Devices d ON rd.DeviceId = d.Id
+  JOIN Customers c ON r.CustomerId = c.Id
+  WHERE d.DeviceName LIKE '%Merida%'
+    AND CAST(r.RentStart AS DATE) = '2026-05-20'
+
+--- 3. ""Mi az email címe / lakóhelye / adatai XXX-nek?"" ---
+Customers tábla, Name LIKE kereséssel, ÖSSZES elérhető adat visszaadása.
+MINTA:
+  SELECT Name, Email, Zipcode, City, Address, IdNumber, Comment
+  FROM Customers
+  WHERE Name LIKE '%Kiss%'
+
+--- 4. ""Hányszor adtuk ki az XXX eszközt [időszakban]?"" ---
+Rentals + RentalDevices + Devices LIKE keresés → eszközönkénti COUNT.
+MINTA:
+  SELECT d.DeviceName, COUNT(rd.Id) AS KiadasokSzama
+  FROM Rentals r
+  JOIN RentalDevices rd ON r.Id = rd.RentalId
+  JOIN Devices d ON rd.DeviceId = d.Id
+  WHERE d.DeviceName LIKE '%Genesis%'
+    AND CAST(r.RentStart AS DATE) >= '2026-01-01'
+    AND CAST(r.RentStart AS DATE) <= '2026-05-20'
+  GROUP BY d.DeviceName
+
+--- 5. ""Mi a legtöbbet kiadott / top 3 / top 10 eszköz [időszakban]?"" ---
+Rentals + RentalDevices → eszközönkénti COUNT → TOP N ORDER BY DESC.
+MINTA:
+  SELECT TOP 10 d.DeviceName, COUNT(rd.Id) AS KiadasokSzama
+  FROM Rentals r
+  JOIN RentalDevices rd ON r.Id = rd.RentalId
+  JOIN Devices d ON rd.DeviceId = d.Id
+  WHERE CAST(r.RentStart AS DATE) >= '2026-01-01'
+    AND CAST(r.RentStart AS DATE) <= '2026-05-20'
+  GROUP BY d.DeviceName
+  ORDER BY KiadasokSzama DESC
+
+--- 6. ""Mennyi bevétel volt [időszakban]?"" (bérlési bevétel) ---
+Bérlési jegyek az időszakban → SUM(TotalAmount).
+MINTA:
+  SELECT SUM(r.TotalAmount) AS OsszesBevetel
+  FROM Rentals r
+  WHERE CAST(r.RentStart AS DATE) >= '2026-05-01'
+    AND CAST(r.RentStart AS DATE) <= '2026-05-20'
+
+--- 7. ""Mennyi bevételt hozott az XXX eszköz [időszakban]?"" ---
+Rentals + RentalDevices + Devices LIKE keresés → kiadások száma + TotalAmount összege.
+FIGYELEM: TotalAmount a teljes bérlés összege (több eszközzel), nem csak az adott eszközé!
+MINTA:
+  SELECT d.DeviceName, COUNT(rd.Id) AS KiadasokSzama, SUM(r.TotalAmount) AS BerlesekOsszerteke
+  FROM Rentals r
+  JOIN RentalDevices rd ON r.Id = rd.RentalId
+  JOIN Devices d ON rd.DeviceId = d.Id
+  WHERE d.DeviceName LIKE '%Merida%'
+    AND CAST(r.RentStart AS DATE) >= '2026-01-01'
+    AND CAST(r.RentStart AS DATE) <= '2026-05-20'
+  GROUP BY d.DeviceName
+
+--- 8. ""Számlázott / számlázatlan bevétel [időszakban]?"" ---
+Rentals.Invoice mező alapján szétválasztás. Ha eszközre is szűr: JOIN RentalDevices + Devices + LIKE.
+MINTA:
+  SELECT
+    SUM(CASE WHEN Invoice IS NOT NULL AND Invoice <> '' AND Invoice <> 'nincs számla' THEN TotalAmount ELSE 0 END) AS SzamlazottBevetel,
+    SUM(CASE WHEN Invoice IS NULL OR Invoice = '' OR Invoice = 'nincs számla' THEN TotalAmount ELSE 0 END) AS SzamlazatlanBevetel,
+    COUNT(CASE WHEN Invoice IS NOT NULL AND Invoice <> '' AND Invoice <> 'nincs számla' THEN 1 END) AS SzamlazottDb,
+    COUNT(CASE WHEN Invoice IS NULL OR Invoice = '' OR Invoice = 'nincs számla' THEN 1 END) AS SzamlazatlanDb
+  FROM Rentals
+  WHERE CAST(RentStart AS DATE) >= '2026-05-01'
+    AND CAST(RentStart AS DATE) <= '2026-05-20'
+
+--- 9. ""Milyen szervizek voltak az XXX eszközön?"" ---
+ServiceDevices + Services + Devices LIKE keresés → szervizjegy lista dátummal, típussal, leírással.
+MINTA:
+  SELECT s.TicketNr, s.ServiceType, s.Description, CAST(s.ServiceDate AS DATE) AS Datum, s.CostAmount, d.DeviceName
+  FROM Services s
+  JOIN ServiceDevices sd ON s.Id = sd.ServiceId
+  JOIN Devices d ON sd.DeviceId = d.Id
+  WHERE d.DeviceName LIKE '%Merida%'
+  ORDER BY s.ServiceDate DESC
+
+══════════════════════════════════════
+EGYÉB SZERVÍZ MINTÁK
+══════════════════════════════════════
+- Összes munkaóra egy eszközön:
+  SELECT SUM(s.WorkHours * 60 + s.WorkMinutes) AS OsszesPerc FROM Services s JOIN ServiceDevices sd ON s.Id = sd.ServiceId JOIN Devices d ON sd.DeviceId = d.Id WHERE d.DeviceName LIKE '%X%'
+- Milyen alkatrészeket cseréltem X eszközön:
+  SELECT p.Name, sp.Quantity, CAST(s.ServiceDate AS DATE) AS Datum FROM ServiceParts sp JOIN Parts p ON sp.PartId = p.Id JOIN Services s ON sp.ServiceId = s.Id JOIN ServiceDevices sd ON s.Id = sd.ServiceId JOIN Devices d ON sd.DeviceId = d.Id WHERE d.DeviceName LIKE '%X%'
+- Melyik eszközt javítottam legtöbbször:
+  SELECT TOP 1 d.DeviceName, COUNT(DISTINCT s.Id) AS SzervizDb FROM Services s JOIN ServiceDevices sd ON s.Id = sd.ServiceId JOIN Devices d ON sd.DeviceId = d.Id GROUP BY d.DeviceName ORDER BY SzervizDb DESC
+
+══════════════════════════════════════
+SQL ÍRÁSI SZABÁLYOK
+══════════════════════════════════════
+- CSAK SELECT! Soha INSERT/UPDATE/DELETE/DROP/ALTER/EXEC!
+- EGYETLEN SELECT utasítás! Nincs pontosvessző (;), nincs több query!
+- Maximum TOP 100 sor
+- A válaszod KIZÁRÓLAG a nyers SQL — semmi más szöveg, semmi markdown, semmi magyarázat!
+- Dátumszűrésnél MINDIG CAST(mező AS DATE)
+- OR + AND kombinálásnál MINDIG zárójel: WHERE (a OR b) AND c
+- Ha darabszámot ÉS listát is kérnek: COUNT(*) OVER() ablakfüggvényt használj
+- Ha a kérdés nem válaszolható meg SQL-lel: HIBA: [rövid ok]
+- A Settings táblát SOHA ne kérdezd le!
+- Ne használd a ReviewEmailSent, ContractEmailSent, InvoiceEmailSent mezőket üzleti logikához"
+            .Replace("##TODAY##", promptToday.ToString("yyyy-MM-dd"))
+            .Replace("##DAYNAME##", promptToday.ToString("dddd", new System.Globalization.CultureInfo("hu-HU")))
+            .Replace("##YEAR##", promptToday.Year.ToString())
+            .Replace("##YESTERDAY##", promptToday.AddDays(-1).ToString("yyyy-MM-dd"))
+            .Replace("##LASTYEAR##", (promptToday.Year - 1).ToString());
 
         var sqlResponse = await client.Messages.GetClaudeMessageAsync(new MessageParameters
         {
@@ -390,12 +498,17 @@ SQL ÍRÁSI SZABÁLYOK:
             Model = "claude-sonnet-4-20250514",
             MaxTokens = 1000,
             System = new List<SystemMessage> { new SystemMessage(
-                @"A felhasználó feltett egy kérdést az adatbázisról. Lefuttattuk az SQL lekérdezést, és megkaptuk az eredményt.
-Foglald össze az eredményt magyarul, közérthetően, röviden. Ha számok vannak, formázd őket szépen (pl. 1 234 567 Ft).
-Ha nincs eredmény (0 sor), mondd el hogy nincs találat. Ne magyarázd az SQL-t, csak az eredményt. Mondja ki, hogy ha van Osszes oszlop, azt tekintse teljes darabszámnak.
-Ha több sor jön vissza, előbb adjon 1 mondatos összegzést, utána legfeljebb 5 fontos tételt.
-Ha a találat a TOP 100 miatt csonkolt lehet, ezt jelezze.
-Ne csak “nincs találat”-ot mondjon, hanem ha időszakos kérdés volt, nevezze meg az időszakot is.") },
+                @"A felhasználó feltett egy kérdést egy kerékpár-kölcsönző cég adatbázisáról. Lefuttattuk az SQL lekérdezést és megkaptuk az eredményt.
+
+Foglald össze az eredményt magyarul, közérthetően, röviden. Szabályok:
+- Számokat formázd szépen: ezres elválasztó szóközzel, pénznem Ft (pl. 1 234 567 Ft)
+- Ha nincs eredmény (0 sor): mondd el hogy nincs találat, és ha időszakos kérdés volt, nevezd meg az időszakot
+- Ha van Osszes oszlop, azt tekintsd teljes darabszámnak és mondd ki
+- Ha több sor jön vissza: adj előbb 1 mondatos összegzést, utána legfeljebb 5-10 fontos tételt
+- Ha a találat TOP 100 miatt csonkolt lehet, jelezd
+- Ha a TotalAmount összeget adod meg egy konkrét eszközre szűrt lekérdezésnél, jelezd hogy ez a teljes bérlés összege (ami más eszközöket is tartalmazhat)
+- Ne magyarázd az SQL-t, csak az eredményt!
+- Ha telefonszámot kérdeztek de nincs az eredményben, jelezd hogy a rendszer nem tartalmaz telefonszámot") },
             Messages = new List<Message>
             {
                 new Message(RoleType.User, $"Kérdés: {question}\n\nEredmény:\n{resultText}")
