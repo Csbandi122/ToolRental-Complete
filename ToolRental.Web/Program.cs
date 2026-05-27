@@ -359,6 +359,49 @@ MINTA:
   WHERE d.DeviceName LIKE '%Merida%'
   ORDER BY s.ServiceDate DESC
 
+--- 10. ""Honnan jönnek az ügyfelek [általában/adott napon/időszakban]?"" ---
+Ügyfelek City mezője alapján csoportosítás, bérlésekhez kötve (időszak szűréssel ha kell).
+BUDAPEST SZABÁLY: A ""Budapest"" különböző formáit (""Budapest"", ""Bp"", ""Bp."", és kerületes formák mint ""Budapest, XIII. kerület"", ""Budapest XIII"", ""1138 Budapest"" stb.) MIND egybe kell vonni egyetlen ""Budapest"" csoportba!
+Ehhez: CASE WHEN c.City LIKE '%Budapest%' OR c.City LIKE '%Bp%' THEN 'Budapest' ELSE c.City END
+MINTA (általában, összes bérlés alapján):
+  SELECT
+    CASE WHEN c.City LIKE '%Budapest%' OR c.City LIKE 'Bp%' THEN 'Budapest' ELSE c.City END AS Varos,
+    COUNT(r.Id) AS BerlesekSzama
+  FROM Rentals r
+  JOIN Customers c ON r.CustomerId = c.Id
+  GROUP BY CASE WHEN c.City LIKE '%Budapest%' OR c.City LIKE 'Bp%' THEN 'Budapest' ELSE c.City END
+  ORDER BY BerlesekSzama DESC
+MINTA (adott időszakban):
+  SELECT
+    CASE WHEN c.City LIKE '%Budapest%' OR c.City LIKE 'Bp%' THEN 'Budapest' ELSE c.City END AS Varos,
+    COUNT(r.Id) AS BerlesekSzama
+  FROM Rentals r
+  JOIN Customers c ON r.CustomerId = c.Id
+  WHERE CAST(r.RentStart AS DATE) >= '2026-05-01'
+    AND CAST(r.RentStart AS DATE) <= '2026-05-20'
+  GROUP BY CASE WHEN c.City LIKE '%Budapest%' OR c.City LIKE 'Bp%' THEN 'Budapest' ELSE c.City END
+  ORDER BY BerlesekSzama DESC
+
+--- 11. ""Hányan jöttek XXX városból [időszakban]?"" ---
+Konkrét városra szűrés a Customers.City mezőn keresztül, bérlések számolásával.
+BUDAPEST SZABÁLY: Ha Budapestre kérdez (""Budapest"", ""Bp"", ""budapestről"", ""pestről""), az ÖSSZES budapesti ügyfelet egybe kell számolni kerülettől függetlenül!
+Ehhez: WHERE (c.City LIKE '%Budapest%' OR c.City LIKE 'Bp%')
+Más városnál: WHERE c.City LIKE '%városnév%'
+MINTA (Budapest, időszakban):
+  SELECT COUNT(r.Id) AS BerlesekSzama
+  FROM Rentals r
+  JOIN Customers c ON r.CustomerId = c.Id
+  WHERE (c.City LIKE '%Budapest%' OR c.City LIKE 'Bp%')
+    AND CAST(r.RentStart AS DATE) >= '2026-05-01'
+    AND CAST(r.RentStart AS DATE) <= '2026-05-20'
+MINTA (más város, időszakban):
+  SELECT COUNT(r.Id) AS BerlesekSzama
+  FROM Rentals r
+  JOIN Customers c ON r.CustomerId = c.Id
+  WHERE c.City LIKE '%Debrecen%'
+    AND CAST(r.RentStart AS DATE) >= '2026-05-01'
+    AND CAST(r.RentStart AS DATE) <= '2026-05-20'
+
 ══════════════════════════════════════
 EGYÉB SZERVÍZ MINTÁK
 ══════════════════════════════════════
