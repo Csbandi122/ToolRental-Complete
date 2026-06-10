@@ -172,6 +172,7 @@ namespace berles2.Services
             AppLogger.Logger.Debug("SMTP kapcsolódás: {Server}:{Port}", _setting.EmailSmtp, _setting.SmtpPort);
 
             using var client = new SmtpClient();
+            client.CheckCertificateRevocation = false;
 
             try
             {
