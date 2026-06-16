@@ -433,7 +433,7 @@ SQL ÍRÁSI SZABÁLYOK
 
         var sqlResponse = await client.Messages.GetClaudeMessageAsync(new MessageParameters
         {
-            Model = "claude-sonnet-4-20250514",
+            Model = "claude-sonnet-4-6",
             MaxTokens = 500,
             System = new List<SystemMessage> { new SystemMessage(schemaPrompt) },
             Messages = new List<Message>
@@ -501,7 +501,7 @@ SQL ÍRÁSI SZABÁLYOK
                 // Első hiba: visszaküldjük Claude-nak javításra
                 var fixResponse = await client.Messages.GetClaudeMessageAsync(new MessageParameters
                 {
-                    Model = "claude-sonnet-4-20250514",
+                    Model = "claude-sonnet-4-6",
                     MaxTokens = 500,
                     System = new List<SystemMessage> { new SystemMessage(schemaPrompt) },
                     Messages = new List<Message>
@@ -538,7 +538,7 @@ SQL ÍRÁSI SZABÁLYOK
 
         var summaryResponse = await client.Messages.GetClaudeMessageAsync(new MessageParameters
         {
-            Model = "claude-sonnet-4-20250514",
+            Model = "claude-sonnet-4-6",
             MaxTokens = 1000,
             System = new List<SystemMessage> { new SystemMessage(
                 @"A felhasználó feltett egy kérdést egy kerékpár-kölcsönző cég adatbázisáról. Lefuttattuk az SQL lekérdezést és megkaptuk az eredményt.
