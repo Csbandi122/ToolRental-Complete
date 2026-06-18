@@ -163,7 +163,13 @@ app.MapGet("/api/tax-estimate", async (ToolRentalDbContext db) =>
         prevCumTaxable = cumTaxable;
     }
 
-    return Results.Json(new { year, threshold, quarters });
+    // Összes számlázott bevétel az évben (a küszöbtől való távolsághoz)
+    var totalInvoiced = await db.Rentals
+        .Where(r => r.RentStart >= yearStart
+            && r.Invoice != null && r.Invoice != "" && r.Invoice != "nincs számla")
+        .SumAsync(r => (decimal?)r.TotalAmount) ?? 0;
+
+    return Results.Json(new { year, threshold, cumInvoiced = totalInvoiced, quarters });
 });
 
 // === ÉVES STATISZTIKA API ===
