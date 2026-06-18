@@ -75,7 +75,7 @@ app.Use(async (context, next) =>
 
     // Védett HTML oldalak: ha nincs bejelentkezve, redirect a login-ra
     if (path.EndsWith(".html", StringComparison.OrdinalIgnoreCase)
-        && !context.User.Identity?.IsAuthenticated == true)
+        && context.User.Identity?.IsAuthenticated != true)
     {
         context.Response.Redirect("/login.html");
         return;
