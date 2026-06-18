@@ -438,6 +438,19 @@
         </div>
     </div>
 
+    <!-- AI KÉRDEZŐ SZEKCIÓ -->
+    <div class="ai-section">
+        <h2>Kerdezz az adatbazisrol</h2>
+        <div class="ai-input-row">
+            <input type="text" class="ai-input" id="aiQuestion"
+                   placeholder="Pl.: Hany berlest adtunk ki ma?"
+                   onkeydown="if(event.key==='Enter') askAI()">
+            <button class="ai-send-btn" id="aiSendBtn" onclick="askAI()">Kerdes</button>
+        </div>
+        <div class="ai-examples" id="recentQuestions"></div>
+        <div id="aiResult" class="ai-result"></div>
+    </div>
+
     <div class="tax-section" id="taxSection" style="display:none;">
         <h2>Becsult negyedeves adobevallasos adofizetesi kotelezettsg</h2>
         <table class="tax-table">
@@ -459,19 +472,6 @@
     </div>
 
     <button class="refresh-btn" onclick="loadData()">Frissites</button>
-
-    <!-- AI KÉRDEZŐ SZEKCIÓ -->
-    <div class="ai-section">
-        <h2>Kerdezz az adatbazisrol</h2>
-        <div class="ai-input-row">
-            <input type="text" class="ai-input" id="aiQuestion"
-                   placeholder="Pl.: Hany berlest adtunk ki ma?"
-                   onkeydown="if(event.key==='Enter') askAI()">
-            <button class="ai-send-btn" id="aiSendBtn" onclick="askAI()">Kerdes</button>
-        </div>
-        <div class="ai-examples" id="recentQuestions"></div>
-        <div id="aiResult" class="ai-result"></div>
-    </div>
 
     <script>
         function formatMoney(amount) {
