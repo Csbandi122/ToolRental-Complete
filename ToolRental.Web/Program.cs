@@ -1,7 +1,10 @@
 using Anthropic.SDK;
 using Anthropic.SDK.Messaging;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using ToolRental.Core;
@@ -24,10 +27,90 @@ builder.Services.AddDbContext<ToolRentalDbContext>(options =>
             maxRetryDelay: TimeSpan.FromSeconds(5),
             errorNumbersToAdd: null)));
 
+// === COOKIE AUTHENTICATION ===
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/login.html";
+        options.ExpireTimeSpan = TimeSpan.FromDays(365);
+        options.SlidingExpiration = true;
+        options.Cookie.Name = "ToolRentalAuth";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Events.OnRedirectToLogin = context =>
+        {
+            // API hívásokra 401-et adunk redirect helyett
+            if (context.Request.Path.StartsWithSegments("/api"))
+            {
+                context.Response.StatusCode = 401;
+                return Task.CompletedTask;
+            }
+            context.Response.Redirect(context.RedirectUri);
+            return Task.CompletedTask;
+        };
+    });
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
+
 var app = builder.Build();
 
-// Statikus fájlok kiszolgálása (CSS, JS, stb.)
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Statikus fájlok: login.html mindig elérhető, minden más HTML-hez bejelentkezés kell
+app.Use(async (context, next) =>
+{
+    var path = context.Request.Path.Value ?? "";
+
+    // login.html mindig elérhető
+    if (path.Equals("/login.html", StringComparison.OrdinalIgnoreCase))
+    {
+        await next();
+        return;
+    }
+
+    // Védett HTML oldalak: ha nincs bejelentkezve, redirect a login-ra
+    if (path.EndsWith(".html", StringComparison.OrdinalIgnoreCase)
+        && !context.User.Identity?.IsAuthenticated == true)
+    {
+        context.Response.Redirect("/login.html");
+        return;
+    }
+
+    await next();
+});
+
 app.UseStaticFiles();
+
+// === LOGIN / LOGOUT ===
+app.MapPost("/api/login", async (HttpContext ctx, IConfiguration config) =>
+{
+    var body = await JsonSerializer.DeserializeAsync<JsonElement>(ctx.Request.Body);
+    var password = body.GetProperty("password").GetString();
+    var correctPassword = config["Auth:Password"];
+
+    if (password != correctPassword)
+        return Results.Json(new { success = false, message = "Hibas jelszo" }, statusCode: 401);
+
+    var claims = new List<Claim> { new(ClaimTypes.Name, "user") };
+    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+    var principal = new ClaimsPrincipal(identity);
+
+    await ctx.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal,
+        new AuthenticationProperties { IsPersistent = true });
+
+    return Results.Json(new { success = true });
+}).AllowAnonymous();
+
+app.MapGet("/api/logout", async (HttpContext ctx) =>
+{
+    await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    return Results.Redirect("/login.html");
+}).AllowAnonymous();
 
 // === REPORTING API ===
 app.MapGet("/api/reporting", async (ToolRentalDbContext db) =>
