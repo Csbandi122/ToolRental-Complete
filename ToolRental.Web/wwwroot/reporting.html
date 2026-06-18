@@ -74,11 +74,35 @@
             border-bottom: 1px solid #f0f0f0;
         }
 
-        .amount-row:last-child {
+        .amount-row.result-row {
             border-bottom: none;
             padding-top: 12px;
             margin-top: 4px;
             border-top: 2px solid #eee;
+        }
+
+        .invoice-row {
+            border-bottom: none;
+            padding: 4px 0 4px 12px;
+        }
+
+        .invoice-row .amount-label {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .invoice-row .amount-value {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .invoiced { color: #2e7d32; }
+        .uninvoiced { color: #e65100; }
+
+        .pct {
+            font-size: 12px;
+            font-weight: 400;
+            color: #999;
         }
 
         .amount-label {
@@ -379,6 +403,10 @@
             const profitClass = data.profit >= 0 ? 'profit-positive' : 'profit-negative';
             const profitSign = data.profit >= 0 ? '+' : '';
 
+            const invTotal = (data.invoiced || 0) + (data.uninvoiced || 0);
+            const invPct = invTotal > 0 ? Math.round(data.invoiced / invTotal * 100) : 0;
+            const uninvPct = invTotal > 0 ? Math.round(data.uninvoiced / invTotal * 100) : 0;
+
             return `
                 <div class="card">
                     <div class="card-title">
@@ -393,9 +421,17 @@
                         <span class="amount-label">Kiadas</span>
                         <span class="amount-value expense">${formatMoney(data.expense)}</span>
                     </div>
-                    <div class="amount-row">
+                    <div class="amount-row result-row">
                         <span class="amount-label">Eredmeny</span>
                         <span class="amount-value ${profitClass}">${profitSign}${formatMoney(data.profit)}</span>
+                    </div>
+                    <div class="amount-row invoice-row">
+                        <span class="amount-label">Szamlazott</span>
+                        <span class="amount-value invoiced">${formatMoney(data.invoiced || 0)} <span class="pct">(${invPct}%)</span></span>
+                    </div>
+                    <div class="amount-row invoice-row">
+                        <span class="amount-label">Szamlazatlan</span>
+                        <span class="amount-value uninvoiced">${formatMoney(data.uninvoiced || 0)} <span class="pct">(${uninvPct}%)</span></span>
                     </div>
                 </div>
             `;

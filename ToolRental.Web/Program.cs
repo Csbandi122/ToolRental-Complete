@@ -69,13 +69,42 @@ app.MapGet("/api/reporting", async (ToolRentalDbContext db) =>
         .Where(f => f.Date >= yearStart && f.EntryType == EntryTypes.Koltseg)
         .SumAsync(f => (decimal?)f.Amount) ?? 0;
 
+    // Számlázott / számlázatlan bontás (Rentals.TotalAmount alapján)
+    var todayInvoiced = await db.Rentals
+        .Where(r => r.RentStart.Date == today && r.Invoice != null && r.Invoice != "" && r.Invoice != "nincs számla")
+        .SumAsync(r => (decimal?)r.TotalAmount) ?? 0;
+    var todayUninvoiced = await db.Rentals
+        .Where(r => r.RentStart.Date == today && (r.Invoice == null || r.Invoice == "" || r.Invoice == "nincs számla"))
+        .SumAsync(r => (decimal?)r.TotalAmount) ?? 0;
+
+    var weekInvoiced = await db.Rentals
+        .Where(r => r.RentStart.Date >= weekStart && r.RentStart.Date <= today && r.Invoice != null && r.Invoice != "" && r.Invoice != "nincs számla")
+        .SumAsync(r => (decimal?)r.TotalAmount) ?? 0;
+    var weekUninvoiced = await db.Rentals
+        .Where(r => r.RentStart.Date >= weekStart && r.RentStart.Date <= today && (r.Invoice == null || r.Invoice == "" || r.Invoice == "nincs számla"))
+        .SumAsync(r => (decimal?)r.TotalAmount) ?? 0;
+
+    var monthInvoiced = await db.Rentals
+        .Where(r => r.RentStart >= monthStart && r.Invoice != null && r.Invoice != "" && r.Invoice != "nincs számla")
+        .SumAsync(r => (decimal?)r.TotalAmount) ?? 0;
+    var monthUninvoiced = await db.Rentals
+        .Where(r => r.RentStart >= monthStart && (r.Invoice == null || r.Invoice == "" || r.Invoice == "nincs számla"))
+        .SumAsync(r => (decimal?)r.TotalAmount) ?? 0;
+
+    var yearInvoiced = await db.Rentals
+        .Where(r => r.RentStart >= yearStart && r.Invoice != null && r.Invoice != "" && r.Invoice != "nincs számla")
+        .SumAsync(r => (decimal?)r.TotalAmount) ?? 0;
+    var yearUninvoiced = await db.Rentals
+        .Where(r => r.RentStart >= yearStart && (r.Invoice == null || r.Invoice == "" || r.Invoice == "nincs számla"))
+        .SumAsync(r => (decimal?)r.TotalAmount) ?? 0;
+
     return Results.Json(new
     {
         generatedAt = DateTime.Now.ToString("yyyy.MM.dd HH:mm:ss"),
-        today = new { revenue = todayRevenue, expense = todayExpense, profit = todayRevenue - todayExpense },
-        week = new { revenue = weekRevenue, expense = weekExpense, profit = weekRevenue - weekExpense, startDate = weekStart.ToString("yyyy.MM.dd") },
-        month = new { revenue = monthRevenue, expense = monthExpense, profit = monthRevenue - monthExpense, startDate = monthStart.ToString("yyyy.MM.dd") },
-        year = new { revenue = yearRevenue, expense = yearExpense, profit = yearRevenue - yearExpense, startDate = yearStart.ToString("yyyy.MM.dd") }
+        today = new { revenue = todayRevenue, expense = todayExpense, profit = todayRevenue - todayExpense, invoiced = todayInvoiced, uninvoiced = todayUninvoiced },
+        week = new { revenue = weekRevenue, expense = weekExpense, profit = weekRevenue - weekExpense, startDate = weekStart.ToString("yyyy.MM.dd"), invoiced = weekInvoiced, uninvoiced = weekUninvoiced },
+        month = new { revenue = monthRevenue, expense = monthExpense, profit = monthRevenue - monthExpense, startDate = monthStart.ToString("yyyy.MM.dd"), invoiced = monthInvoiced, uninvoiced = monthUninvoiced },
+        year = new { revenue = yearRevenue, expense = yearExpense, profit = yearRevenue - yearExpense, startDate = yearStart.ToString("yyyy.MM.dd"), invoiced = yearInvoiced, uninvoiced = yearUninvoiced }
     });
 });
 
