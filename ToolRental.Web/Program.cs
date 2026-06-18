@@ -49,12 +49,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
             return Task.CompletedTask;
         };
     });
-builder.Services.AddAuthorization(options =>
-{
-    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
-        .RequireAuthenticatedUser()
-        .Build();
-});
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
@@ -104,13 +99,13 @@ app.MapPost("/api/login", async (HttpContext ctx, IConfiguration config) =>
         new AuthenticationProperties { IsPersistent = true });
 
     return Results.Json(new { success = true });
-}).AllowAnonymous();
+});
 
 app.MapGet("/api/logout", async (HttpContext ctx) =>
 {
     await ctx.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
     return Results.Redirect("/login.html");
-}).AllowAnonymous();
+});
 
 // === REPORTING API ===
 app.MapGet("/api/reporting", async (ToolRentalDbContext db) =>
@@ -189,7 +184,7 @@ app.MapGet("/api/reporting", async (ToolRentalDbContext db) =>
         month = new { revenue = monthRevenue, expense = monthExpense, profit = monthRevenue - monthExpense, startDate = monthStart.ToString("yyyy.MM.dd"), invoiced = monthInvoiced, uninvoiced = monthUninvoiced },
         year = new { revenue = yearRevenue, expense = yearExpense, profit = yearRevenue - yearExpense, startDate = yearStart.ToString("yyyy.MM.dd"), invoiced = yearInvoiced, uninvoiced = yearUninvoiced }
     });
-});
+}).RequireAuthorization();
 
 // === NEGYEDÉVES ADÓBECSLÉS API ===
 app.MapGet("/api/tax-estimate", async (ToolRentalDbContext db) =>
@@ -253,7 +248,7 @@ app.MapGet("/api/tax-estimate", async (ToolRentalDbContext db) =>
         .SumAsync(r => (decimal?)r.TotalAmount) ?? 0;
 
     return Results.Json(new { year, threshold, cumInvoiced = totalInvoiced, quarters });
-});
+}).RequireAuthorization();
 
 // === ÉVES STATISZTIKA API ===
 app.MapGet("/api/stats", async (ToolRentalDbContext db) =>
@@ -290,7 +285,7 @@ app.MapGet("/api/stats", async (ToolRentalDbContext db) =>
         repairHours = repairMinutes / 60,
         repairMinutes = repairMinutes % 60
     });
-});
+}).RequireAuthorization();
 
 // === AI LEKÉRDEZŐ API ===
 app.MapPost("/api/ask", async (HttpRequest request, ToolRentalDbContext db, IConfiguration config) =>
@@ -746,7 +741,7 @@ Foglald össze az eredményt magyarul, közérthetően, röviden. Szabályok:
     {
         return Results.Json(new { answer = $"Hiba: {ex.Message}", sql = "", rowCount = 0 });
     }
-});
+}).RequireAuthorization();
 
 // === KORÁBBI KÉRDÉSEK API ===
 app.MapGet("/api/recent-questions", () =>
@@ -755,10 +750,10 @@ app.MapGet("/api/recent-questions", () =>
     {
         return Results.Json(recentQuestions.ToList());
     }
-});
+}).RequireAuthorization();
 
 // Főoldal → reporting.html
-app.MapGet("/", () => Results.Redirect("/reporting.html"));
+app.MapGet("/", () => Results.Redirect("/reporting.html")).RequireAuthorization();
 
 // Hálózaton elérhető legyen (nem csak localhost)
 app.Run("http://0.0.0.0:5000");
