@@ -108,6 +108,64 @@ app.MapGet("/api/reporting", async (ToolRentalDbContext db) =>
     });
 });
 
+// === NEGYEDÉVES ADÓBECSLÉS API ===
+app.MapGet("/api/tax-estimate", async (ToolRentalDbContext db) =>
+{
+    var year = DateTime.Today.Year;
+    var yearStart = new DateTime(year, 1, 1);
+
+    // Negyedév végdátumai
+    var quarterEnds = new DateTime[] {
+        new(year, 3, 31), new(year, 6, 30), new(year, 9, 30), new(year, 12, 31)
+    };
+
+    // Általányadózó EV, 45% költséghányad, heti 36 órát meghaladó munkaviszony
+    const decimal threshold = 3_520_000m;
+    const decimal incomeRatio = 0.55m; // 100% - 45% költséghányad
+    const decimal szjaRate = 0.15m;
+    const decimal tbRate = 0.13m;
+    const decimal szochoRate = 0.185m;
+
+    var quarters = new object[4];
+    decimal prevCumTaxable = 0;
+
+    for (int q = 0; q < 4; q++)
+    {
+        // Kumulált számlázott bevétel az év elejétől a negyedév végéig
+        var cumInvoiced = await db.Rentals
+            .Where(r => r.RentStart >= yearStart && r.RentStart.Date <= quarterEnds[q]
+                && r.Invoice != null && r.Invoice != "" && r.Invoice != "nincs számla")
+            .SumAsync(r => (decimal?)r.TotalAmount) ?? 0;
+
+        // Kumulált adóköteles rész (küszöb feletti bevétel)
+        var cumTaxable = Math.Max(0, cumInvoiced - threshold);
+
+        // Erre a negyedévre jutó adóköteles bevétel
+        var qTaxable = cumTaxable - prevCumTaxable;
+
+        // Adóalap = adóköteles bevétel × 55% (költséghányad levonása után)
+        var qTaxBase = qTaxable * incomeRatio;
+
+        var szja = Math.Round(qTaxBase * szjaRate);
+        var tb = Math.Round(qTaxBase * tbRate);
+        var szocho = Math.Round(qTaxBase * szochoRate);
+
+        quarters[q] = new
+        {
+            quarter = q + 1,
+            taxableRevenue = Math.Round(qTaxable),
+            szja,
+            tb,
+            szocho,
+            total = szja + tb + szocho
+        };
+
+        prevCumTaxable = cumTaxable;
+    }
+
+    return Results.Json(new { year, threshold, quarters });
+});
+
 // === ÉVES STATISZTIKA API ===
 app.MapGet("/api/stats", async (ToolRentalDbContext db) =>
 {

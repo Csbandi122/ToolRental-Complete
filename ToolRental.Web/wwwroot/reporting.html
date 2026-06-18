@@ -333,6 +333,69 @@
         .stat-card.accent-red .stat-value { color: #c62828; }
         .stat-card.accent-purple .stat-value { color: #6a1b9a; }
 
+        /* === ADÓ TÁBLÁZAT === */
+        .tax-section {
+            max-width: 1000px;
+            margin: 0 auto 28px;
+        }
+
+        .tax-section h2 {
+            font-size: 16px;
+            color: #1a1a2e;
+            margin-bottom: 12px;
+        }
+
+        .tax-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            font-size: 14px;
+        }
+
+        .tax-table th {
+            background: #1a1a2e;
+            color: white;
+            padding: 10px 14px;
+            text-align: right;
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .tax-table th:first-child {
+            text-align: left;
+        }
+
+        .tax-table td {
+            padding: 8px 14px;
+            border-bottom: 1px solid #f0f0f0;
+            text-align: right;
+            color: #333;
+        }
+
+        .tax-table td:first-child {
+            text-align: left;
+            color: #666;
+            font-size: 13px;
+        }
+
+        .tax-table tr:last-child td {
+            border-bottom: none;
+            font-weight: 600;
+            border-top: 2px solid #eee;
+            color: #c62828;
+        }
+
+        .tax-table tr:last-child td:first-child {
+            color: #c62828;
+        }
+
+        .tax-table .zero {
+            color: #ccc;
+        }
+
         @media (max-width: 768px) {
             .stats-strip { grid-template-columns: repeat(3, 1fr); }
         }
@@ -373,6 +436,22 @@
             <div class="stat-label">Szervíz munkaóra</div>
             <div class="stat-sub" id="statWorkTimeYear"></div>
         </div>
+    </div>
+
+    <div class="tax-section" id="taxSection" style="display:none;">
+        <h2>Becsult negyedeves adobevallasos adofizetesi kotelezettsg</h2>
+        <table class="tax-table">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Q1</th>
+                    <th>Q2</th>
+                    <th>Q3</th>
+                    <th>Q4</th>
+                </tr>
+            </thead>
+            <tbody id="taxBody"></tbody>
+        </table>
     </div>
 
     <div id="content">
@@ -550,9 +629,38 @@
             } catch (e) { /* csendben ha nem megy */ }
         }
 
+        function taxCell(val) {
+            if (val === 0) return '<td class="zero">0 Ft</td>';
+            return `<td>${formatMoney(val)}</td>`;
+        }
+
+        async function loadTaxEstimate() {
+            try {
+                const resp = await fetch('/api/tax-estimate');
+                if (!resp.ok) return;
+                const d = await resp.json();
+                const q = d.quarters;
+
+                const rows = [
+                    { label: 'Adokoteles bevetel', key: 'taxableRevenue' },
+                    { label: 'SZJA (15%)', key: 'szja' },
+                    { label: 'TB (13%)', key: 'tb' },
+                    { label: 'SZOCHO (18,5%)', key: 'szocho' },
+                    { label: 'Osszesen', key: 'total' }
+                ];
+
+                document.getElementById('taxBody').innerHTML = rows.map(r =>
+                    `<tr><td>${r.label}</td>${q.map(qi => taxCell(qi[r.key])).join('')}</tr>`
+                ).join('');
+
+                document.getElementById('taxSection').style.display = 'block';
+            } catch (e) { /* csendben ha nem megy */ }
+        }
+
         // Automatikus betoltes indulaskor
         loadData();
         loadStats();
+        loadTaxEstimate();
         loadRecentQuestions();
     </script>
 </body>
